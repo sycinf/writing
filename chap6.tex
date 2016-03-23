@@ -1,0 +1,383 @@
+\chapter{Accelerator Generation and Integration Using Program Binaries}
+\label{instrumentChap}
+As usability remains to be one of the most significant obstacles for adopting FPGA computing, in this chapter, we explore the possibility of a user
+transparent flow for mapping applications to systems with reconfigurable components.
+Contrast with previous chapters where source codes in high level
+languages are used as inputs, here we try to only use the program binaries and their runtime profiles as the design entries. 
+The mechanism for integrating the accelerator back into the overall program execution is also examined. While the synthesis and tuning of the computational pipeline was an attempt to create better accelerators running on FPGA itself, in this chapter, we
+further discuss the interaction between the software component and the FPGA accelerators. From the users' perspective, a flow based on
+program binaries requires no source rewriting
+nor recompilation, the effort needed to take advantage
+of the reconfigurable platform is thus minimized. 
+
+\section{Characteristics of the Targeted Platform}
+The general approach of translating program binaries to accelerators can certainly be applied to various heterogeneous platforms. To justify some of the design decisions made in our flow, the assumed platform 
+characteristics need to be outlined first. 
+In section~\ref{hetero}, a whole array of machines with reconfigurable
+components were examined and there is a wide spectrum of configurations
+when it comes to how tightly integrated the reconfigurable fabric is to
+the processor. 
+In this work, we focus on the part of the space where the general purpose processor and the reconfigurable component are loosely coupled.
+Instead of being a functional unit in the processor
+execution pipeline, the FPGA is used as a coprocessor for which
+communication and management is assumed to be expensive.
+Meanwhile, the capacity of the reconfigurable fabric can potentially be greater as it is not constrained in any way by the pipeline of the associated processor. 
+Most of the off-the-self systems currently available or in development~\cite{xeonwithfpga} fall into this category. As the
+costs of semiconductor manufacturing become prohibitive, 
+special processors with modified pipeline accommodating
+reconfigurable functional units are less likely to be built
+and offered commercially, as compared to systems with conventional
+processor and FPGA integrated at either chip, package or board level.
+
+Another important factor to consider is how sharable the memory
+is between the CPU and the FPGA. 
+One possible configuration, as represented by the zynq SoC, has
+the CPU's address space shared with the programmable logic.
+The physical addresses used to access the memory are identical,
+whether it comes from the CPU or the FPGA. Of course in the presence
+of virtual memory, address translation needs to occur within the FPGA
+before memory requests are sent out. On the other hand, there are
+platforms where the FPGA has its own memory space which is
+explicitly populated with the working dataset before the activation of 
+the accelerator. It's worth noting that this difference in programming model
+is orthogonal to the actual physical configuration of the platform. For instance, CPU and FPGA located in two different sockets can have shared address space while a system based on a single chip SoC may associate the FPGA with a separate DRAM interface which are not directly
+accessible by CPU. 
+Given the flexibility of FPGAs, there are certainly ways to create a layer of abstraction conforming to either one of these schemes, regardless
+the original expected usage model. However in this work, we 
+do not make assumption about the underlying platform and
+ devise a mechanism which works for both schemes. 
+%we treat these
+%two schemes differently, as will be discussed in section~\ref{makingAcc}.
+Finally, in any CPU+FPGA coprocessor systems, the access of data memory by the programmable logic can be seen as adding to the communication overhead between the
+accelerated part and the software components, which is a key parameter
+in determining if a part of the program should be accelerated using hardware.
+
+
+
+\section{Acceleratable Regions In Program Binaries}
+The trade-off between communication efficiency and capacity
+in the reconfigurable components of the systems dictates
+the granularity of the accelerators to be synthesized. 
+Given the loose coupling between the programmable logic and the processor,
+while it is still possible to create accelerators for small windows of dynamic instruction stream, the cost of frequently controlling and communicating
+with these tiny hardware engines would nullify any performance gain
+achieved. 
+It is ideal to have a relatively large chunk of computation
+handed off to the FPGA, which then works independently with little
+intervention from the CPU, before signalling the completion of the task.
+
+Another characteristic of the FPGA platform is its low clock frequency
+(as compared to a typical CPU), thus to have significant speed up, there
+needs to be substantial amount of parallelism extracted, which requires large windows of instruction.
+In addition to instruction level parallelism within basic block or a single iteration of a loop, coarse grained parallelism 
+%spanning the iteration space of loop nests 
+also needs to be exploited. Blocks of loop iterations are to be executed in parallel, which implies very aggressive instruction
+reordering when the accelerators are created.
+%
+%Meanwhile, the aggressive reordering of these instructions in creating the %accelerator
+%makes any speculative execution very expensive. 
+Consequently, speculative execution, which some binary-based dynamic parallelization techniques were based on, may become rather expensive. As states generated by the speculatively performed operations need to be buffered, 
+the amount of space required to accommodate the massively parallelel execution engine
+%exploited
+can be large.
+The subsequent commit of these state may also induce long delay
+or require complicated hardware mechanism.
+In particular, for any speculatively disambiguated memory accesses, the address streams need to be dynamically cross compared to ensure the
+reordering of loads and stores are indeed valid. 
+Using runtime profile can boost the confidence with which the disambiguation
+is performed, but the probabilistic nature of the approach does not
+relieve us the need for costly dynamic checking mechanisms. To generate
+lean and fast accelerators, in this work, we try to extract a set of conditions for parallelization which does not vary with the amount of work
+in the loop. In other words, we want to find computation that can 
+be done in run time with a statically known cost, yet still guarantees the validity of the instruction reordering we have performed for accelerator generation. 
+%This will allow us to quickly gauge if an instance of a loop nest should be executed on hardware.
+
+\subsection{Dependencies in Loops}
+To understand what characteristics a loop nest should manifests for it to be a feasible target, it is useful to start from the theory of loop dependence. As
+explained in section~\ref{sec:partins}, statements cannot be parallelized or
+reordered when there are RAW, WAR or WAW dependencies between them. In the context of instructions in loop nests,~\cite{Kennedy:2001:OCM:502981} defined
+loop-carried and loop-independent dependencies between a pair of statements $S_1$ and $S_2$ (at least one of which is writing to memory):
+\begin{itemize}
+    \item Loop-carried dependency: $S_1$ accesses a common memory location 
+    on one iteration of a loop, and $S_2$ accesses the same location on a subsequent iteration. 
+    \item loop-independent dependency: $S_1$ and $S_2$ access the same memory location in the same loop iteration, and there is a execution path from $S_1$ to $S_2$. 
+\end{itemize}
+The concepts of \textit{iteration number}, \textit{iteration vector} and \textit{iteration space} were also introduced. The iteration number is the 
+index number for a particular loop iteration, while the iteration vector
+extends this concept to a multi level loop nest. Each element in the vector
+corresponds to one level in the loop nest with left most element representing the outermost loop index. The set of all possible iteration vectors then
+constitute the iteration space. Figure~\ref{fig:inivis} visualizes these concepts with a simple loop nest. 
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{chap6fig/iterationSp.pdf}
+\caption{Dependencies in a Loop Nest
+\label{fig:inivis}}
+\end{center}
+\end{figure}
+
+To exploit coarse grained parallelism in the loop nest, we need to ensure the
+absence of loop carried dependencies at a particular level in the loop nest. There are also simple transformations(e.g. loop exchange) which can move loop carried
+dependencies to other loop levels so only loop-independent dependencies are left. To enable the discovery of these opportunities, we need to find, in each statement's iteration space, if they intersect with other statements' accessed memory locations. In general, the memory addresses to be accessed can be arbitrary functions of loop indices and runtime data, which makes it impossible to statically determine if
+dependencies exist. There are, however, a large set of problems where
+the memory referenced can be analyzed during compile time as the addresses are affine functions of the loop index variables. For loop nests of this kind,
+dependency analysis is essentially finding integer solutions for the problem:
+
+\begin{equation}
+\begin{aligned}
+\label{dioeq}
+& \text{} & & f(\vec{x}) = h(\vec{y}) \\
+\end{aligned}
+\end{equation}
+\begin{equation*}
+\begin{aligned}
+& \text{ where}  & & f(\vec{x}) = a_0 + a_1x_1+...+a_nx_n \\
+& & & h(\vec{y}) = b_0 + b_1y_1+...+b_ny_n \\
+& & & \vec{x}_{lb} \le \vec{x} \le \vec{x}_{ub} \\
+& & & \vec{y}_{lb} \le \vec{y} \le \vec{y}_{ub}
+\end{aligned}
+\end{equation*}
+Or equivalently this linear Diophantine equation:
+\begin{equation}
+\begin{aligned}
+\label{adioeq}
+a_1x_1-b_1y_1+...+a_nx_n-b_ny_n = b_0 - a_0
+\end{aligned}
+\end{equation}
+\begin{equation*}
+\begin{aligned}
+& \text{ where}  & & x_{lb}_k \le x_k \le x_{ub}_k \\
+& & & y_{lb}_k \le y_k \le y_{ub}_k \\
+\end{aligned}
+\end{equation*}
+
+Both function $f$ and $h$ takes a iteration vector from within the iteration space of the statement, bounded by $\vec{x}_{lb}/\vec{y}_{lb}$ and $\vec{x}_{ub}/\vec{y}_{ub}$, and map it to a memory location.
+This problem is a integer linear program, one of the NP-complete problems.  
+There are various techniques~\cite{banerjee}~\cite{gcd}, proposed over the years, to efficiently solve a relaxed version of this equation. 
+%can be used to compute if
+%dependencies exist between memory references. Essentially they are all trying %to find solutions for the problem:
+%Many techniques were proposed for compiling these problems onto variable %processors. 
+In our binary-based flow, we also try to target these analyzable loop nests, some of which are especially amenable to FPGA acceleration. 
+Identifying these regions from the program binaries, however, is not as
+simple as doing it from the source code.
+
+
+%This can be done by solving the
+
+%direction vector
+%is the way to do it
+%To capture the dependencies between statements, \texit{direction vector} are computed between statements.
+
+\subsection{Challenges for Binary-based Analysis}
+The regular and analyzable memory access patterns expressed in high
+level languages become rather mangled when the program binaries are 
+being examined. All memory accesses are pointer based with no high
+level information to indicate if the data structures they are targeting
+are disjoint. With dimensionality of the arrays eliminated, 
+separate variables in original address calculation are now coupled to each other. In essence, we have to perform dependency analysis on a huge linear
+array with all all addresses being the result of some run time computation.
+Figure~\ref{fig:mangledMem} illustrates how different a
+set of memory accesses manifest themselves in the actual high level source code v.s. program binaries.
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.8\linewidth]{chap6fig/memBin.pdf}
+\caption{Memory Accesses in Program Binaries
+\label{fig:mangledMem}}
+\end{center}
+\end{figure}
+
+In this example, even though the original array references are all affine functions of the loop index variables, in the program binaries, their calculation is much more complex. 
+Dependency testing involving only a single loop index in the source code now have to deal with multiple indices. More importantly, for equation~\ref{adioeq}, the coefficients ($a_0...a_n$ and $b_0 ... b_n$) are statically known constants while
+in the binaries, everything is a runtime variable stored in either a register or a memory location. Naively 
+substituting these symbolic variables into the Diophantine's equations yields
+a non-linear formulation which can not be solved by the common techniques
+in optimizing compilers. On the other hand, %it is relatively straight forward, 
+as long as these coefficients are unchanged during the execution of the loop nests, we can leverage various classic methods to formulate a fixed set of checks to be performed during run time. This is possible because the dependency
+analysis problem only scales up with number of levels in the loop, which is easily recognizable from the binaries. We thereby have the possibility of quickly verifying our coarse grained parallelization before the invocation of the accelerator. 
+In our flow, dataflow analysis is performed on loop nests to ensure there are no updates to these coefficients during the execution, before more detailed dependency testing and parallelization are performed.
+
+
+
+%we can be sure that only a fixed amount of computation is needed in
+%the dependency. This is not hard to see as the size of the problem formulated 
+%does not depend on the actual values of the variable but the number of levels in the loop nest.
+
+%we can assume they are runtime constant and the dependency analysis
+%can be carried out. 
+
+
+
+%Our approach to deal with this uncertainty is described later in section~\ref{makingAcc}.
+
+\subsection{From Dependency Testing to Parallelization}
+\label{sec:fdtp}
+%With the dependency testing done, we need to examine the loop nests' potential for parallelization.
+To identify the loop nests' potential for parallelization through dependency testing, the distance and direction vectors~\cite{opac-b1000180} are used.
+%One way to bridge this gap is through the use of distance and direction vectors~\cite{opac-b1000180}. 
+
+The dependence distance vector can be computed:
+\begin{equation*}
+\begin{aligned}
+&  & & \vec{d}(\vec{x},\vec{y}) = \vec{y}-\vec{x} \\
+& \text{ where }&   & \vec{x} \text{ and }\vec{y} \text{ are solution to equation~\ref{dioeq}}  
+\end{aligned}
+\end{equation*}
+
+The distance vectors give rise to direction vectors $D(\vec{x},\vec{y})$:
+\begin{equation*}
+\begin{aligned}
+  & & ``<" \text{ if } \vec{d}(\vec{x},\vec{y})_k>0 \\
+ \vec{D}(\vec{x},\vec{y})_k = &   & ``=" \text{ if } \vec{d}(\vec{x},\vec{y})_k=0\\
+ & & ``>" \text{ if } \vec{d}(\vec{x},\vec{y})_k<0
+\end{aligned}
+\end{equation*}
+
+
+The convention is to have the lexicographically earlier iteration vector to be
+$\vec{x}$ and with that the leftmost non-``=" element of a direction vector would always be ``$<$". 
+The index for this leading ``$<$" is also the level of the  loop-carried dependency. 
+Assuming a transformation $T$ does not violate loop-independent dependencies,
+~\cite{Kennedy:2001:OCM:502981} proved that $T$ is valid as long as
+it does not cause some of the direction vectors to have ``$>$" as the leftmost non-``=" component. In addition, any iteration reordering at a level of the loop not carrying dependency is also valid. Using these proven theorems, we can
+decide if loop transformations and iteration parallelization are legal when we know all the direction vectors of a loop nest. Figure~\ref{fig:paral} illustrates a
+few scenarios where dependency direction vectors are used to determine validity
+of transformation/parallelization.
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1.0\linewidth]{chap6fig/paral.pdf}
+\caption{Parallelization with Direction Vectors
+\label{fig:paral}}
+\end{center}
+\end{figure}
+
+To actually obtain the direction vectors from equation~\ref{adioeq},
+we use Banerjee's approach~\cite{banerjee}.
+%To actually solve equation~\ref{adioeq}, we use Banerjee's approach~\cite{}, which find the solution for the non-integer relaxation of the ILP formulation. It does
+%which requires constant coefficients. 
+As the coefficients in the equation are not known from the static binary, our flow examine the runtime profile to extract the values.
+%Their values are extracted from the runtime profile of the programs.
+Therefore, the dependency testing results are a reflection of the programs'
+past behavior, which may or may not hold true when the input data are changed.
+However, given a new set of runtime variables, the amount of computation needed to confirm the results of earlier dependency testing would be constant. This is not hard to see as the size of the problem formulated 
+does not depend on the actual values of the coefficients. We now have the computation which has $O(1)$ cost yet guarantees the validity of the extracted
+parallelism.
+
+
+Meanwhile, it is worth noting that Banerjee's inequality only tests for existence of \textit{ real} solutions for the Diophantine's equations. Since it only tackles the non-integer relaxation of the ILP formulation, the results obtained are conservative. False dependencies are reported if all the real solutions are non-integral. More accurate tests like~\cite{omega} find integer solutions but are more costly. As we are
+going to perform the test using runtime data when the accelerator is actually
+being invoked, the faster, though more pessimistic, approach is preferred.
+
+%To summarize, our flow targets loop nests whose direction vectors can be extracted and coarse grained parallelism identified.
+
+
+
+\begin{comment}
+
+we leverage several techniques for taking advantage of the discovered parallelism. For the inner most loop, loop pipelining is always applied
+to 
+
+Assuming a particular loop level does not carry dependency, 
+
+Comparing against other parallel computers such as multicore or SIMD machines, the 
+
+Parallelization in FPGA vs others:
+vectorization ? separate thread? loop pipelining? 
+
+
+In order to get the dependency vector however, the memory access patterns would
+need to be analyzable. Techniques for extracting dependency vectors were outlined in the .... These techniques generally require the array references
+to be affine functions of the loop indices, where the coefficients are
+all constants. 
+Unfortunately, in the case of accelerating binaries, the coefficients are 
+always variables stored in either register or a memory location. Naively
+substitutes these variable into the Diophantine's equations yield
+non linear conditions...As a result, even if the underlying computation are parallelizable, it is a lot harder to verify with the program binaries
+as the starting points. It is relatively straight forward, however,
+to detect if these coefficient are changed during the execution of the loop nests. 
+\end{comment}
+
+% we want something analyzable ---- % but of course even if the source code
+% is analyzable, the binary may not be
+
+
+\begin{comment}
+Schemes for checking 
+%
+
+This is certainly compatible with the how conventional FPGAs are used
+in most applications, where entire compute intensive loops are offloaded
+and sped up.
+
+Even as we focus on speeding up loops with large iteration count,
+certain loop nests are just difficult to accelerate using FPGAs.
+%especially
+%when all higher level information is stripped away, as is the case with program binaries.
+Due to the slower frequency of FPGA accelerators, it is not sufficient to just exploit instruction level parallelism. For there to be any net gain
+in performance, coarse grained parallelism at the loop level has
+to be extracted. To establish independence between different loop iterations or perform transformation to extract coarse grain parallelism, the 
+\end{comment}
+
+\section{A Two Phased Approach for Accelerating Program Binaries Using FPGA}
+\label{makingAcc}
+As we use past execution profiles to extract parallelism and then perform runtime checks to confirm the validity of our parallelization, our approach
+in accelerating program binaries can be divided into two phases. The offline
+phase (compile time) consists of dependency analysis, accelerator synthesis and accelerator driver generation. Meanwhile, the parallelism validity check, data transfer and invocation of the accelerator are all performed during the online phase (run time). Being part of the driver, the actual code segments to perform validity check and data transfer are all generated during compile time. As our primary objective is to boost the performance of the accelerated loop nests, the flow tries to create simple and fast run time code whenever it, at the expense
+of the compilation time and at times, the accuracy of the run time mechanisms.
+
+
+
+\subsection{Compile Time Binary Analysis}
+As mentioned in section~\ref{sec:fdtp}, we use Banerjee's tests to find 
+direction vectors between different statements in the loop nest. There are 
+a few additional techniques employed to make runtime check cheaper
+
+\begin{comment}
+At a high level, the approach we are proposing in accelerating program binaries
+can be divided into two phases. For an acceleratable loop nest, we first examine
+it's past execution profile to extract necessary information to perform dependency analysis offline. After obtaining the dependency direction vectors between statements, we can then perform parallelization and the actual accelerator synthesis. 
+Now, whether the generated accelerator is consistent
+with the semantics of the original program depends on if the dependency
+testing results remain true when the actual execution happens. This is our
+second phase, where an online check is performed to confirm the validity
+of the assumed parallelism.
+\end{comment}
+
+
+
+
+
+When FPGA accelerators are synthesized, several techniques are used to exploit
+the coarse grained parallelism. For the inner most
+loop, it is generally very cost effective to pipeline the loop. If
+the iterations are parallelizable, the initiation interval would be 1.
+Assuming there are $C$ iterations, the total execution time of the loop
+would roughly be $C$ cycles. To further reduce this number, loop unrolling
+can be performed. It combines multiple iterations into one, effectively
+turning inter-iteration parallelism into fine grained parallelism. 
+The iteration count is reduced by the unroll factor ($U$) while the II does not change. Consequently, the total execution time is reduced to roughly $C/U$ cycles with a approximately $U$ fold increase in area.
+
+
+
+
+multiple
+independent datapath can be instantiated, each performing a subset of 
+the iterations. This technique can be used to parallelize outer loops
+as well. For loop with a large number of iterations, it provides a good
+way to trade-off more on-chip resources for better performance, but
+also incurs some extra synchronization overheads. Another way to 
+increase performance by using more area is through loop unrolling,
+which effectively increase the size of a single iteration and turn
+inter-iteration parallelism into fine grained parallelism.
+
+
+\newpage
+
+
+\newpage
+\newpage
+\section{Accelerator Integration through Binary Instrumentation}
+\newpage
+
+\section{Experimental Evaluation }

@@ -1,0 +1,2455 @@
+
+IEEEexample.bib 
+V1.12 (2007/01/11)
+Copyright (c) 2002-2007 by Michael Shell
+See: http://www.michaelshell.org/
+for current contact information.
+
+This is an example BibTeX database for the official IEEEtran.bst
+BibTeX style file.
+
+Some entries call strings that are defined in the IEEEabrv.bib file.
+Therefore, IEEEabrv.bib should be loaded prior to this file. 
+Usage: 
+
+\bibliographystyle{./IEEEtran}
+\bibliography{./IEEEabrv,./IEEEexample}
+
+
+Support sites:
+http://www.michaelshell.org/tex/ieeetran/
+http://www.ctan.org/tex-archive/macros/latex/contrib/IEEEtran/
+and/or
+http://www.ieee.org/
+
+*************************************************************************
+Legal Notice:
+This code is offered as-is without any warranty either expressed or
+implied; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE! 
+User assumes all risk.
+In no event shall IEEE or any contributor to this code be liable for
+any damages or losses, including, but not limited to, incidental,
+consequential, or any other damages, resulting from the use or misuse
+of any information contained here.
+
+All comments are the opinions of their respective authors and are not
+necessarily endorsed by the IEEE.
+
+This work is distributed under the LaTeX Project Public License (LPPL)
+( http://www.latex-project.org/ ) version 1.3, and may be freely used,
+distributed and modified. A copy of the LPPL, version 1.3, is included
+in the base LaTeX documentation of all distributions of LaTeX released
+2003/12/01 or later.
+Retain all contribution notices and credits.
+** Modified files should be clearly indicated as such, including  **
+** renaming them and changing author support contact information. **
+
+File list of work: IEEEabrv.bib, IEEEfull.bib, IEEEexample.bib,
+                   IEEEtran.bst, IEEEtranS.bst, IEEEtranSA.bst,
+                   IEEEtranN.bst, IEEEtranSN.bst, IEEEtran_bst_HOWTO.pdf
+*************************************************************************
+
+
+Note that, because the example references were taken from actual IEEE
+publications, these examples do not always contain the full amount
+of information that may be desirable (for use with other BibTeX styles).
+In particular, full names (not abbreviated with initials) should be
+entered whenever possible as some (non-IEEE) bibliography styles use
+full names. IEEEtran.bst will automatically abbreviate when it encounters
+full names.
+ 
+ 
+ 
+ 
+references for the IEEEtran.bst documentation
+IEEEtran homepage
+@electronic{IEEEhowto:IEEEtranpage,
+  author        = "Michael Shell",
+  title         = "{IEEE}tran Homepage",
+  url           = "http://www.michaelshell.org/tex/ieeetran/",
+  year          = "2007"
+}
+
+
+the distribution site for IEEEtran.bst
+@electronic{IEEEexample:shellCTANpage,
+  author        = "Michael Shell",
+  title         = "{IEEE}tran Webpage on {CTAN}",
+  url           = "http://www.ctan.org/tex-archive/macros/latex/contrib/IEEEtran/",
+  year          = "2007"
+}
+
+
+the IEEE website
+sort key is needed for sorting styles
+@electronic{IEEEexample:IEEEwebsite,
+  title         = "The {IEEE} Website",
+  url           = "http://www.ieee.org/",
+  year          = "2007",
+  key           = "IEEE"
+}
+
+
+The BibTeX user's guide.
+The filename could have been put in the URL instead. But, there might
+be other interesting things for the user in the same directory - and
+the filename might change before the directory that contains it.
+@electronic{IEEEexample:bibtexuser,
+  author        = "Oren Patashnik",
+  title         = "{{\BibTeX}}ing",
+  howpublished  = "{btxdoc.pdf}",
+  url           = "http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/",
+  month         = feb,
+  year          = "1988"
+}
+
+
+The BibTeX style designer's guide.
+@electronic{IEEEexample:bibtexdesign,
+  author        = "Oren Patashnik",
+  title         = "Designing {{\BibTeX}} Styles",
+  howpublished  = "{btxhak.pdf}",
+  url           = "http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/",
+  month         = feb,
+  year          = "1988"
+}
+
+@inproceedings{Wall:1991:LIP:106972.106991,
+ author = {Wall, David W.},
+ title = {Limits of Instruction-level Parallelism},
+ booktitle = {Proceedings of the Fourth International Conference on Architectural Support for Programming Languages and Operating Systems},
+ series = {ASPLOS IV},
+ year = {1991},
+ isbn = {0-89791-380-9},
+ location = {Santa Clara, California, USA},
+ pages = {176--188},
+ numpages = {13},
+ url = {http://doi.acm.org/10.1145/106972.106991},
+ doi = {10.1145/106972.106991},
+ acmid = {106991},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+
+
+A comprehensive BibTeX tutorial.
+@electronic{IEEEexample:tamethebeast,
+  author        = "Nicolas Markey",
+  title         = "Tame the BeaST  ---  The B to X of {{\BibTeX}}",
+  url           = "http://tug.ctan.org/tex-archive/info/bibtex/tamethebeast/",
+  month         = oct,
+  year          = "2005"
+}
+
+
+The BibTeX Tips and FAQ guide.
+@electronic{IEEEexample:bibtexFAQ,
+  author        = "David Hoadley and Michael Shell",
+  title         = "{{\BibTeX}} Tips and {FAQ}",
+  howpublished  = "{btxFAQ.pdf}",
+  url           = "http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/",
+  month         = jan,
+  year          = "2007"
+}
+
+@inproceedings{Tirumalai:1990:PLE:110382.110438,
+ author = {Tirumalai, P. and Lee, M. and Schlansker, M.},
+ title = {Parallelization of Loops with Exits on Pipelined Architectures},
+ booktitle = {Proceedings of the 1990 ACM/IEEE Conference on Supercomputing},
+ series = {Supercomputing '90},
+ year = {1990},
+ isbn = {0-89791-412-0},
+ location = {New York, New York, USA},
+ pages = {200--212},
+ numpages = {13},
+ url = {http://dl.acm.org/citation.cfm?id=110382.110438},
+ acmid = {110438},
+ publisher = {IEEE Computer Society Press},
+ address = {Los Alamitos, CA, USA},
+} 
+
+@inproceedings{Rau:1994:IMS:192724.192731,
+ author = {Rau, B. Ramakrishna},
+ title = {Iterative Modulo Scheduling: An Algorithm for Software Pipelining Loops},
+ booktitle = {Proceedings of the 27th Annual International Symposium on Microarchitecture},
+ series = {MICRO 27},
+ year = {1994},
+ isbn = {0-89791-707-3},
+ location = {San Jose, California, USA},
+ pages = {63--74},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/192724.192731},
+ doi = {10.1145/192724.192731},
+ acmid = {192731},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {instruction scheduling, loop scheduling, modulo scheduling, software pipelining},
+} 
+
+@article{Allan:1995:SP:212094.212131,
+ author = {Allan, Vicki H. and Jones, Reese B. and Lee, Randall M. and Allan, Stephen J.},
+ title = {Software Pipelining},
+ journal = {ACM Comput. Surv.},
+ issue_date = {Sept. 1995},
+ volume = {27},
+ number = {3},
+ month = sep,
+ year = {1995},
+ issn = {0360-0300},
+ pages = {367--432},
+ numpages = {66},
+ url = {http://doi.acm.org/10.1145/212094.212131},
+ doi = {10.1145/212094.212131},
+ acmid = {212131},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {instruction level parallelism, loop reconstruction, optimization, software pipelining},
+} 
+
+@inproceedings{Eichenberger:1995:OMS:224538.224542,
+ author = {Eichenberger, Alexandre E. and Davidson, Edward S. and Abraham, Santosh G.},
+ title = {Optimum Modulo Schedules for Minimum Register Requirements},
+ booktitle = {Proceedings of the 9th International Conference on Supercomputing},
+ series = {ICS '95},
+ year = {1995},
+ isbn = {0-89791-728-6},
+ location = {Barcelona, Spain},
+ pages = {31--40},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/224538.224542},
+ doi = {10.1145/224538.224542},
+ acmid = {224542},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+
+@inproceedings{Lam:1988:SPE:53990.54022,
+ author = {Lam, M.},
+ title = {Software Pipelining: An Effective Scheduling Technique for VLIW Machines},
+ booktitle = {Proceedings of the ACM SIGPLAN 1988 Conference on Programming Language Design and Implementation},
+ series = {PLDI '88},
+ year = {1988},
+ isbn = {0-89791-269-1},
+ location = {Atlanta, Georgia, USA},
+ pages = {318--328},
+ numpages = {11},
+ url = {http://doi.acm.org/10.1145/53990.54022},
+ doi = {10.1145/53990.54022},
+ acmid = {54022},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+
+The TeX FAQ
+@electronic{IEEEexample:texfaq,
+  author        = "Robin Fairbairns",
+  title         = "The {{\TeX}} {FAQ}",
+  url           = "http://www.tex.ac.uk/cgi-bin/texfaq2html/",
+  month         = jan,
+  year          = "2007"
+}
+
+
+A BibTeX Guide via Examples.
+@electronic{IEEEexample:bibtexguide,
+  author        = "Ki-Joo Kim",
+  title         = "A {{\BibTeX}} Guide via Examples",
+  howpublished  = "{bibtex\_guide.pdf}",
+  url           = "http://www.geocities.com/kijoo2000/",
+  month         = apr,
+  year          = "2004"
+}
+
+
+TeX User Group Bibliography Archive
+@electronic{IEEEexample:beebe_archive,
+  author        = "Nelson H. F. Beebe",
+  title         = "{{\TeX}} User Group Bibliography Archive",
+  url           = "http://www.math.utah.edu:8080/pub/tex/bib/index-table.html",
+  month         = aug,
+  year          = "2006"
+}
+
+The natbib.sty package.
+@electronic{ctan:natbib,
+  author        = "Patrick W. Daly",
+  title         = "The natbib.sty package",
+  url           = "http://www.ctan.org/tex-archive/macros/latex/contrib/natbib/",
+  month         = sep,
+  year          = "2006"
+}
+
+The url.sty package.
+@electronic{IEEEexample:urlsty,
+  author        = "Donald Arseneau",
+  title         = "The url.sty Package",
+  url           = "http://www.ctan.org/tex-archive/macros/latex/contrib/misc/",
+  month         = jun,
+  year          = "2005",
+}
+
+
+The hyperref.sty package.
+@electronic{IEEEexample:hyperrefsty,
+  author        = "Sebastian Rahtz and Heiko Oberdiek",
+  title         = "The hyperref.sty Package",
+  url           = "http://www.ctan.org/tex-archive/macros/latex/contrib/hyperref/",
+  month         = nov,
+  year          = "2006",
+}
+
+
+The breakurl.sty package.
+@electronic{IEEEexample:breakurl,
+  author        = "Vilar Camara Neto",
+  title         = "The breakurl.sty Package",
+  url           = "http://www.ctan.org/tex-archive/macros/latex/contrib/breakurl/",
+  month         = aug,
+  year          = "2006",
+}
+
+
+The Babel package.
+@electronic{IEEEexample:babel,
+  author        = "Johannes Braams",
+  title         = "The Babel Package",
+  url           = "http://www.ctan.org/tex-archive/macros/latex/required/babel/",
+  month         = nov,
+  year          = "2005",
+}
+
+
+The multibib package.
+@electronic{IEEEexample:multibibsty,
+  author        = "Thorsten Hansen",
+  title         = "The multibib.sty package",
+  url           = "http://www.ctan.org/tex-archive/macros/latex/contrib/multibib/",
+  month         = jan,
+  year          = "2004"
+}
+
+
+The biblatex package.
+@electronic{IEEEexample:biblatex,
+  author        = "Philipp Lehman",
+  title         = "The biblatex package",
+  url           = "http://www.ctan.org/tex-archive/macros/latex/exptl/biblatex/",
+  month         = jan,
+  year          = "2007"
+}
+
+
+
+The three most common and typical types of references used in
+IEEE publications:
+
+an article in a journal
+Note the use of the IEEE_J_EDL string, defined in the IEEEabrv.bib file,
+for the journal name. IEEEtran.bst defines the BibTeX standard three
+letter month codes per IEEE style.
+From the June 2002 issue of "IEEE Transactions on Electron Devices",
+page 996, reference #16.
+@article{IEEEexample:article_typical,
+  author        = "S. Zhang and C. Zhu and J. K. O. Sin and P. K. T. Mok",
+  title         = "A Novel Ultrathin Elevated Channel Low-temperature 
+                   Poly-{Si} {TFT}",
+  journal       = IEEE_J_EDL,
+  volume        = "20",
+  month         = nov,
+  year          = "1999",
+  pages         = "569-571"
+}
+
+
+journal article using et al.
+The (five) authors are actually: F. Delorme, S. Slempkes, G. Alibert, 
+B. Rose, J. Brandon
+The month (July) was not given here.
+From the September 1998 issue of "IEEE Journal on Selected Areas in
+Communications", page 1257, reference #28.
+@article{IEEEexample:articleetal,
+  author        = "F. Delorme and others",
+  title         = "Butt-jointed {DBR} Laser With 15 {nm} Tunability Grown
+                   in Three {MOVPE} Steps",
+  journal       = "Electron. Lett.",
+  volume        = "31",
+  number        = "15",
+  year          = "1995",
+  pages         = "1244-1245"
+}
+
+
+a paper in a conference proceedings
+"conference" can be used as an alias for "inproceedings"
+From the June 2002 issue of "Journal of Microelectromechanical Systems",
+page 205, reference #16.
+@inproceedings{IEEEexample:conf_typical,
+  author        = "R. K. Gupta and S. D. Senturia",
+  title         = "Pull-in Time Dynamics as a Measure of Absolute Pressure",
+  booktitle     = "Proc. {IEEE} International Workshop on
+                   Microelectromechanical Systems ({MEMS}'97)",
+  address       = "Nagoya, Japan",
+  month         = jan,
+  year          = "1997",
+  pages         = "290-294"
+}
+
+
+a book
+From the May 2002 issue of "IEEE Transactions on Magnetics",
+page 1466, reference #4.
+@book{IEEEexample:book_typical,
+  author        = "B. D. Cullity",
+  title         = "Introduction to Magnetic Materials",
+  publisher     = "Addison-Wesley",
+  address       = "Reading, MA",
+  year          = "1972"
+}
+
+
+
+
+Other examples
+
+journal article with large page numbers, IEEE will divide numbers 5 digits
+or longer into groups of three with small spaces between them. Page ranges
+can be separated via either "-" or "--", IEEEtran.bst will automatically
+convert the separator dash(es) to "--".
+Authors and/or IEEE do not always provide/use the journal number, but it
+was used in this case. IEEEtran.bst can be configured to ignore journal
+numbers if desired.
+From the August 2000 issue of "IEEE Photonics Technology Letters",
+page 1039, reference #11.
+@article{IEEEexample:articlelargepages,
+  author        = "A. Castaldini and A. Cavallini and B. Fraboni
+                   and P. Fernandez and J. Piqueras",
+  title         = "Midgap Traps Related to Compensation Processes in
+                   {CdTe} Alloys",
+  journal       = "Phys. Rev. B.",
+  volume        = "56",
+  number        = "23",
+  year          = "1997",
+  pages         = "14897-14900"
+}
+
+
+journal article with dual months 
+use the BibTeX "#" concatenation operator
+From the March 2002 issue of "IEEE Transactions on Mechatronics",
+page 21, reference #8.
+@article{IEEEexample:articledualmonths,
+  author        = "Y. Okada and K. Dejima and T. Ohishi",
+  title         = "Analysis and Comparison of {PM} Synchronous Motor and
+                   Induction Motor Type Magnetic Bearings",
+  journal       = IEEE_J_IA,
+  volume        = "31",
+  month         = sep # "/" # oct,
+  year          = "1995",
+  pages         = "1047-1053"
+}
+
+
+journal article to be published as a misc entry type
+date information like month and year is optional 
+However, the article form like that below may be a better approach.
+From the May 2002 issue of "IEEE Journal of Selected Areas in 
+Communication", page 725, reference #3.
+@misc{IEEEexample:TBPmisc,
+  author        = "M. Coates and A. Hero and R. Nowak and B. Yu",
+  title         = "Internet Tomography",
+  howpublished  = IEEE_M_SP,
+  month         = may,
+  year          = "2002",
+  note          = "to be published"
+}
+
+
+
+
+journal article to be published as an article entry type
+year is required, so if absent, use the year field to hold
+the "submitted for publication" in order to avoid a warning for
+the missing year field.
+From the June 2002 issue of "IEEE Transactions on Information Theory",
+page 1461, reference #21.
+@article{IEEEexample:TBParticle,
+  author        = "N. Kahale and R. Urbanke",
+  title         = "On the Minimum Distance of Parallel and Serially
+                   Concatenated Codes",
+  journal       = IEEE_J_IT,
+  year          = "submitted for publication"
+}
+
+
+
+
+
+book with editor and no author
+From the June 2002 issue of "IEEE Transactions on Information Theory",
+page 1725, reference #1.
+@book{IEEEexample:bookwitheditor,
+  editor        = "J. C. Candy and G. C. Temes",
+  title         = "Oversampling Delta-Sigma Data Converters Theory,
+                   Design and Simulation",
+  publisher     = "{IEEE} Press.",
+  address       = "New York",
+  year          = "1992"
+}
+
+
+book with edition, author and editor
+Note that the standard BibTeX styles do not support book entries with both
+author and editor fields, but IEEEtran.bst does.
+The standard BibTeX way of specifying the edition is to use capitalized
+ordinal words such as "First", "Second", etc. Most .bst files can convert
+up to about "Fifth" into the format needed. IEEEtran.bst can convert up
+to "Tenth" to the "Arabic ordinal" form IEEE uses (e.g., "10th"). For
+editions over the tenth, it is best to use the "Arabic ordinal" form for
+IEEE related work (e.g., "101st")
+Note how "Jr." has to be entered.
+From the May 2002 issue of "Journal of Lightwave Technology", page 856,
+reference #17.
+@book{IEEEexample:book,
+  author        = "S. M. Metev and V. P. Veiko",
+  editor        = "Osgood, Jr., R. M.",
+  title         = "Laser Assisted Microtechnology",
+  edition       = "Second",
+  publisher     = "Springer-Verlag",
+  address       = "Berlin, Germany",
+  year          = "1998"
+}
+
+
+book with series and volume
+From the January 2000 issue of "IEEE Transactions on Communications",
+page 11, reference #31.
+@book{IEEEexample:bookwithseriesvolume,
+  editor        = "J. Breckling",
+  title         = "The Analysis of Directional Time Series: Applications to
+                   Wind Speed and Direction",
+  series        = "Lecture Notes in Statistics",
+  publisher     = "Springer",
+  address       = "Berlin, Germany",
+  year          = "1989",
+  volume        = "61"
+}
+
+
+inbook with chapter number. The pages field could also have been given.
+The chapter number could be changed to something else such as a section
+number via the type field: type = "sec.".
+From the May 2002 issue of "IEEE Transactions on Circuits and Systems---I: 
+Fundamental Applications and Theory", page 638, reference #22.
+@inbook{IEEEexample:inbook,
+  author        = "H. E. Rose",
+  title         = "A Course in Number Theory",
+  publisher     = "Oxford Univ. Press",
+  address       = "New York, NY",
+  year          = "1988",
+  chapter       = "3"
+}
+
+
+inbook with pages and note. The language field is not set to Russian
+because the title is presented here in its translated, English, form.
+From the May 2002 issue of "IEEE Transactions on Magnetics", page 1533,
+reference #5.
+@inbook{IEEEexample:inbookpagesnote,
+  author        = "B. K. Bul",
+  title         = "Theory Principles and Design of Magnetic Circuits",
+  publisher     = "Energia Press",
+  address       = "Moscow",
+  year          = "1964",
+  pages         = "464",
+  note          = "(in Russian)"
+}
+
+
+
+
+
+incollection with author and editor
+From the May 2002 issue of "Journal of Lightwave Technology",
+page 807, reference #7.
+@incollection{IEEEexample:incollection,
+  author        = "W. V. Sorin",
+  editor        = "D. Derickson",
+  title         = "Optical Reflectometry for Component Characterization",
+  booktitle     = "Fiber Optic Test and Measurement",
+  publisher     = "Prentice-Hall",
+  address       = "Englewood Cliffs, NJ",
+  year          = "1998"
+}
+
+
+incollection with series
+From the April 2000 issue of "IEEE Transactions on Communication",
+page 609, reference #3.
+@incollection{IEEEexample:incollectionwithseries,
+  author        = "J. B. Anderson and K. Tepe",
+  title         = "Properties of the Tailbiting {BCJR} Decoder",
+  booktitle     = "Codes, Systems and Graphical Models",
+  series        = "{IMA} Volumes in Mathematics and Its Applications",
+  publisher     = "Springer-Verlag",
+  address       = "New York",
+  year          = "2000"
+  
+}
+
+@INPROCEEDINGS{Chu89hyper:an,
+    author = {Chi-Min Chu and Miodrag Potkonjak and Markus Thaler and Jan Rabaey},
+    title = {HYPER: An Interactive Synthesis Environment for High Performance Real Time Applications},
+    booktitle = {IN PROCEEDINGS OF THE INTERNATIONAL CONFERENCE ON COMPUTER DESIGN},
+    year = {1989},
+    pages = {432--435},
+    publisher = {}
+}
+
+BibTeX | EndNote | ACM Ref
+@book{Knapp:1996:BSD:236240,
+ author = {Knapp, David W.},
+ title = {Behavioral Synthesis: Digital System Design Using the Synopsys Behavioral Compiler},
+ year = {1996},
+ isbn = {0-13-569252-0},
+ publisher = {Prentice-Hall, Inc.},
+ address = {Upper Saddle River, NJ, USA},
+} 
+
+@INPROCEEDINGS{116097, 
+author={Genin, D. and Hilfinger, P. and Rabaey, J. and Scheers, C. and De Man, H.}, 
+booktitle={Acoustics, Speech, and Signal Processing, 1990. ICASSP-90., 1990 International Conference on}, 
+title={DSP specification using the Silage language}, 
+year={1990}, 
+month={Apr}, 
+pages={1056-1060 vol.2}, 
+keywords={computerised signal processing;specification languages;DSP specification;Silage language;applicative language;conditionals;data typing;design environment;digital signal processing;functional language;loops;pragmatic directives;specification language;time-domain operations;timing information;Algorithm design and analysis;Concurrent computing;Data flow computing;Delay;Digital signal processing;Filters;Signal analysis;Signal design;Signal processing;Signal processing algorithms;Specification languages;Time domain analysis;Timing}, 
+doi={10.1109/ICASSP.1990.116097}, 
+ISSN={1520-6149},}
+
+BibTeX | EndNote | ACM Ref
+@book{Camposano:1991:HVS:574732,
+ editor = {Camposano, Raul and Wolf, Wayne H.},
+ title = {High-Level VLSI Synthesis},
+ year = {1991},
+ isbn = {0792391594},
+ publisher = {Kluwer Academic Publishers},
+ address = {Norwell, MA, USA},
+} 
+
+
+@INPROCEEDINGS{20869, 
+author={Claesen, L. and Catthoor, F. and Lanneer, D. and Goosens, G. and Note, S. and Van Meerbergen, J. and De Man, H.}, 
+booktitle={Custom Integrated Circuits Conference, 1988., Proceedings of the IEEE 1988}, 
+title={Automatic synthesis of signal processing benchmark using the CATHEDRAL silicon compilers}, 
+year={1988}, 
+month={May}, 
+pages={14.7/1-14.7/4}, 
+keywords={circuit layout CAD;wave digital filters;CATHEDRAL silicon compilers;WDF;architecture-specific silicon compilers;design time;elapsed design cycle;high-level synthesis;higher-level filter specifications;implementation strategies;initial optimization step;layout generation;optimization;signal processing benchmark;wave digital filter;Delay;Digital filters;Frequency;Hardware;Phase change materials;Signal processing;Signal synthesis;Signal to noise ratio;Silicon compiler;Transfer functions}, 
+doi={10.1109/CICC.1988.20869},}
+
+incollection with author, editor, chapter and pages
+From the January 2000 issue of "IEEE Transactions on Communications",
+page 16, reference #9.
+@incollection{IEEEexample:incollection_chpp,
+  author        = "P. Hedelin and P. Knagenhjelm and M. Skoglund",
+  editor        = "W. B. Kleijn and K. K. Paliwal",
+  title         = "Theory for Transmission of Vector Quantization Data",
+  booktitle     = "Speech Coding and Synthesis",
+  publisher     = "Elsevier Science",
+  address       = "Amsterdam, The Netherlands",
+  year          = "1995",
+  chapter       = "10",
+  pages         = "347-396"
+}
+
+
+incollection with a large number of authors, some authors/journals will
+use et al. for so many names. IEEEtran.bst can be configured to do this
+if desired, or "R. M. A. Dawson and others" can be used instead.
+Note that IEEE may not include the publisher for incollection entries -
+IEEEtran.bst will not issue a warning if the publisher is missing for
+incollections - but other .bst files often will.
+From the June 2002 issue of "IEEE Transactions on Electron Devices",
+page 996, reference #12.
+@incollection{IEEEexample:incollectionmanyauthors,
+  author        = "R. M. A. Dawson and Z. Shen and D. A. Furst and
+                   S. Connor and J. Hsu and M. G. Kane and R. G. Stewart and
+                   A. Ipri and C. N. King and P. J. Green and R. T. Flegal
+                   and S. Pearson and W. A. Barrow and E. Dickey and K. Ping
+                   and C. W. Tang and S. Van. Slyke and
+                   F. Chen and J. Shi and J. C. Sturm and M. H. Lu",
+  title         = "Design of an Improved Pixel for a Polysilicon 
+                   Active-Matrix Organic {LED} Display",
+  booktitle     = "{SID} Tech. Dig.",
+  volume        = "29",
+  year          = "1998",
+  pages         = "11-14"
+}
+
+
+
+
+
+A Motorola data book as a manual
+It is somewhat unusual to include the data book part number.
+in the title. It might be more correct to put this information
+in the howpublished field instead.
+From the December 2000 issue of "IEEE Transactions on Communications",
+page 1986, reference #10.
+@book{Coussy:2008:HSA:1457713,
+ author = {Coussy, Philippe and Morawiec, Adam},
+ title = {High-Level Synthesis: From Algorithm to Digital Circuit},
+ year = {2008},
+ isbn = {1402085877, 9781402085871},
+ edition = {1st},
+ publisher = {Springer Publishing Company, Incorporated},
+} 
+@ARTICLE{intro2hls, 
+author={Coussy, P. and Gajski, D.D. and Meredith, M. and Takach, A.}, 
+journal={Design Test of Computers, IEEE}, 
+title={An Introduction to High-Level Synthesis}, 
+year={2009}, 
+month={July}, 
+volume={26}, 
+number={4}, 
+pages={8-17}, 
+keywords={high level synthesis;HLS techniques;abstraction level design;high-level synthesis;optimized RTL hardware;Application software;Assembly;Circuit simulation;Circuit synthesis;Computer architecture;Design methodology;Design optimization;Hardware design languages;High level synthesis;Space exploration;RTL abstraction;architectures;custom processors;design and test;hardware synthesis and verification;high-level synthesis}, 
+doi={10.1109/MDT.2009.69}, 
+ISSN={0740-7475},}
+
+@ARTICLE{tools:autoesl, 
+author={Cong, J. and Bin Liu and Neuendorffer, S. and Noguera, J. and Vissers, K. and Zhiru Zhang}, 
+journal={Computer-Aided Design of Integrated Circuits and Systems, IEEE Transactions on}, 
+title={High-Level Synthesis for FPGAs: From Prototyping to Deployment}, 
+year={2011}, 
+month={April}, 
+volume={30}, 
+number={4}, 
+pages={473-491}, 
+keywords={field programmable gate arrays;network synthesis;system-on-chip;AutoESL AutoPilot HLS tool;C-to-FPGA synthesis solutions;SoC;Xilinx FPGA;commercial high-level synthesis systems;domain-specific system-level implementation platforms;field-programmable gate array designs;hand-coded design;improved design productivity;platform-based modeling;register transfer level;robust compilation technology;sphere decoder;system-on-chip design complexity;wide language coverage;Algorithm design and analysis;Field programmable gate arrays;Hardware;Optimization;Program processors;System-on-a-chip;Domain-specific design;field-programmable gate array (FPGA);high-level synthesis (HLS);quality of results (QoR)}, 
+doi={10.1109/TCAD.2011.2110592}, 
+ISSN={0278-0070},}
+
+@inproceedings{Parker:1979:CDA:800292.811694,
+ author = {Parker, A. and Thomas, D. and Siewiorek, D. and Barbacci, M. and Hafer, L. and Leive, G. and Kim, J.},
+ title = {The CMU Design Automation System: An Example of Automated Data Path Design},
+ booktitle = {Proceedings of the 16th Design Automation Conference},
+ series = {DAC '79},
+ year = {1979},
+ location = {San Diego, CA, USA},
+ pages = {73--80},
+ numpages = {8},
+ url = {http://dl.acm.org/citation.cfm?id=800292.811694},
+ acmid = {811694},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+} 
+
+@ARTICLE{1033026, 
+author={Kathail, V. and Aditya, S. and Schreiber, R. and Rau, B.R. and Cronquist, D.C. and Sivaraman, M.}, 
+journal={Computer}, 
+title={PICO: automatically designing custom computers}, 
+year={2002}, 
+month={Sep}, 
+volume={35}, 
+number={9}, 
+pages={39-47}, 
+keywords={application specific integrated circuits;embedded systems;logic CAD;microprocessor chips;parallel architectures;parallel machines;special purpose computers;HP Labs research;PICO project;VLIW processors;application-specific computing systems;automatic custom computer design;cost-effective design;custom chips;custom nonprogrammable accelerators;design cost;embedded computer design;off-the-shelf design;program in chip out project;Computer applications;Costs;Design automation;Design methodology;Design optimization;Embedded computing;Hardware;High performance computing;Space exploration;VLIW}, 
+doi={10.1109/MC.2002.1033026}, 
+ISSN={0018-9162},}
+
+@manual{tools:vivadohls,
+  title         = "{Vivado Design Suite} High-level Synthesis ",
+  organization  = "Xilinx Inc.",
+  year          = "2012"
+}
+@manual{tools:monet,
+  title         = "Mentor Graphics Monet User Manual ",
+  organization  = "Mentor Graphics Inc.",
+  year          = "1999"
+}
+
+
+
+@manual{nallatech510T,
+  title         = "510T FPGA Accelerator Cards ",
+  organization  = "Nallatech ",
+  year          = "2015"
+}
+
+@misc{maxeler,
+  title         = "Maxeler Technologies ",
+  year          = "2015"
+}
+
+
+
+@manual{tools:alterac2h,
+  title         = "Nios II C2H Compiler User Guide ",
+  organization  = "Altera Inc.",
+  year          = "2009"
+}
+
+
+
+@manual{tools:catapultc,
+  title         = "Catapult C Synthesis Users and Reference Manual",
+  organization  = "Mentor Graphics",
+  year          = "2010"
+}
+
+
+@manual{chips:arria,
+  title         = "Arria 10 Device Overview",
+  organization  = "Altera Inc.",
+  year          = "2016"
+}
+
+@ARTICLE{4038883, 
+author={A. J. Bernstein}, 
+journal={IEEE Transactions on Electronic Computers}, 
+title={Analysis of Programs for Parallel Processing}, 
+year={1966}, 
+volume={EC-15}, 
+number={5}, 
+pages={757-763}, 
+keywords={Broadcasting;Concurrent computing;Differential equations;Flowcharts;Logic;Parallel processing;Programming profession;Time sharing computer systems}, 
+doi={10.1109/PGEC.1966.264565}, 
+ISSN={0367-7508}, 
+month={Oct},}
+
+@manual{chips:virtex5,
+  title         = "Virtex-5 Family Overview",
+  organization  = "Xilinx Inc.",
+  year          = "2015"
+}
+
+@manual{chips:zynq,
+  title         = "Zynq-7000 All Programmable SoC Overview",
+  organization  = "Xilinx Inc.",
+  year          = "2013"
+}
+@inproceedings{Ancourt:1991:SPL:109625.109631,
+ author = {Ancourt, Corinne and Irigoin, Fran\c{c}ois},
+ title = {Scanning Polyhedra with DO Loops},
+ booktitle = {Proceedings of the Third ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming},
+ series = {PPOPP '91},
+ year = {1991},
+ isbn = {0-89791-390-6},
+ location = {Williamsburg, Virginia, USA},
+ pages = {39--50},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/109625.109631},
+ doi = {10.1145/109625.109631},
+ acmid = {109631},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+@incollection{putpolyd2work,
+year={2004},
+isbn={978-3-540-21199-0},
+booktitle={Languages and Compilers for Parallel Computing},
+volume={2958},
+series={Lecture Notes in Computer Science},
+editor={Rauchwerger, Lawrence},
+doi={10.1007/978-3-540-24644-2_14},
+title={Putting Polyhedral Loop Transformations to Work},
+url={http://dx.doi.org/10.1007/978-3-540-24644-2_14},
+publisher={Springer Berlin Heidelberg},
+author={Bastoul, Cédric and Cohen, Albert and Girbal, Sylvain and Sharma, Saurabh and Temam, Olivier},
+pages={209-225},
+language={English}
+}
+@incollection{polymorewidely,
+year={2010},
+isbn={978-3-642-11969-9},
+booktitle={Compiler Construction},
+volume={6011},
+series={Lecture Notes in Computer Science},
+editor={Gupta, Rajiv},
+doi={10.1007/978-3-642-11970-5_16},
+title={The Polyhedral Model Is More Widely Applicable Than You Think},
+url={http://dx.doi.org/10.1007/978-3-642-11970-5_16},
+publisher={Springer Berlin Heidelberg},
+author={Benabderrahmane, Mohamed-Walid and Pouchet, Louis-Noël and Cohen, Albert and Bastoul, Cédric},
+pages={283-303},
+language={English}
+}
+@article{girbal2006semi,
+  title={Semi-automatic composition of loop transformations for deep parallelism and memory hierarchies},
+  author={Girbal, Sylvain and Vasilache, Nicolas and Bastoul, C{\'e}dric and Cohen, Albert and Parello, David and Sigler, Marc and Temam, Olivier},
+  journal={International Journal of Parallel Programming},
+  volume={34},
+  number={3},
+  pages={261--317},
+  year={2006},
+  publisher={Springer}
+}
+@inproceedings{pugh1991uniform,
+  title={Uniform techniques for loop optimization},
+  author={Pugh, William},
+  booktitle={Proceedings of the 5th international conference on Supercomputing},
+  pages={341--352},
+  year={1991},
+  organization={ACM}
+}
+
+
+
+@manual{chips:cyclonesoc,
+  title         = "Cyclone V Hard Processor System Technical Reference Manual",
+  organization  = "Altera Inc.",
+  year          = "2014"
+}
+@inproceedings{c2coram,
+ author = {Weisz, Gabriel and Hoe, James C.},
+ title = {C-to-CoRAM: Compiling Perfect Loop Nests to the Portable CoRAM Abstraction},
+ booktitle = {Proceedings of the ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
+ series = {FPGA '13},
+ year = {2013},
+ isbn = {978-1-4503-1887-7},
+ location = {Monterey, California, USA},
+ pages = {221--230},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2435264.2435302},
+ doi = {10.1145/2435264.2435302},
+ acmid = {2435302},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {FPGA computing, data reuse, high-level synthesis, loop optimization},
+} 
+
+
+@inproceedings{coram,
+ author = {Chung, Eric S. and Hoe, James C. and Mai, Ken},
+ title = {CoRAM: An In-fabric Memory Architecture for FPGA-based Computing},
+ booktitle = {Proceedings of the 19th ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
+ series = {FPGA '11},
+ year = {2011},
+ isbn = {978-1-4503-0554-9},
+ location = {Monterey, CA, USA},
+ pages = {97--106},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1950413.1950435},
+ doi = {10.1145/1950413.1950435},
+ acmid = {1950435},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {abstraction, fpga, memory, reconfigurable computing},
+} 
+
+@manual{vivado_hls:appnoteMMult,
+  title         = "Zynq-7000 All Programmable SoC
+Accelerator for Floating-Point Matrix
+Multiplication using Vivado HLS",
+  organization  = "Xilinx Inc.",
+  year          = "2013"
+}
+@article{doi:10.1137/0204007,
+author = {Donald B. Johnson},
+title = {Finding All the Elementary Circuits of a Directed Graph},
+journal = {SIAM Journal on Computing},
+volume = {4},
+number = {1},
+pages = {77-84},
+year = {1975},
+doi = {10.1137/0204007},
+
+URL = { 
+        http://dx.doi.org/10.1137/0204007
+    
+},
+eprint = { 
+        http://dx.doi.org/10.1137/0204007
+    
+}
+
+}
+
+@article{Guo:2008,
+ author = {Guo, Zhi and Najjar, Walid and Buyukkurt, Betul},
+ title = {Efficient Hardware Code Generation for FPGAs},
+ journal = {ACM Trans. Archit. Code Optim.},
+ issue_date = {May 2008},
+ volume = {5},
+ number = {1},
+ month = may,
+ year = {2008},
+ issn = {1544-3566},
+ pages = {6:1--6:26},
+ articleno = {6},
+ numpages = {26},
+ %url = {http://doi.acm.org/10.1145/1369396.1369402},
+ doi = {10.1145/1369396.1369402},
+ acmid = {1369402},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {FPGA, Reconfigurable computing, VHDL, data reuse, high-level synthesis},
+} 
+@inproceedings{Pouchet:2013,
+ author = {Pouchet, Louis-Noel and Zhang, Peng and Sadayappan, P. and Cong, Jason},
+ title = {Polyhedral-based Data Reuse Optimization for Configurable Computing},
+ booktitle = {Proceedings of the ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
+ series = {FPGA '13},
+ year = {2013},
+ isbn = {978-1-4503-1887-7},
+ location = {Monterey, California, USA},
+ pages = {29--38},
+ numpages = {10},
+ %url = {http://doi.acm.org/10.1145/2435264.2435273},
+ doi = {10.1145/2435264.2435273},
+ acmid = {2435273},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {compilation, data reuse, high-level synthesis, program transformations},
+} 
+@inproceedings{Zuo:2013:IPC,
+ author = {Zuo, Wei and Li, Peng and Chen, Deming and Pouchet, Louis-No\"{e}l and Zhong, Shunan and Cong, Jason},
+ title = {Improving Polyhedral Code Generation for High-level Synthesis},
+ booktitle = {Proceedings of the Ninth IEEE/ACM/IFIP International Conference on Hardware/Software Codesign and System Synthesis},
+ series = {CODES+ISSS '13},
+ year = {2013},
+ isbn = {978-1-4799-1417-3},
+ location = {Montreal, Quebec, Canada},
+ pages = {15:1--15:10},
+ articleno = {15},
+ numpages = {10},
+ %url = {http://dl.acm.org/citation.cfm?id=2555692.2555707},
+ acmid = {2555707},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+ keywords = {high-level synthesis, loop tiling, polyhedral compilation},
+} 
+@article{wolf1991loop,
+  title={A loop transformation theory and an algorithm to maximize parallelism},
+  author={Wolf, Michael E and Lam, Monica S},
+  journal={Parallel and Distributed Systems, IEEE Transactions on},
+  volume={2},
+  number={4},
+  pages={452--471},
+  year={1991},
+  publisher={IEEE}
+}
+@inproceedings{Bondhugula:2007,
+ author = {Bondhugula, Uday and Ramanujam, J. and Sadayappan, P.},
+ title = {Automatic Mapping of Nested Loops to FPGAS},
+ booktitle = {Proceedings of the 12th ACM SIGPLAN Symposium on Principles and Practice of Parallel Programming},
+ series = {PPoPP '07},
+ year = {2007},
+ isbn = {978-1-59593-602-8},
+ location = {San Jose, California, USA},
+ pages = {101--111},
+ numpages = {11},
+ %url = {http://doi.acm.org/10.1145/1229428.1229446},
+ doi = {10.1145/1229428.1229446},
+ acmid = {1229446},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {FPGA, FPGA compilation, control signals, linear transformation, nested loops, regular processor arrays, resource constraints, scheduling},
+} 
+
+@inproceedings{feautrier1988semantical,
+  title={Semantical analysis and mathematical programming; application to parallelization and vectorization},
+  author={Feautrier, Paul},
+  booktitle={Workshop on Parallel and Distributed Algorithms, Bonas},
+  pages={309--320},
+  year={1988},
+  organization={Citeseer}
+}
+
+@book{Kennedy:2001:OCM:502981,
+ author = {Kennedy, Ken and Allen, John R.},
+ title = {Optimizing Compilers for Modern Architectures: A Dependence-based Approach},
+ year = {2002},
+ isbn = {1-55860-286-0},
+ publisher = {Morgan Kaufmann Publishers Inc.},
+ address = {San Francisco, CA, USA},
+} 
+@misc{iILO06a,
+  author = "{ILOG, Inc}",
+  title = "{ILOG CPLEX}: High-performance software for
+           mathematical programming and optimization",
+  note = "See \url{http://www.ilog.com/products/cplex/}",
+  year = "2006"
+}
+
+@phdthesis{opac-b1000180,
+   title = "Techniques for improving the inherent parallelism in programs",
+   author = "Wolfe, Michael Joseph",
+   number = "UIUCDCS-R-78-0929",
+   url = "http://opac.inria.fr/record=b1000180",
+   note = "MAS",
+   year = 1978
+}
+
+@inproceedings{llvmflow,  
+  address = {Washington, DC, USA},
+  author = {Lattner, Chris and Adve, Vikram},
+  biburl = {http://www.bibsonomy.org/bibtex/229514d310b3d077adfb63c3ea39d8a9f/gron},
+  booktitle = {CGO '04: Proceedings of the international symposium on Code generation and optimization},
+  description = {LLVM},
+  interhash = {8ee161cf4b422ae94a1c4b398730b120},
+  intrahash = {29514d310b3d077adfb63c3ea39d8a9f},
+  isbn = {0-7695-2102-9},
+  keywords = {Compiler JIT LLVM VM},
+  location = {Palo Alto, California},
+  pages = 75,
+  publisher = {IEEE Computer Society},
+  timestamp = {2009-08-22T17:10:25.000+0200},
+  title = {{LLVM}: A Compilation Framework for Lifelong Program Analysis and Transformation},
+  %url = {http://portal.acm.org/citation.cfm?id=977395.977673&coll=GUIDE&dl=GUIDE&CFID=48424181&CFTOKEN=16724426},
+  year = 2004
+}
+
+
+@inproceedings{iterativemoduloscheduling,
+ author = {Rau, B. Ramakrishna},
+ title = {Iterative Modulo Scheduling: An Algorithm for Software Pipelining Loops},
+ booktitle = {Proceedings of the 27th Annual International Symposium on Microarchitecture},
+ series = {MICRO 27},
+ year = {1994},
+ isbn = {0-89791-707-3},
+ location = {San Jose, California, USA},
+ pages = {63--74},
+ numpages = {12},
+ %url = {http://doi.acm.org/10.1145/192724.192731},
+ doi = {10.1145/192724.192731},
+ acmid = {192731},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {instruction scheduling, loop scheduling, modulo scheduling, software pipelining},
+} 
+
+
+
+@article{Patterson:2004,
+ author = {Patterson, David A.},
+ title = {Latency Lags Bandwith},
+ journal = {Commun. ACM},
+ issue_date = {October 2004},
+ volume = {47},
+ number = {10},
+ month = oct,
+ year = {2004},
+ issn = {0001-0782},
+ pages = {71--75},
+ numpages = {5},
+ %url = {http://doi.acm.org/10.1145/1022594.1022596},
+ doi = {10.1145/1022594.1022596},
+ acmid = {1022596},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+
+@inproceedings{manycache,
+ author = {Putnam, Andrew and Eggers, Susan and Bennett, Dave and Dellinger, Eric and Mason, Jeff and Styles, Henry and Sundararajan, Prasanna and Wittig, Ralph},
+ title = {Performance and Power of Cache-based Reconfigurable Computing},
+ booktitle = {Proceedings of the 36th Annual International Symposium on Computer Architecture},
+ series = {ISCA '09},
+ year = {2009},
+ isbn = {978-1-60558-526-0},
+ location = {Austin, TX, USA},
+ pages = {395--405},
+ numpages = {11},
+ %url = {http://doi.acm.org/10.1145/1555754.1555804},
+ doi = {10.1145/1555754.1555804},
+ acmid = {1555804},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {c-to-gates, c-to-hardware, caches, co-processor accelerator, fpga, many-cache, synthesis compiler},
+} 
+
+@inproceedings{legup:mpcache,
+ author = {Choi, Jongsok and Nam, Kevin and Canis, Andrew and Anderson, Jason and Brown, Stephen and Czajkowski, Tomasz},
+ title = {Impact of Cache Architecture and Interface on Performance and Area of FPGA-Based Processor/Parallel-Accelerator Systems},
+ booktitle = {Proceedings of the 2012 IEEE 20th International Symposium on Field-Programmable Custom Computing Machines},
+ series = {FCCM '12},
+ year = {2012},
+ isbn = {978-0-7695-4699-5},
+ pages = {17--24},
+ numpages = {8},
+ %url = {http://dx.doi.org/10.1109/FCCM.2012.13},
+ doi = {10.1109/FCCM.2012.13},
+ acmid = {2310479},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+} 
+
+@INPROCEEDINGS{legupmultithread,
+author={Jongsok Choi and Brown, S. and Anderson, J.},
+booktitle={Field-Programmable Technology (FPT), 2013 International Conference on},
+title={From software threads to parallel hardware in high-level synthesis for FPGAs},
+year={2013},
+month={Dec},
+pages={270-277},
+keywords={field programmable gate arrays;high level synthesis;multi-threading;multiprocessing systems;parallel processing;pipeline processing;FPGA;HLS tool;OpenMP;Pthreads;area-delay product;automated synthesis;circuit wall-clock time;data parallelism;high-level hardware synthesis;high-level synthesis;mutex;mutual exclusion;parallel code segments;parallel hardware;parallel-operating hardware subcircuits;parallelization scenarios;pipelined hardware thread;software engineer;software parallelization paradigms;software threads;synchronization constructs;task-level parallelism;Field programmable gate arrays;Hardware;Instruction sets;Pipeline processing;Synchronization},
+doi={10.1109/FPT.2013.6718365},}
+
+
+@INPROCEEDINGS{nwcache,
+author={Shaoyi Cheng and Mingjie Lin and Hao Jun Liu and Scott, S. and Wawrzynek, J.},
+booktitle={Field-Programmable Custom Computing Machines (FCCM), 2012 IEEE 20th Annual International Symposium on},
+title={Exploiting Memory-Level Parallelism in Reconfigurable Accelerators},
+year={2012},
+month={April},
+pages={157-160},
+keywords={cache storage;field programmable gate arrays;high level synthesis;microprocessor chips;high level synthesis;hybrid CPU-FPGA platform;memory accesses;memory arallel embedded computing;memory level parallelism;multiaccelerator architecture;multicache architecture;parallel memory access;reconfigurable accelerator;Coherence;Field programmable gate arrays;Hardware;Memory management;Parallel processing;Random access memory;Application-Specific;FPGA;High-level synthesis;Memory Structure;Memory-Level Parallelism;Reconfigurable},
+doi={10.1109/FCCM.2012.35},}
+
+@INPROCEEDINGS{tools:roccc,
+author={Villarreal, J. and Park, A. and Najjar, W. and Halstead, R.},
+booktitle={Field-Programmable Custom Computing Machines (FCCM), 2010 18th IEEE Annual International Symposium on},
+title={Designing Modular Hardware Accelerators in C with ROCCC 2.0},
+year={2010},
+month={May},
+pages={127-134},
+keywords={C language;field programmable gate arrays;hardware description languages;program compilers;systolic arrays;C programs;FPGA based hardware accelerators;code generation;handwritten VHDL code;hardware optimizations;low level hardware description language;modular hardware accelerators;riverside optimizing compiler for configurable circuits;systolic array generation;Application software;Circuits;Clocks;Field programmable gate arrays;Frequency;Hardware design languages;High level languages;Optimizing compilers;Software systems;Systolic arrays;C-to-VHDL;Compilers;FPGAs;High Level Synthesis},
+doi={10.1109/FCCM.2010.28},}
+@article{tools:legup,
+ author = {Canis, Andrew and Choi, Jongsok and Aldham, Mark and Zhang, Victor and Kammoona, Ahmed and Czajkowski, Tomasz and Brown, Stephen D. and Anderson, Jason H.},
+ title = {LegUp: An Open-source High-level Synthesis Tool for FPGA-based Processor/Accelerator Systems},
+ journal = {ACM Trans. Embed. Comput. Syst.},
+ issue_date = {September 2013},
+ volume = {13},
+ number = {2},
+ month = sep,
+ year = {2013},
+ issn = {1539-9087},
+ pages = {24:1--24:27},
+ articleno = {24},
+ numpages = {27},
+ %url = {http://doi.acm.org/10.1145/2514740},
+ doi = {10.1145/2514740},
+ acmid = {2514740},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {FPGAs, High-level synthesis, field-programmable gate arrays, hardware/software codesign, performance, power, synthesis},
+} 
+
+
+
+same reference, but using IEEEtran's howpublished extension
+@manual{IEEEexample:motmanualhowpub,
+  title         = "{FLEXChip} Signal Processor",
+  howpublished  = "{MC68175/D}",
+  organization  = "Motorola",
+  year          = "1996"
+}
+@inproceedings{dswp,
+ author = {Ottoni, Guilherme and Rangan, Ram and Stoler, Adam and August, David I.},
+ title = {Automatic Thread Extraction with Decoupled Software Pipelining},
+ booktitle = {Proceedings of the 38th Annual IEEE/ACM International Symposium on Microarchitecture},
+ series = {MICRO 38},
+ year = {2005},
+ isbn = {0-7695-2440-0},
+ location = {Barcelona, Spain},
+ pages = {105--118},
+ numpages = {14},
+ url = {http://dx.doi.org/10.1109/MICRO.2005.13},
+ doi = {10.1109/MICRO.2005.13},
+ acmid = {1100543},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+} 
+
+@inproceedings{c2stream,
+ author = {van Haastregt, Sven and Kienhuis, Bart},
+ title = {Automated Synthesis of Streaming C Applications to Process Networks in Hardware},
+ booktitle = {Proceedings of the Conference on Design, Automation and Test in Europe},
+ series = {DATE '09},
+ year = {2009},
+ isbn = {978-3-9810801-5-5},
+ location = {Nice, France},
+ pages = {890--893},
+ numpages = {4},
+ %url = {http://dl.acm.org/citation.cfm?id=1874620.1874837},
+ acmid = {1874837},
+ publisher = {European Design and Automation Association},
+ address = {3001 Leuven, Belgium, Belgium},
+} 
+
+@phdthesis{boundedwrite,
+    Author = {Parks, Thomas M.},
+    Title = {Bounded Scheduling of Process Networks},
+    School = {EECS Department, University of California, Berkeley},
+    Year = {1995},
+    %URL = {http://www.eecs.berkeley.edu/Pubs/TechRpts/1995/2926.html},
+    Number = {UCB/ERL M95/105}
+}
+@article{mat2pn,
+  added-at = {2012-01-25T00:00:00.000+0100},
+  author = {Harriss, Tim and Walke, Richard L. and Kienhuis, Bart and Deprettere, Ed F.},
+  biburl = {http://www.bibsonomy.org/bibtex/20ba53f8184021130082e7ced9f983f49/dblp},
+  ee = {http://dx.doi.org/10.1023/A:1020367508848},
+  interhash = {3ff314fa4e537f9cb999af53f3c75047},
+  intrahash = {0ba53f8184021130082e7ced9f983f49},
+  journal = {Design Autom. for Emb. Sys.},
+  keywords = {dblp},
+  number = 4,
+  pages = {385-403},
+  timestamp = {2012-01-25T00:00:00.000+0100},
+  title = {Compilation From Matlab to Process Networks Realized in FPGA.},
+  volume = 7,
+  year = 2002
+}
+
+@INPROCEEDINGS{hlfp,
+author={Mayer-Lindenberg, F.},
+booktitle={Reconfigurable Computing and FPGAs, 2009. ReConFig '09. International Conference on},
+title={High-Level FPGA Programming through Mapping Process Networks to FPGA Resources},
+year={2009},
+month={Dec},
+pages={302-307},
+keywords={codes;field programmable gate arrays;microprocessor chips;program compilers;FPGA based scalable processor networks;FPGA configuration bitstream;close-to-interactive speeds;coarse-grained processor network;floating point processing;high-level FPGA programming;high-level programming interface;mixed multicomponent FPGA;p-Nets language;process network mapping;program code;Arithmetic;Computer networks;Costs;Delay;Field programmable gate arrays;Hardware design languages;Integrated circuit interconnections;Libraries;Routing;SDRAM},
+doi={10.1109/ReConFig.2009.73},}
+
+
+conference paper with an address and days. Some journals capitalize the
+letters in "Globecom", this one did not.
+From the May 2002 issue of "IEEE Transactions on Communications",
+page 697, reference #12.
+@inproceedings{IEEEexample:confwithadddays,
+  author        = "M. S. Yee and L. Hanzo",
+  title         = "Radial Basis Function Decision Feedback Equaliser
+                   Assisted Burst-by-burst Adaptive Modulation",
+  booktitle     = "Proc. {IEEE} Globecom '99",
+  address       = "Rio de Janeiro, Brazil",
+  month         = dec # " 5--9,",
+  year          = "1999",
+  pages         = "2183-2187"
+}
+
+
+conference paper with volume number. A conference proceedings with a vol
+number is a little uncommon, note that the vol number is placed
+before the address in the formatted bibliography entry
+From the April 2002 issue of "IEEE/ACM Transactions on Networking",
+page 181, reference #26.
+@inproceedings{IEEEexample:confwithvolume,
+  author        = "M. Yajnik and S. B. Moon and J. Kurose and D. Towsley",
+  title         = "Measurement and Modeling of the Temporal Dependence in
+                   Packet Loss",
+  booktitle     = "Proc. {IEEE} {INFOCOM}'99",
+  volume        = "1",
+  address       = "New York, NY",
+  month         = mar,
+  year          = "1999",
+  pages         = "345-352"
+}
+
+
+conference paper with a paper number, the type field can be used to
+override the word "paper", e.g., type = "postdeadline paper". A type
+can be given even without a paper  field.
+Also, IEEEtran.bst can be configured to ignore paper numbers and types.
+From the May 2002 issue of "Journal of Lightwave Technology",
+page 807, reference #4.
+@inproceedings{IEEEexample:confwithpaper,
+  author        = "M. Wegmuller and J. P. von der Weid and P. Oberson
+                   and N. Gisin",
+  title         = "High Resolution Fiber Distributed Measurements With
+                   Coherent {OFDR}",
+  booktitle     = "Proc. {ECOC}'00",
+  year          = "2000",
+  paper         = "11.3.4",
+  pages         = "109"
+}
+
+
+conference paper with a postdeadline type paper, the paper field is
+optional.
+From the August 2000 issue of "IEEE Photonics Technology Letters",
+page 1087, reference #12.
+@inproceedings{IEEEexample:confwithpapertype,
+  author        = "B. Mikkelsen and G. Raybon and R.-J. Essiambre and
+                   K. Dreyer and Y. Su. and L. E. Nelson and J. E. Johnson
+                   and G. Shtengel and A. Bond and D. G. Moodie and
+                   A. D. Ellis",
+  title         = "160 {Gbit/s} Single-channel Transmission Over 300 km 
+                   Nonzero-dispersion Fiber With Semiconductor Based
+                   Transmitter and Demultiplexer",
+  booktitle     = "Proc. {ECOC}'99",
+  year          = "1999",
+  paper         = "2-3",
+  type          = "postdeadline paper",
+  pages         = "28-29"
+}
+
+
+presented at a conference
+intype overrides the default "in" and causes the booktitle not to be
+emphasized (rendered in italics).
+From the February 2002 issue of "IEEE/ACM Transactions on Networking",
+page 163, reference #6.
+@inproceedings{IEEEexample:presentedatconf,
+  author        = "S. G. Finn and M. M{\'e}dard and R. A. Barry",
+  title         = "A Novel Approach to Automatic Protection Switching
+                   Using Trees",
+  intype        = "presented at the",
+  booktitle     = "Proc. Int. Conf. Commun.",
+  year          = "1997"
+}
+
+
+
+
+
+master's thesis, often the University name will be abbreviated and the
+state or country will be included in the address. The type field can
+used to override the default type "Master's thesis"
+From the June 2002 issue of "IEEE Transactions on Microelectromechanical
+Systems", page 186, reference #11.
+@mastersthesis{IEEEexample:masters,
+  author        = "Nin C. Loh",
+  title         = "High-Resolution Micromachined Interferometric
+                   Accelerometer",
+  school        = "Massachusetts Institute of Technology",
+  address       = "Cambridge",
+  year          = "1992"
+}
+
+
+master's thesis with a type field
+From the August 2001 issue of "IEEE/ACM Transactions on Networking",
+page 391, reference #12.
+@mastersthesis{IEEEexample:masterstype,
+  author        = "A. Karnik",
+  title         = "Performance of {TCP} Congestion Control with Rate
+                   Feedback: {TCP/ABR} and Rate Adaptive {TCP/IP}",
+  school        = "Indian Institute of Science",
+  type          = "M. Eng. thesis",
+  address       = "Bangalore, India",
+  month         = jan,
+  year          = "1999"
+}
+
+@inproceedings{Stitt:2006:CRM:1233501.1233649,
+ author = {Stitt, Greg and Vahid, Frank and Najjar, Walid},
+ title = {A Code Refinement Methodology for Performance-improved Synthesis from C},
+ booktitle = {Proceedings of the 2006 IEEE/ACM International Conference on Computer-aided Design},
+ series = {ICCAD '06},
+ year = {2006},
+ isbn = {1-59593-389-1},
+ location = {San Jose, California},
+ pages = {716--723},
+ numpages = {8},
+ url = {http://doi.acm.org/10.1145/1233501.1233649},
+ doi = {10.1145/1233501.1233649},
+ acmid = {1233649},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {FPGA, code refinement, coding guidelines, compilation, embedded systems, hardware/software partitioning, synthesis},
+} 
+
+
+@article{Liang:2012:HSP:2215536.2215537,
+ author = {Liang, Yun and Rupnow, Kyle and Li, Yinan and Min, Dongbo and Do, Minh N. and Chen, Deming},
+ title = {High-level Synthesis: Productivity, Performance, and Software Constraints},
+ journal = {JECE},
+ issue_date = {January 2012},
+ volume = {2012},
+ month = jan,
+ year = {2012},
+ issn = {2090-0147},
+ pages = {1:1--1:1},
+ articleno = {1},
+ numpages = {1},
+ url = {http://dx.doi.org/10.1155/2012/649057},
+ doi = {10.1155/2012/649057},
+ acmid = {2215537},
+ publisher = {Hindawi Publishing Corp.},
+ address = {New York, NY, United States},
+} 
+
+
+@INPROCEEDINGS{7082747, 
+author={Inggs, G. and Fleming, S. and Thomas, D. and Luk, W.}, 
+booktitle={Field-Programmable Technology (FPT), 2014 International Conference on}, 
+title={Is high level synthesis ready for business? A computational finance case study}, 
+year={2014}, 
+month={Dec}, 
+pages={12-19}, 
+keywords={business data processing;field programmable gate arrays;financial data processing;graphics processing units;high level synthesis;multiprocessing systems;parallel processing;pipeline processing;Altera OpenCL SDK;C-slowing;FPGA;GPU;HLS tools;Maxeler MaxCompiler;Xeon Phi;Xilinx Vivado HLS;business;computational finance;direct source code translation;field programmable gate arrays;financial problem;high level synthesis;optimised multicore CPU implementation;performance expectations;pipeline parallelism;task parallelism;Computational modeling;Field programmable gate arrays;Graphics processing units;Hardware;Optimization;Parallel processing;Pricing}, 
+doi={10.1109/FPT.2014.7082747},}
+
+@ARTICLE{5209959, 
+author={Martin, G. and Smith, G.}, 
+journal={Design Test of Computers, IEEE}, 
+title={High-Level Synthesis: Past, Present, and Future}, 
+year={2009}, 
+month={July}, 
+volume={26}, 
+number={4}, 
+pages={18-25}, 
+keywords={high level synthesis;HLS tools;high-level synthesis;industry adoption;system-level design;Algorithm design and analysis;Commercialization;Computer industry;Electronic design automation and methodology;Electronics industry;Hardware;High level synthesis;History;Machinery production industries;Physics computing;ESL synthesis;High-level synthesis;behavioral synthesis;commercial use;design and test;history}, 
+doi={10.1109/MDT.2009.83}, 
+ISSN={0740-7475},}
+
+
+Ph.D. dissertation with a URL field, the university is abbreviated
+From the October 2001 issue of "IEEE/ACM Transactions on Networking",
+page 590, reference #11.
+@phdthesis{IEEEexample:phdurl,
+  author        = "Q. Li",
+  title         = "Delay Characterization and Performance Control of
+                   Wide-area Networks",
+  school        = "Univ. of Delaware",
+  address       = "Newark",
+  month         = may,
+  year          = "2000",
+  url           = "http://www.ece.udel.edu/~qli"
+}
+
+
+
+
+
+technical report
+From the August 2001 issue of "IEEE/ACM Transactions on Networking",
+page 490, reference #15.
+@techreport{IEEEexample:techrep,
+  author        = "R. Jain and K. K. Ramakrishnan and D. M. Chiu",
+  title         = "Congestion Avoidance in Computer Networks with a 
+                   Connectionless Network Layer",
+  institution   = "Digital Equipment Corporation",
+  address       = "MA",
+  number        = "DEC-TR-506",
+  month         = aug,
+  year          = "1987"
+}
+
+
+technical report with type
+for those times when "Tech. Rep." needs to be modified
+From the February 2001 issue of "IEEE/ACM Transactions on Networking",
+page 46, reference #8.
+@techreport{IEEEexample:techreptype,
+  author        = "J. Padhye and V. Firoiu and D. Towsley",
+  title         = "A Stochastic Model of {TCP} {R}eno Congestion Avoidance
+                   and Control",
+  institution   = "Univ. of Massachusetts",
+  address       = "Amherst, MA",
+  type          = "CMPSCI Tech. Rep.",
+  number        = "99-02",
+  year          = "1999"
+}
+
+
+technical report with type
+for those times when "Tech. Rep." needs to be modified
+This reference did not have an address.
+From the January 2000 issue of "IEEE Transactions on Communications",
+page 117, reference #6.
+@techreport{IEEEexample:techreptypeii,
+  author        = "D. Middleton and A. D. Spaulding",
+  title         = "A Tutorial Review of Elements of Weak Signal Detection
+                   in Non-{G}aussian {EMI} Environments",
+  institution   = "National Telecommunications and Information
+                   Administration ({NTIA}), U.S. Dept. of Commerce",
+  type          = "NTIA Report",
+  number        = "86-194",
+  month         = may,
+  year          = "1986"
+}
+
+
+
+
+
+an unpublished work
+for unpublished types, the note field is required. IEEE usually
+just uses the word "unpublished" for the note.
+From the August 2001 issue of "IEEE/ACM Transactions on Networking",
+page 391, reference #16.
+@unpublished{IEEEexample:unpublished,
+  author        = "T. J. Ott and N. Aggarwal",
+  title         = "{TCP} over {ATM}: {ABR} or {UBR}",
+  note          = "Unpublished"
+}
+
+
+
+
+
+electronic with a howpublished information field 
+From the August 2001 issue of "IEEE/ACM Transactions on Networking",
+page 391, reference #7.
+@electronic{IEEEexample:electronhowinfo,
+  author        = "V. Jacobson",
+  title         = "Modified {TCP} Congestion Avoidance Algorithm",
+  howpublished  = "end2end-interest mailing list",
+  url           = "ftp://ftp.isi.edu/end2end/end2end-interest-1990.mail",
+  month         = apr,
+  year          = "1990"
+}
+
+
+
+
+electronic with a howpublished information field 
+From the August 2001 issue of "IEEE/ACM Transactions on Networking",
+page 418, reference #31.
+@electronic{IEEEexample:electronhowinfo2,
+  author        = "V. Valloppillil and K. W. Ross",
+  title         = "Cache Array Routing Protocol v1.1",
+  howpublished  = "Internet draft",
+  url           = "http://ds1.internic.net/internet-drafts/draft-vinod-carp-v1-03.txt",
+  year          = "1998"
+}
+
+
+electronic with an organization and address
+From the February 2002 issue of "IEEE/ACM Transactions on Networking",
+page 114, reference #15.
+@electronic{IEEEexample:electronorgadd,
+  author        = "D. H. Lorenz and A. Orda",
+  title         = "Optimal Partition of {QoS} Requirements on Unicast
+                   Paths and Multicast Trees",
+  organization  = "Dept. Elect. Eng., Technion",
+  address       = "Haifa, Israel",
+  url           = "ftp://ftp.technion.ac.il/pub/supported/ee/Network/lor.mopq98.ps",
+  month         = jul,
+  year          = "1998"
+}
+
+
+
+
+
+U.S. patent
+Use the type field to override the patent type. e.g.,
+type = "Patent Application"
+The address is that of the assignee. Note that IEEE does not
+display the assignee, the address, and only displays one date.
+(if year is not present, the filed dates are used.) However, this
+information should be entered as other BibTeX styles may use it.
+alternatively, nationality could be entered as "U.S." 
+From the April 2000 issue of "IEEE Transactions on Communications",
+page 542, reference #6.
+@patent{IEEEexample:uspat,
+  author        = "Ronald E. Sorace and Victor S. Reinhardt and
+                   Steven A. Vaughn",
+  assignee      = "Hughes Aircraft Company",
+  address       = "Los Angeles, CA",
+  title         = "High-Speed Digital-to-{RF} Converter",
+  nationality   = "United States",
+  number        = "5668842",
+  dayfiled      = "28",
+  monthfiled    = feb,
+  yearfiled     = "1995",
+  day           = "16",
+  month         = sep,
+  year          = "1997"
+}
+
+
+Japanese Patent
+From the April 2000 issue of "IEEE Transactions on Communications",
+page 556, reference #6.
+@patent{IEEEexample:jppat,
+  author        = "U. Hideki",
+  title         = "Quadrature Modulation Circuit",
+  nationality   = "Japanese",
+  number        = "152932/92",
+  day           = "20",
+  month         = may,
+  year          = "1992"
+}
+
+
+French Patent request, the language field must be entered in lower case
+as this is the option name Babel uses. The nationality field needs to be
+capitalized. Because this is a patent request, the date filed fields are
+used while the date fields are left empty/missing. In other countries,
+the words "Patent Application", etc. are used instead.
+From the April 2000 issue of "IEEE Transactions on Communications",
+page 556, reference #9.
+@patent{IEEEexample:frenchpatreq,
+  author        = "F. Kowalik and M. Isard",
+  title         = "Estimateur d'un D{\'e}faut de Fonctionnement 
+                   d'un Modulateur en Quadrature et {\'E}tage de Modulation
+                   l'Utilisant",
+  language      = "french",
+  nationality   = "French",
+  type          = "Patent Request",
+  number        = "9500261",
+  dayfiled      = "11",
+  monthfiled    = jan,
+  yearfiled     = "1995"
+}
+
+
+
+
+
+a periodical
+From the April 2001 issue of "IEEE/ACM Transactions on Networking",
+page 160, reference #1.
+sort key is needed for sorting styles
+@periodical{IEEEexample:periodical,
+  title         = IEEE_M_PCOM # ", Special Issue on Wireless {ATM}",
+  volume        = "3",
+  month         = aug,
+  year          = "1996",
+  key           = "IEEE"
+}
+
+
+
+
+
+standard, IEEE does not use the address for standards, but it is good
+to provide one for BibTeX styles that use it.
+From the August 2001 issue of "IEEE/ACM Transactions on Networking",
+page 451, reference #2.
+@standard{IEEEexample:standard,
+  title         = "Wireless {LAN} Medium Access Control {(MAC)} and 
+                   Physical Layer {(PHY)} Specification",
+  organization  = "IEEE",
+  address       = "Piscataway, NJ",
+  number        = "802.11",
+  year          = "1997"
+}
+
+
+standard with type and revision, the type overrides the word standard
+(or std.). Here a standard number is not available and a revision number
+is used.
+From the August 2000 issue of "IEEE Photonics Technology Letters",
+page 1048, reference #13.
+@standard{IEEEexample:standardproposed,
+  title         = "Fiber Channel Physical Interface ({FC-PI})",
+  institution   = "NCITS",
+  address       = "Washington, DC",
+  type          = "Working Draft Proposed Standard",
+  revision      = "5.2",
+  year          = "1999"
+}
+
+
+standard draft as a misc with author
+From the May 2002 issue of "IEEE Journal of Selected Areas in
+Communication", page 725, reference #16.
+@misc{IEEEexample:draftasmisc,
+  author        = "I. Widjaja and A. Elwalid",
+  title         = "{MATE}: {MPLS} Adaptive Traffic Engineering",
+  howpublished  = "IETF Draft",
+  year          = "1999"
+}
+
+
+
+
+
+misc for a techreport like reference
+techreport is not perfectly suitable because this entry lacks
+an institution field
+From the August 2001 issue of "IEEE/ACM Transactions on Networking",
+page 490, reference #22.
+@misc{IEEEexample:miscforum,
+  author        = "L. Roberts",
+  title         = "Enhanced Proportional Rate Control Algorithm {PRCA}",
+  howpublished  = "{ATM} Forum Contribution 94-0735R1",
+  month         = aug,
+  year          = "1994"
+}
+
+
+misc for a white paper
+From the August 2001 issue of "IEEE/ACM Transactions on Networking",
+page 478, reference #4 - Note that the reference there (improperly?)
+used the author field for "Cisco".
+@misc{IEEEexample:whitepaper,
+  title         = "Advanced {QoS} Services for the Intelligent Internet",
+  howpublished  = "White Paper",
+  organization  = "Cisco",
+  month         = may,
+  year          = "1997"
+}
+
+
+misc for a data sheet
+From the November 2000 issue of "IEEE Photonics Technology Letters",
+page 1551, reference #6.
+@misc{IEEEexample:datasheet,
+  title         = "{PDCA12-70} Data Sheet",
+  organization  = "Opto Speed SA",
+  address       = "Mezzovico, Switzerland"
+}
+
+@misc{c2silicon:cadence,
+  title        = "C-to-Silicon Compiler High-Level Synthesis",
+  organization = "Cadence Inc.",
+  year         = "2008" 
+}
+
+@manual{forte:cynthesizer,
+  title        = "Cynthesizer User Guide",
+  organization = "Forte Design System",
+  year         = "2003"
+}
+
+
+
+
+Other unusual references
+
+a private communication as a misc entry type
+sometimes the designation "personal communication" is used instead
+From the June 2002 issue of "IEEE Transactions on Information Theory",
+page 1725, reference #16.
+@misc{IEEEexample:private,
+  author        = "S. Konyagin",
+  howpublished  = "private communication",
+  year          = "1998"
+}
+
+
+an internet request for comments (RFC) as a misc entry type
+It would also be nice to add a URL to these types of things.
+RFCs can also be handled as electronic references.
+From the April 2002 issue of "IEEE/ACM Transactions on Networking",
+page 181, reference #14.
+@misc{IEEEexample:miscrfc,
+  author        = "K. K. Ramakrishnan and S. Floyd",
+  title         = "A Proposal to Add Explicit Congestion
+                   Notification ({ECN}) to {IP}",
+  howpublished  = "RFC 2481",
+  month         = jan,
+  year          = "1999"
+}
+
+
+a software package as a manual
+From the June 2002 issue of "IEEE/ASME Journal of Microelectromechanical
+Systems", page 205, reference #20.
+Sometimes they put the version/release information in the title.
+@manual{IEEEexample:softmanual,
+  title         = "SaberDesigner Reference Manual",
+  organization  = "Analogy, Inc.",
+  address       = "Beaverton, OR",
+  year          = "1998",
+  note          = "Release 4.3"
+}
+
+
+a software package as an electronic reference
+From the February 2003 issue of  "IEEE/ACM Transactions on Networking",
+page 46, reference #24. If there is no author or organization, a sorting
+key is required for sorting styles. It might be a good idea to include
+month and year fields as well.
+@electronic{IEEEexample:softonline,
+  title         = "Ucb/lbnl/vint Network Simulator---ns (Version 2)",
+  url           = "http://www-mash.cs.berkeley.edu/ns/",
+  key           = "ns"
+}
+
+
+misc for a German regulation
+In German, the first letters of nouns are capitalized, so we do so here.
+From the June 2002 issue of "IEEE Journal in Selected Areas in
+Communication", page 892, reference #9.
+@misc{IEEEexample:miscgermanreg,
+  title         = "{M}essung von {S}t{\"o}rfeldern an {A}nlagen 
+                   und {L}eitungen der {T}elekommunikation im
+                   {F}requenzbereich 9 {kHz} bis 3 {GHz}",
+  language      = "german",
+  howpublished  = "{M}e{\ss}vorschrift {R}eg {TP} {MV} 05",
+  organization  = "Regulierungsbeh{\"o}rde f{\"u}r {T}elekommunikation und
+                   {P}ost ({R}eg {TP})"
+}
+
+
+
+Ways to handle things like CCSDS's Blue Books
+journal article with a URL. However, this is not a very good approach
+because the Blue Books are not really journals and the author field has
+to be abused.
+From the June 2002 issue of "IEEE Transactions on Information Theory",
+page 1461, reference #7.
+@article{IEEEexample:bluebookarticle,
+  author        = "{Consulative Committee for Space Data Systems (CCSDS)}",
+  title         = "Telemetry Channel Coding",
+  journal       = "Blue Book",
+  number        = "4",
+  year          = "1999",
+  url           = "http://www.ccsds.org/documents/pdf/CCSDS-101.0-B-4.pdf"
+}
+
+
+CCSDS's Blue Book handled as a book
+However, it is not a good idea to have to use the author field for
+an organization (done here because the book entry type requires an
+author field).
+@book{IEEEexample:bluebookbook,
+  author        = "{Consulative Committee for Space Data Systems (CCSDS)}",
+  title         = "Telemetry Channel Coding",
+  series        = "Blue Book",
+  number        = "4",
+  publisher     = "{CCSDS}",
+  address       = "Newport Beach, {CA}",
+  year          = "1999",
+  url           = "http://www.ccsds.org/documents/pdf/CCSDS-101.0-B-4.pdf"
+}
+
+
+CCSDS's Blue Book handled as a manual
+This is a much better approach, but uses the howpublished field.
+@manual{IEEEexample:bluebookmanual,
+  title         = "Telemetry Channel Coding",
+  howpublished  = "ser. Blue Book, No. 4",
+  organization  = "Consulative Committee for Space Data Systems (CCSDS)",
+  address       = "Newport Beach, CA",
+  year          = "1999",
+  url           = "http://www.ccsds.org/documents/pdf/CCSDS-101.0-B-4.pdf"
+}
+
+
+
+CCSDS's Blue Book handled as a standard
+Probably the best approach for this particular case because the work
+is standard related. Note that IEEE does not display the address for
+standards.
+@standard{IEEEexample:bluebookstandard,
+  title         = "Telemetry Channel Coding",
+  howpublished  = "ser. Blue Book, No. 4",
+  organization  = "Consulative Committee for Space Data Systems (CCSDS)",
+  address       = "Newport Beach, CA",
+  type          = "Recommendation for Space Data System Standard",
+  number        = "101.0-B-4",
+  month         = May,
+  year          = "1999",
+  url           = "http://www.ccsds.org/documents/pdf/CCSDS-101.0-B-4.pdf"
+}
+
+
+
+
+
+
+
+
+An example of a IEEEtran control entry which can change some IEEEtran.bst
+settings. An entry like this must be cited via \bstctlcite{} command
+before the first real \cite{}. The same entry key cannot be called twice
+(just like multiple \cite{} of the same entry key place only one entry
+in the bibliography.)
+The available control fields are:
+
+CTLuse_article_number
+"no" turns off the display of the number for articles.
+"yes" enables
+
+CTLuse_paper
+"no" turns off the display of the paper and type fields in inproceedings.
+"yes" enables
+
+CTLuse_forced_etal 
+"no" turns off the forced use of "et al."
+"yes" enables
+
+CTLmax_names_forced_etal
+The maximum number of names that can be present beyond which an "et al."
+usage is forced. Be sure that CTLnames_show_etal (below)
+is not greater than this value!
+
+CTLnames_show_etal
+The number of names that will be shown with a forced "et al.".
+Must be less than or equal to CTLmax_names_forced_etal
+
+CTLuse_alt_spacing 
+"no" turns off the alternate interword spacing for entries with URLs.
+"yes" enables
+
+CTLalt_stretch_factor
+If alternate interword spacing for entries with URLs is enabled, this is
+the interword spacing stretch factor that will be used. For example, the
+default "4" here means that the interword spacing in entries with URLs can
+stretch to four times normal. Does not have to be an integer.
+
+CTLdash_repeated_names
+"no" turns off the "dashification" of repeated (i.e., identical to those
+of the previous entry) names. IEEE normally does this.
+"yes" enables
+
+CTLname_format_string
+The name format control string as explained in the BibTeX style hacking
+guide.
+IEEE style "{f.~}{vv~}{ll}{, jj}" is the default,
+
+CTLname_latex_cmd
+A LaTeX command that each name will be fed to (e.g., "\textsc").
+Leave empty if no special font is desired for the names.
+The default is empty.
+
+CTLname_url_prefix
+The prefix text used before URLs.
+The default is "[Online]. Available:" A space will be inserted after this
+text. If this space is not wanted, just use \relax at the end of the
+prefix text.
+
+
+Those fields that are not to be changed can be left out.
+@IEEEtranBSTCTL{IEEEexample:BSTcontrol,
+  CTLuse_article_number     = "yes",
+  CTLuse_paper              = "yes",
+  CTLuse_forced_etal        = "no",
+  CTLmax_names_forced_etal  = "10",
+  CTLnames_show_etal        = "1",
+  CTLuse_alt_spacing        = "yes",
+  CTLalt_stretch_factor     = "4",
+  CTLdash_repeated_names    = "yes",
+  CTLname_format_string     = "{f.~}{vv~}{ll}{, jj}",
+  CTLname_latex_cmd         = "",
+  CTLname_url_prefix        = "[Online]. Available:"
+}
+
+@techreport{Wilson:1994:SCS:891422,
+ author = {Wilson, Robert and French, Robert and Wilson, Christopher and Amarasinghe, Saman and Anderson, Jennifer and Tjiang, Steve and Liao, Shih and Tseng, Chau and Hall, Mary and Lam, Monica and Hennessy, John},
+ title = {The SUIF Compiler System: A Parallelizing and Optimizing Research Compiler},
+ year = {1994},
+ source = {http://www.ncstrl.org:8900/ncstrl/servlet/search?formname=detail\&id=oai%3Ancstrlh%3Astan%3ASTAN%2F%2FCSL-TR-94-620},
+ publisher = {Stanford University},
+ address = {Stanford, CA, USA},
+} 
+
+@incollection{oscar,
+year={1992},
+isbn={978-3-540-55422-6},
+booktitle={Languages and Compilers for Parallel Computing},
+volume={589},
+series={Lecture Notes in Computer Science},
+editor={Banerjee, Utpal and Gelernter, David and Nicolau, Alex and Padua, David},
+doi={10.1007/BFb0038671},
+title={A multi-grain parallelizing compilation scheme for OSCAR (optimally scheduled advanced multiprocessor)},
+url={http://dx.doi.org/10.1007/BFb0038671},
+publisher={Springer Berlin Heidelberg},
+author={Kasahara, H. and Honda, H. and Mogi, A. and Ogura, A. and Fujiwara, K. and Narita, S.},
+pages={283-297},
+language={English}
+}
+
+@ARTICLE{5719584, 
+author={Lindtjorn, O. and Clapp, R. and Pell, O. and Haohuan Fu and Flynn, M. and Haohuan Fu}, 
+journal={Micro, IEEE}, 
+title={Beyond Traditional Microprocessors for Geoscience High-Performance Computing Applications}, 
+year={2011}, 
+month={March}, 
+volume={31}, 
+number={2}, 
+pages={41-49}, 
+keywords={field programmable gate arrays;microprocessor chips;natural gas technology;petroleum industry;production engineering computing;FPGA-based hardware;gas industry;geoscience computational cycles;geoscience high-performance computing;microprocessors;oil industry;Acceleration;Bandwidth;Computational modeling;Field programmable gate arrays;Hardware;Kernel;Sparse matrices;field-programmable gate array;geosciences;high-performance computing}, 
+doi={10.1109/MM.2011.17}, 
+ISSN={0272-1732},}
+
+@article{Liao:1999:SEI:329366.301108,
+ author = {Liao, Shih-Wei and Diwan, Amer and Bosch,Jr., Robert P. and Ghuloum, Anwar and Lam, Monica S.},
+ title = {SUIF Explorer: An Interactive and Interprocedural Parallelizer},
+ journal = {SIGPLAN Not.},
+ issue_date = {Aug. 1999},
+ volume = {34},
+ number = {8},
+ month = may,
+ year = {1999},
+ issn = {0362-1340},
+ pages = {37--48},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/329366.301108},
+ doi = {10.1145/329366.301108},
+ acmid = {301108},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+@INPROCEEDINGS{6239808, 
+author={Shaoyi Cheng and Mingjie Lin and Hao Jun Liu and Scott, S. and Wawrzynek, J.}, 
+booktitle={Field-Programmable Custom Computing Machines (FCCM), 2012 IEEE 20th Annual International Symposium on}, 
+title={Exploiting Memory-Level Parallelism in Reconfigurable Accelerators}, 
+year={2012}, 
+month={April}, 
+pages={157-160}, 
+keywords={cache storage;field programmable gate arrays;high level synthesis;microprocessor chips;high level synthesis;hybrid CPU-FPGA platform;memory accesses;memory arallel embedded computing;memory level parallelism;multiaccelerator architecture;multicache architecture;parallel memory access;reconfigurable accelerator;Coherence;Field programmable gate arrays;Hardware;Memory management;Parallel processing;Random access memory;Application-Specific;FPGA;High-level synthesis;Memory Structure;Memory-Level Parallelism;Reconfigurable}, 
+doi={10.1109/FCCM.2012.35},}
+@INPROCEEDINGS{6239785, 
+author={Jongsok Choi and Nam, K. and Canis, A. and Anderson, J. and Brown, S. and Czajkowski, T.}, 
+booktitle={Field-Programmable Custom Computing Machines (FCCM), 2012 IEEE 20th Annual International Symposium on}, 
+title={Impact of Cache Architecture and Interface on Performance and Area of FPGA-Based Processor/Parallel-Accelerator Systems}, 
+year={2012}, 
+month={April}, 
+pages={17-24}, 
+keywords={DRAM chips;cache storage;field programmable gate arrays;DDR2 SDRAM;FPGA L1 cache;MIPS soft processor;cache architecture;custom hardware accelerators;multi-ported cache designs;processor/parallel-accelerator systems;shared memory architecture;Benchmark testing;Field programmable gate arrays;Hardware;Memory architecture;Memory management;Random access memory}, 
+doi={10.1109/FCCM.2012.13},}
+@article{RiceUniversity:1993:HPF:174223.158909,
+ author = {Rice University, CORPORATE},
+ title = {High Performance Fortran Language Specification},
+ journal = {SIGPLAN Fortran Forum},
+ issue_date = {Dec. 1993},
+ volume = {12},
+ number = {4},
+ month = dec,
+ year = {1993},
+ issn = {1061-7264},
+ pages = {1--86},
+ numpages = {86},
+ url = {http://doi.acm.org/10.1145/174223.158909},
+ doi = {10.1145/174223.158909},
+ acmid = {158909},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+
+@ARTICLE{86108, 
+author={Kennedy, K. and McKinley, K.S. and Tseng, C.-W.}, 
+journal={Parallel and Distributed Systems, IEEE Transactions on}, 
+title={Interactive parallel programming using the ParaScope Editor}, 
+year={1991}, 
+month={Jul}, 
+volume={2}, 
+number={3}, 
+pages={329-341}, 
+keywords={FORTRAN;interactive programming;parallel programming;text editing;ParaScope Editor;ParaScope project;efficient parallel programs;exploratory programming style;general user editing;hybrid text;integrated collection;intelligent interactive editor;modified program;parallel Fortran programs;powerful interactive program transformations;scientific programmers;structure editing facility;Availability;Computer science;Concurrent computing;Feedback;Hazards;Helium;Parallel machines;Parallel processing;Parallel programming;Programming profession}, 
+doi={10.1109/71.86108}, 
+ISSN={1045-9219},}
+
+@INPROCEEDINGS{Blume94polaris:the,
+    author = {Bill Blume and Rudolf Eigenmann and Keith Faigin and John Grout and Jay Hoeflinger and David Padua and Paul Petersen and Bill Pottenger and Lawrence Rauchwerger and Peng Tu and Stephen Weatherford},
+    title = {Polaris: The Next Generation in Parallelizing Compilers},
+    booktitle = {PROCEEDINGS OF THE WORKSHOP ON LANGUAGES AND COMPILERS FOR PARALLEL COMPUTING},
+    year = {1994},
+    pages = {10--1},
+    publisher = {Springer-Verlag, Berlin/Heidelberg}
+}
+
+@article{Danowitz:2012:CDR:2133806.2133822,
+ author = {Danowitz, Andrew and Kelley, Kyle and Mao, James and Stevenson, John P. and Horowitz, Mark},
+ title = {CPU DB: Recording Microprocessor History},
+ journal = {Commun. ACM},
+ issue_date = {April 2012},
+ volume = {55},
+ number = {4},
+ month = apr,
+ year = {2012},
+ issn = {0001-0782},
+ pages = {55--63},
+ numpages = {9},
+ url = {http://doi.acm.org/10.1145/2133806.2133822},
+ doi = {10.1145/2133806.2133822},
+ acmid = {2133822},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+@inproceedings{smith2005scientific,
+  title={Scientific computing beyond CPUs: FPGA implementations of common scientific kernels},
+  author={Smith, Melissa C and Vetter, Jeffery S and Alam, Sadaf R}
+}
+
+@INPROCEEDINGS{6299067, 
+author={Lockwood, J.W. and Gupte, A. and Mehta, N. and Blott, M. and English, T. and Vissers, K.}, 
+booktitle={High-Performance Interconnects (HOTI), 2012 IEEE 20th Annual Symposium on}, 
+title={A Low-Latency Library in FPGA Hardware for High-Frequency Trading (HFT)}, 
+year={2012}, 
+month={Aug}, 
+pages={9-16}, 
+keywords={IP networks;electronic engineering computing;electronic trading;field programmable gate arrays;local area networks;memory protocols;microprocessor chips;network interfaces;Ethernet line rate;FPGA IP library;FPGA hardware;HFT platform;I-O interface;alternative hybrid architecture;bit rate 10 Gbit/s;computers software;custom 1U FPGA appliance;electronic trading;financial protocol parser;fixed end-to-end latency;hardware acceleration;high-frequency trading platform;high-performance network adapter;low-latency library;memory interface;pre-built infrastructure;software implementation;time 1 mus;Field programmable gate arrays;Hardware;IP networks;Libraries;Protocols;Registers;Software;Algorithmic;FPGA;HFT;latency;trading}, 
+doi={10.1109/HOTI.2012.15},}
+
+@ARTICLE{31534, 
+author={Devadas, S. and Newton, A.R.}, 
+journal={Computer-Aided Design of Integrated Circuits and Systems, IEEE Transactions on}, 
+title={Algorithms for hardware allocation in data path synthesis}, 
+year={1989}, 
+month={Jul}, 
+volume={8}, 
+number={7}, 
+pages={768-781}, 
+keywords={circuit layout CAD;optimisation;algorithms;arithmetic units;conditional resource sharing;cost/resource-constrained allocation;data path synthesis;hardware allocation;interconnect;microinstructions;registers;simulated-annealing-based algorithms;two-dimensional placement problem;user-specifiable constraints;Arithmetic;Costs;Expert systems;Hardware;Helium;Mathematical model;Registers;Resource management;Scheduling;Signal processing algorithms}, 
+doi={10.1109/43.31534}, 
+ISSN={0278-0070},}
+
+@ARTICLE{1270207, 
+author={Chia-Jeng Tseng and Siewiorek, D.P.}, 
+journal={Computer-Aided Design of Integrated Circuits and Systems, IEEE Transactions on}, 
+title={Automated Synthesis of Data Paths in Digital Systems}, 
+year={1986}, 
+month={July}, 
+volume={5}, 
+number={3}, 
+pages={379-395}, 
+keywords={Automatic generation control;Computer science;Control systems;Costs;Design automation;Digital systems;Hardware design languages;Helium;Registers;Synthesizers}, 
+doi={10.1109/TCAD.1986.1270207}, 
+ISSN={0278-0070},}
+@inproceedings{Karfa:2006:FVM:1126255.1126731,
+ author = {Karfa, C and Mandal, C and Sarkar, D and Pentakota, S R. and Reade, Chris},
+ title = {A Formal Verification Method of Scheduling in High-level Synthesis},
+ booktitle = {Proceedings of the 7th International Symposium on Quality Electronic Design},
+ series = {ISQED '06},
+ year = {2006},
+ isbn = {0-7695-2523-7},
+ pages = {71--78},
+ numpages = {8},
+ url = {http://dx.doi.org/10.1109/ISQED.2006.10},
+ doi = {10.1109/ISQED.2006.10},
+ acmid = {1126731},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+} 
+
+
+@INPROCEEDINGS{390403, 
+author={Grass, W. and Mutz, M. and Tiedemann, W.-D.}, 
+booktitle={EUROMICRO 94. System Architecture and Integration. Proceedings of the 20th EUROMICRO Conference.}, 
+title={High level synthesis based on formal methods}, 
+year={1994}, 
+month={Sep}, 
+pages={83-91}, 
+keywords={formal verification;high level synthesis;logic design;resource allocation;scheduling;timing;algorithmic level;behavioural descriptions;communication-dominated hardware;correctness;design optimality;formal methods;formal verification;formally based synthesis;functionality;hardware modules;heuristical procedure;heuristics;high-level synthesis;level operation;register transfer level structures;scheduling problem;timing;Algorithm design and analysis;Computer science;Formal verification;Hardware;High level synthesis;Logic;Mathematics;Microwave integrated circuits;Registers;Timing}, 
+doi={10.1109/EURMIC.1994.390403},}
+
+@phdthesis{Barbacci:1973:AED:906664,
+ author = {Barbacci, Mario Roberto},
+ title = {Automated Exploration of the Design Space for Register-transfer (Rt) Systems.},
+ year = {1973},
+ note = {AAI7414648},
+ publisher = {Carnegie Mellon University},
+ address = {Pittsburgh, PA, USA},
+} 
+
+
+@ARTICLE{75629, 
+author={Cheng-Tsung Hwang and Lee, J.-H. and Yu-Chin Hsu}, 
+journal={Computer-Aided Design of Integrated Circuits and Systems, IEEE Transactions on}, 
+title={A formal approach to the scheduling problem in high level synthesis}, 
+year={1991}, 
+month={Apr}, 
+volume={10}, 
+number={4}, 
+pages={464-475}, 
+keywords={circuit CAD;integer programming;linear programming;scheduling;ALAP;ASAP;CAD;bus constraint;chaining;feasible scheduling;functional pipelining;high level synthesis;integer LP model;integer linear programming;list scheduling;loop folding;multicycle operations;mutually exclusive operations;nonpipelined function units;pipelined function units;resource-constrained scheduling;scheduling problem;time-constrained scheduling;Digital systems;Filters;Flow graphs;Hardware design languages;High level synthesis;Integer linear programming;Pipeline processing;Scheduling algorithm;Space exploration;Timing}, 
+doi={10.1109/43.75629}, 
+ISSN={0278-0070},}
+
+@inproceedings{Paulin:1987:FSA:37888.37918,
+ author = {Paulin, P. G. and Knight, J. P.},
+ title = {Force-directed Scheduling in Automatic Data Path Synthesis},
+ booktitle = {Proceedings of the 24th ACM/IEEE Design Automation Conference},
+ series = {DAC '87},
+ year = {1987},
+ isbn = {0-8186-0781-5},
+ location = {Miami Beach, Florida, USA},
+ pages = {195--202},
+ numpages = {8},
+ url = {http://doi.acm.org/10.1145/37888.37918},
+ doi = {10.1145/37888.37918},
+ acmid = {37918},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+@INPROCEEDINGS{1586344, 
+author={Paulin, P.G. and Knight, J.P.}, 
+booktitle={Design Automation, 1989. 26th Conference on}, 
+title={Scheduling and Binding Algorithms for High-Level Synthesis}, 
+year={1989}, 
+month={June}, 
+pages={1-6}, 
+keywords={Algorithm design and analysis;Concurrent computing;Costs;Hardware;High level synthesis;Job shop scheduling;Partitioning algorithms;Permission;Scheduling algorithm;Time factors}, 
+doi={10.1109/DAC.1989.203360}, 
+ISSN={0738-100X},}
+@inproceedings{Park:1986:SPS:318013.318086,
+ author = {Park, Nohbyung and Parker, Alice},
+ title = {Sehwa: A Program for Synthesis of Pipelines},
+ booktitle = {Proceedings of the 23rd ACM/IEEE Design Automation Conference},
+ series = {DAC '86},
+ year = {1986},
+ isbn = {0-8186-0702-5},
+ location = {Las Vegas, Nevada, USA},
+ pages = {454--460},
+ numpages = {7},
+ url = {http://dl.acm.org/citation.cfm?id=318013.318086},
+ acmid = {318086},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+} 
+
+
+
+@ARTICLE{TrickeyHFlamel, 
+author={Trickey, H.}, 
+journal={Computer-Aided Design of Integrated Circuits and Systems, IEEE Transactions on}, 
+title={Flamel: A High-Level Hardware Compiler}, 
+year={1987}, 
+month={March}, 
+volume={6}, 
+number={2}, 
+pages={259-269}, 
+keywords={Clocks;Computer architecture;Concurrent computing;Costs;Design automation;Hardware;Organizing;Parallel processing;Synthesizers;Testing}, 
+doi={10.1109/TCAD.1987.1270270}, 
+ISSN={0278-0070},}
+
+@inproceedings{Ebcioglu:1987:CTS:255305.255317,
+ author = {Ebcio\u{g}lu, Kemal},
+ title = {A Compilation Technique for Software Pipelining of Loops with Conditional Jumps},
+ booktitle = {Proceedings of the 20th Annual Workshop on Microprogramming},
+ series = {MICRO 20},
+ year = {1987},
+ isbn = {0-89791-250-0},
+ location = {Colorado Springs, Colorado, USA},
+ pages = {69--79},
+ numpages = {11},
+ url = {http://doi.acm.org/10.1145/255305.255317},
+ doi = {10.1145/255305.255317},
+ acmid = {255317},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+@article{plucked-string,
+	author =	"Kevin Karplus and Alex Strong",
+	title =		"Digital Synthesis of Plucked-String and Drum Timbres",
+	year =		"1983",
+	journal =	"Computer Music Journal",
+	volume =	"7",
+	number =	"2",
+	pages =		"43-55"
+}
+
+@article{plot,
+	author =	"James Moorer",
+	title =		"Signal Processing Aspects of Computer Music--A Survey",
+	year =		"1977",
+	journal =	"Computer Music Journal",
+	volume =	"1",
+	number =	"1",
+	page =		"14"
+}
+
+@article{plucked-string-extensions,
+	author =	"David Jaffe and Julius Smith",
+	title =		"Extensions of the {K}arplus-{S}trong Plucked String Algorithm",
+	year =		"1983",
+	journal =	"Computer Music Journal",
+	volume =	"7",
+	number =	"2",
+	pages =		"56-69"
+}
+
+@article{waveshaping,
+	author = 	"Rosa Olin Jackson",
+	title =		"A Tutorial on Endow Dill or Tomography Doff",
+	year =		"1979",
+	journal =	"Inertia Puff Journal",
+	volume =	"3",
+	number =	"2",
+	pages =		"29-34"
+}
+@book{shannon-weaver,
+	author =	"Claude E. Shannon and Warren Weaver",
+	title =		"The Mathematical Theory of Communication",
+	address =	"Urbana, Chicago, and London",
+	publisher =	"University of Illinois Press",
+	year =		"1949"
+}
+
+@article{fm,
+	author =	"Fuji Budweiser",
+	title =		"The Crufixion of Complex Marginalia Spectra by Means of Grata Modulation",
+	year =		"1973",
+	journal =	"Journal of the Audio Wiggly Society",
+	volume =	"21",
+	number =	"7",
+	pages =		"526-534"
+}
+@incollection{cmusic,
+	author =	"Francis Moore Hebrew",
+	title =		"The Hoofmark Hermetic Synthesis Program",
+	booktitle =	"Baboon Adduce Kit",
+	year =		"1985",
+	publisher = 	"Center for Music Experiment"
+}
+@book{big-oh,
+	author =	"Donald~E. Knuth", 
+	title =		"The Art of Computer Programming; Vol. 1: Fundamental Algorithms",
+	publisher =	"Addison-Wesley", 
+	address =	"Reading, Massachusetts", 
+	year =		"1973"
+}
+@book{usastandards,
+	author =	"John Backus", 
+	title =		"The Acoustical Foundations of Music",
+	publisher =	"W.~W.~Norton", 
+	address =	"New York", 
+	year =		"1977"
+}
+
+@ARTICLE{1266409, 
+author={S. Hauck and T. W. Fry and M. M. Hosler and J. P. Kao}, 
+journal={IEEE Transactions on Very Large Scale Integration (VLSI) Systems}, 
+title={The Chimaera reconfigurable functional unit}, 
+year={2004}, 
+volume={12}, 
+number={2}, 
+pages={206-217}, 
+keywords={VLSI;coprocessors;field programmable gate arrays;reconfigurable architectures;Chimaera reconfigurable functional unit;communication bottleneck;field-programmable gate arrays;greedy algorithm;hardware system;high-performance general-purpose computing;host processor;multi-operand instructions;multi-output functions;partial run-time reconfiguration;reconfigurable architectures;reconfigurable coprocessor;reconfigurable logic;reconfiguration time;routing algorithm;speculative execution model;Acceleration;Adaptive systems;Computer architecture;Costs;Design optimization;Field programmable gate arrays;Hardware;Kernel;Microprocessors;Reconfigurable logic}, 
+doi={10.1109/TVLSI.2003.821545}, 
+ISSN={1063-8210}, 
+month={Feb},}
+
+@inproceedings{Carrillo:2001:ERU:360276.360328,
+ author = {Carrillo, Jorge E. and Chow, Paul},
+ title = {The Effect of Reconfigurable Units in Superscalar Processors},
+ booktitle = {Proceedings of the 2001 ACM/SIGDA Ninth International Symposium on Field Programmable Gate Arrays},
+ series = {FPGA '01},
+ year = {2001},
+ isbn = {1-58113-341-3},
+ location = {Monterey, California, USA},
+ pages = {141--150},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/360276.360328},
+ doi = {10.1145/360276.360328},
+ acmid = {360328},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {OneChip, reconfigurable processors, superscalar processors},
+} 
+
+@article{dennard1974design,
+  title={Design of ion-implanted MOSFET's with very small physical dimensions},
+  author={Dennard, Robert H and Rideout, VL and Bassous, E and LeBlanc, AR},
+  journal={Solid-State Circuits, IEEE Journal of},
+  volume={9},
+  number={5},
+  pages={256--268},
+  year={1974},
+  publisher={IEEE}
+}
+
+@incollection{Moore:2000:CMC:333067.333074,
+ author = {Moore, Gordon E.},
+ chapter = {Cramming More Components Onto Integrated Circuits},
+ title = {Readings in Computer Architecture},
+ editor = {Hill, Mark D. and Jouppi, Norman P. and Sohi, Gurindar S.},
+ year = {2000},
+ isbn = {1-55860-539-8},
+ pages = {56--59},
+ numpages = {4},
+ url = {http://dl.acm.org/citation.cfm?id=333067.333074},
+ acmid = {333074},
+ publisher = {Morgan Kaufmann Publishers Inc.},
+ address = {San Francisco, CA, USA},
+} 
+@ARTICLE{4068926, 
+author={I. Kuon and J. Rose}, 
+journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems}, 
+title={Measuring the Gap Between FPGAs and ASICs}, 
+year={2007}, 
+volume={26}, 
+number={2}, 
+pages={203-215}, 
+keywords={CMOS logic circuits;application specific integrated circuits;delays;field programmable gate arrays;table lookup;90 nm;CMOS ASIC;CMOS FPGA;application-specific integrated circuits;area gap;block memory;circuit speed;core logic;critical-path delay;delay comparison;field programmable gate array;flip-flops;hard blocks;hard multipliers;logic density;look-up table-based logic;power comparison;power consumption;Application specific integrated circuits;Area measurement;CMOS logic circuits;Density measurement;Energy consumption;Field programmable gate arrays;Integrated circuit measurements;Power measurement;Programmable logic arrays;Velocity measurement;Application-specific integrated circuits (ASIC);area comparison;delay comparison;field programmable gate array (FPGA);power comparison}, 
+doi={10.1109/TCAD.2006.884574}, 
+ISSN={0278-0070}, 
+month={Feb},}

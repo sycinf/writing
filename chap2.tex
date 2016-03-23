@@ -1,0 +1,114 @@
+\chapter{Background and Related Work}
+\label{relatedWorkChap}
+In section~\ref{hlsDevel}, we first briefly discuss the history of high level synthesis 
+and its most recent development. As current generation of HLS tools are heavily leveraging
+technologies developed in compilers for parallel computers, section~\ref{relevantTech}
+describes some of the most relevant work in this area. 
+Section~\ref{hetero} looks at previous works in 
+integrating conventional processors and reconfigurable fabric, which
+provide the target substrate for any software + accelerator
+compilation flow. Finally, parallelization based on program
+binaries (section~\ref{binpar}) is another research area which overlaps with our effort, though the existing work mostly focused on creation
+of parallel executable for multicore/vector machines.
+
+
+\section{Development of High Level Synthesis}
+\label{hlsDevel}
+The synthesis of hardware accelerator from higher-level specifications 
+has attracted interest from the CAD research community since the 1970s~\cite{Barbacci:1973:AED:906664}~\cite{Parker:1979:CDA:800292.811694}.
+The very early works focused on synthesis and simulation at both RTL and algorithmic level, but had little impact outside of academia as 
+they predate the emergence of the EDA software industry. During the 80s and 90s, many fundamental concepts in HLS were explored. The main steps in HLS: allocation, scheduling and binding were all being investigated and influential papers and books were published, laying the foundation for the field~\cite{Paulin:1987:FSA:37888.37918}\cite{Park:1986:SPS:318013.318086}\cite{Camposano:1991:HVS:574732}\cite{1586344}\cite{31534}\cite{1270207}\cite{75629}\cite{390403}\cite{Karfa:2006:FVM:1126255.1126731}. Meanwhile, for design input, domain specific languages were often used, especially in the DSP-oriented 
+projects~\cite{116097}\cite{20869}\cite{Chu89hyper:an}. In terms of commercialization of the research, in an era where RTL synthesis
+was just getting acceptance, the notion that HLS could further improve productivity using an unfamiliar input language did not appeal
+to most ASIC designers. As major EDA software vendors ventured into this space~\cite{Knapp:1996:BSD:236240}\cite{tools:monet}, however, HLS tools started 
+to draw more attention by the early 2000s. But as the input languages for these tools were behavioral HDLs, 
+and the quality of results were not superior to synthesized RTL, they did not achieve much success among the RTL designers. 
+
+The most recent generation of HLS tools finally made an attempt to target algorithm and software designers, by adopting
+C/C++ as the medium for design input~~\cite{c2silicon:cadence}\cite{forte:cynthesizer}\cite{1033026}. The rise of FPGAs also offered 
+a perfect target for high level synthesis. The time to market advantage of FPGAs is nicely enhanced with a fast algorithm to hardware
+mapping flow. The quality of results was also boosted as the newer tools leveraged progress in compiler optimizations and parallel computing.
+Consequently, we are seeing wider adoption of HLS in recent years~\cite{5209959}. 
+%The optimization required to generate the final implementation assumes a certain level of hardware awareness
+%The usage model of modern HLS still assumes hardware-awareness in its users, who need to iteratively optimize the
+%design, either in the form of pragma insertion or 
+On the other hand, the usage model of modern HLS still assumes a certain level of hardware-awareness in the users, 
+be it in the form of following the right coding style~\cite{Stitt:2006:CRM:1233501.1233649} or knowing where and when to insert optimization pragmas. 
+Independent studies also suggested the necessity of FPGA expertise in the development of 
+efficient end-to-end solutions~\cite{Liang:2012:HSP:2215536.2215537}\cite{7082747}. 
+There is certainly room for further improvement as the gap between a truely high level design specification and efficient
+hardware implementation still exists. 
+
+\section{Compilation Techniques in High Level Synthesis}
+\label{relevantTech}
+As mentioned in section~\ref{chap1:het}, the performance advantage of FPGA accelerators comes from the massive
+parallelism exploited when computations are spatially mapped. The newest generation of HLS tools has been evolving
+concurrently with the wide adoption of parallel computers, many of the techniques proposed for parallelizing compilers
+were borrowed and applied in HLS.
+
+Since the targeted platforms can vary for automatic parallelization, parallelisms of different granularities need to be
+identified to match of characteristics of the machines (e.g. data-level parallelism for SIMD machines, thread-level
+parallelism for multicores etc.). All these can be potentially taken advantage of by FPGAs due to their flexibility.
+
+When mapping to FPGAs, it is possible to exploit instruction level parallelism(ILP) within basic blocks of the program without
+applying any transformation. Due to the limit of ILP within basic blocks~\cite{Wall:1991:LIP:106972.106991}, however, the speed up 
+is not enough to provide a significant advantage versus a general purpose processor where the clock frequency
+can be a lot higher than a typical FPGA. To improve the quality of results in FPGA accelerators, execution of different iterations of loops are often overlapped. This is often  performed using software pipelining techniques,
+proposed for (very long instruction word)VLIW processors~\cite{Lam:1988:SPE:53990.54022}\cite{Rau:1994:IMS:192724.192731}\cite{Tirumalai:1990:PLE:110382.110438}\cite{Allan:1995:SP:212094.212131}\cite{Ebcioglu:1987:CTS:255305.255317}.  The HLS tools start new iterations before previous ones are completed, and the minimum interval with which a new iteration can be initiated is dictated by the latency of the longest circular dependence in the control dataflow graph. This initiation interval (II) ultimately bounds the overall throughput achievable by the accelerators. Other loop transformations like loop unrolling and splitinng are sometimes used to complement the loop pipelining performed during HLS. Incurring higher area overhead, they improve the performance by either decreasing the total number of iterations, each with more intra-iteration parallelism, or by simplifying the logic in the critical cycle of dependencies. In general purpose commercial HLS tools, these techniques are often applied through
+the use of pragmas by the users. Thus to find out where to apply these
+techniques often involves interactive design space exploration using the particular
+tool.
+
+In certain application domains where memory access patterns
+can be statically analyzed, concise mathematical models can be used to represent data dependencies and mathematical 
+transformation~\cite{Ancourt:1991:SPL:109625.109631}\cite{putpolyd2work}\cite{polymorewidely}\cite{girbal2006semi}\cite{pugh1991uniform}\cite{wolf1991loop}. These techniques were employed in program compilation targeting parallel machines of various memory hierarchies\cite{feautrier1988semantical}\cite{}, and are now used by the HLS community~\cite{Zuo:2013:IPC}\cite{Pouchet:2013}\cite{}
+
+
+Another body of work explored transformations from imperative descriptions in
+high level programs to alternative models of computation(MoC), before mapping to
+hardware accelerators~\cite{mat2pn}\cite{c2stream}. MoCs like Kahn process network
+are more suitable for implementation in hardware due to the explicit parallelism laid out
+in the model. These methodologies are most effective when applied to regular computation kernels
+like those in DSP applications. There are also some unaddressed issues 
+such as how to close the gap
+between the memory model of the new MoC and that of a
+general purpose processor, which is essential in the context of
+generating closely coupled CPU+accelerator systems.
+Other tools requires the user to directly construct application
+in more parallel description of computation to facilitate hardware
+generation~\cite{hlfp}\cite{MARC}. 
+
+An important aspect of the HLS-generated accelerators lies in their interaction
+with the data stored in the memory.
+It is a common design practice to have data explicitly moved in and out of chip through
+instantiation of DMA engines~\cite{vivado_hls:appnoteMMult}, and coordinate the computation with transfer of data
+through using software. There are also tools~\cite{coram} which hide the 
+complexity of managing memory
+hierarchy from the user by providing a standard abstraction
+of data access interfaces. The FPGA designers can use the
+provided primitives to explicitly manage data movement between
+the on-board memory and the SRAM on-chip, allowing
+locally-addressed memory access by the computation pipeline.
+A set of regular kernels are synthesized to this architecture
+in~\cite{c2coram}, demonstrating its applicability in the context of high level
+synthesis.
+
+\section{Hardware Platforms with Reconfigurable Components}
+\label{hetero}
+
+
+In contrast with the systems with reconfigurable functional unit~\cite{Carrillo:2001:ERU:360276.360328}~\cite{1266409}, which 
+boasts low communication overhead between the RFU and the processor pipeline, the targeted platform has much greater capacity in accommodating coarser grained accelerators.
+
+
+
+\section{Binary Based Parallelization}
+\label{binpar}
+Thus, most existing
+software dynamic translation (SDT) systems, such as Dynamo [14], DynamoRio [15], Transmeta [26],
+and Daisy [27], only perform alias analysis in the form of instruction inspection, which disambiguates
+two memory references if they access either different memory regions or their addresses have the
+same base register and different offsets.
+Polyhedral Parallelization of Binary
+Code
+
