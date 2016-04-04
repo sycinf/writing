@@ -109,10 +109,15 @@ processes generating request sequences which violates memory dependency constrai
 %multiple input ports and multiple output ports however, 
 %it cannot be described
 %as a simple sequential process with blocking read, since the absence of requests at one port never prevents the memory from serving request from other ports. 
-We can 
-model it as a deviant process with no blocking read who, when scheduled, always takes a new request token and produces response/acknowledge token. This concept is visualized in figure~\ref{fig:memproc}. In particular, there is no sequential
-ordering between the two response block $R1$ and $R2$, though within each block,
-the operations are strictly ordered.
+%We can 
+%model it as a deviant process with no blocking read who, when scheduled, always takes a new request token and produces response/acknowledge token. 
+%This concept is visualized 
+We have visualize the concept of this memory process in  figure~\ref{fig:memproc}. 
+For the \textit{Select} operation in the process, at any point in time, the selectable incoming requests can be served in
+any order without causing any difference in the final result. 
+%In particular, there is no sequential
+%ordering between the two response block $R1$ and $R2$, though within each block,
+%the operations are strictly ordered.
 
 
 
@@ -232,7 +237,7 @@ For each element $j \in J^p, p \in P$ in this set:
     
 
 %If $i_k^p \in \overline{I^p}$, the fanout process $f_i$, if there is any, is then scheduled. Subsequently, all the $\widetilde{i_k^p'}$ are scheduled.
-    \item If $j_k$ accesses memory, then the instructions in the corresponding response block in $M$ is immediately scheduled to serve the request before everything else.
+    \item If $j_k$ accesses memory, then the instructions in $M$ is immediately scheduled to serve the request before everything else.
     \item If $j \in \underline{J}^p$, do not schedule it directly, wait for the producer instruction and $f_i$ to be scheduled.
 \end{itemize}
 Since the consumers of the tokens are always executed immediately after the producer instruction, the FIFOs will not see a backlog of tokens.
@@ -281,7 +286,8 @@ Lemma~\ref{blockingwriteconsistent} can be proven by contradiction.....
 \end{comment}
 \begin{lemma}
 \label{nondeadlock}
-Assuming requests to $M$ is first-come first-served,
+Assuming 
+%requests to $M$ is first-come first-served,
 all FIFOs are of size one and blocking write,
 as long as $G(p), \forall p \in P \cup F$ are locally consistent with $H$,
 artificial deadlock will not occur in $N$. 
@@ -300,8 +306,16 @@ or $j_k \succ j''_{k-1} \succ ... \succ j_k$ in $H$, as each pair in the chain
 comes from a schedule locally consistent with $H$. This chain is self-contradictory
 and therefore the scenario for artificial deadlock can never occur. 
 
-The memory subsystem, being FCFS, always produces tokens some processes are waiting to consume, there is no possibility of it being blocked on write, and thus being
-part of the dependency cycle causing the deadlock.
+%The memory subsystem, being FCFS, always produces response tokens some processes are waiting to consume, there is no possibility of it being blocked on write, and thus being
+%part of the dependency cycle causing the deadlock. 
+Note in $G(p)$, each memory
+access is atomic -- the sending of the address is immediately followed by the receiving of response, both of which happen in the same process $p$.
+The memory process thus always produces response tokens some processes are waiting to consume, precluding the possibility of it being blocked on write. %and thus being
+%part of the dependency cycle causing the deadlock.
+It therefore will not be part of the dependency cycle causing the deadlock.
+However, when we optimize the memory access mechanism by pipelining the requests, this is no longer the case. 
+We will elaborate the change in our model later in section~\ref{memstrange}.
+
 
 
 As each $G(p), p \in P \cup F$ is locally consistent with $H$, which is derived from
@@ -460,9 +474,9 @@ An example of this is shown in figure~\ref{fig:vectorannot}.
 
 
 
-All the vector weights assigned to the edges between instructions of
+The vector weights assigned to the edges between instructions of
 the same level in the loop nest are really the same as in the single level loop
-example, except the padding of zeros to match the dimension of the iteration space. A more interesting case is the $DepS$ edge from INS $\overline{E}$ to INS $\overline{B}$, which goes from an outer loop instruction to an inner loop instruction. 
+example, except the padding of zeros. A more interesting case is the $DepS$ edge from INS $\overline{E}$ to INS $\overline{B}$, which goes from an outer loop instruction to an inner loop instruction. 
 The last components of the subscript vectors of INS $\overline{E}$ instances are always 1
 as the instruction does not execute in the innermost loop. The subscript vectors of INS $\overline{B}$ instances, however, can take a value up to 10 for its right most element, as the inner most loop has an iteration count of 10. Thus the weight $(0,9)$
 means the $1$st INS $\overline{E}$ instance is scheduled after the $10$th occurrence of INS $\overline{B}$ in the current iteration of the outer loop.
@@ -473,7 +487,7 @@ An deadlock is manifested as a cycle with weight being the zero vector ($\vec{0}
 or vectors whose first non-zero elements (leading elements) are positive.
 Similar to the case when we have scalar
 weights, these weight vectors 
-indicate an instruction instance depending on itself or a later instance in the iteration space, and thus a deadlock. The deadlocks can also be
+indicate an instruction instance depending on itself or a later instance in the execution trace, and thus a deadlock. The deadlocks can also be
 resolved by finding the $DepF$ edges, whose change of capacity makes
 all the cycles' weights' to have negative  leading element. 
 
@@ -525,6 +539,8 @@ As lemma~\ref{deadlock2cycle} is proven to be true, the absence of cycles of
 weight $\vec{0}$ or with positive leading elements guarantees the the absence of artificial deadlock (the contrapositive).
 
 \begin{comment}
+% real not useful
+
 In addition, the number of $DepS$ edges added can also
 be reduced. Only the scheduling of producer/consumer instructions matters for
 deadlock detection, therefore any $DepS$ edges having end point $j \not\in \bar{J^p} \cup \underline{J}^p$ can be omitted.For
@@ -544,18 +560,18 @@ it may.
 
 
 
-\begin{comment}
+%\begin{comment}
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=1.1\linewidth]{chap4fig/unresolve.pdf}
+\includegraphics[width=1.0\linewidth]{chap4fig/unresolve.pdf}
 \caption{Rescheduling Creates Statically Unresolvable Deadlock
 \label{fig:badsitu}}
 \end{center}
 \end{figure}
 
 \subsection{Statically Unresolvable Artificial Deadlocks}
-Using the analysis framework we have formulated, we can construct situations
+Using the analysis framework we have formulated, we can foresee situations
 where artificial deadlocks may always occur, regardless of how much
 space is statically assigned to a FIFO channel. Figure~\ref{fig:badsitu}
 shows one example where no guarantee of deadlock freedom can be
@@ -567,7 +583,7 @@ number of iterations of the inner loop is statically unknown, there will
 always be a $DepF$ between a pair of the $push$ and $pop$ instruction instances (and therefore a cycle of dependence),
 regardless of how large the FIFO size is. 
 
-In the weighted edge graph, the size of the iteration space is represented
+In the weighted edge graph, the number of iterations is represented
 symbolically and the $DepS$ edge between the outer loop and inner loop producers carries a weight of $(0,i)$. Assuming FIFOs of size 1, a cycle of weight $(0, i-1)$ is found. Without knowing the bound of $i$, there is no way we can add enough
 space to the $DepF$ edge between the producer and consumer of ``data" such
 that the cycle weight has negative leading element.
@@ -577,11 +593,47 @@ The actual computation is shown
 in this example to demonstrate the validity of the reordering. There is no local data dependency violated, yet artificial deadlocks are created in the network.
 To prevent this type of unresolvable deadlocks, we can impose constraints on the
 reordering of instructions performed by the HLS tools. The starting point of
-instruction rescheduling is always the original program order, or more specifically the locally consistent $G(p)$. In the weighted graph representing the network of processes each scheduled according to $G(p)$, $DepS$ edges going from an instruction to its predecessor in the inner most loop all have weight $\vec{0}$. The weight of a $DepS$ edge from an outer loop instruction towards a preceding inner loop instruction has its leading element equals to the max number of inner loop iterations minus 1.
+instruction rescheduling is always the original program order, or more specifically the locally consistent $G(p)$. 
+It was proven that if every process is run according to $G(p)$, there will be no artificial deadlock. Thus as long as we do not add symbolic vectors into the the weights of the cycles in the graph representing the process network, no unresolvable deadlock would be introduced.
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1.0\linewidth]{chap4fig/safeRule.pdf}
+\caption{Reordering without Introducing Unresolvable Deadlock
+\label{fig:safeReschdule}}
+\end{center}
+\end{figure}
+
+
+A sufficient condition to ensure this is to disallow
+outer loop instruction to be locally reordered with respect to inner loop instruction.
+It should be noted that according to our scheme, all the simple paths whose weights contain symbolic variables are ones going from an outer loop instruction to inner loop ones.
+Meanwhile,
+simple paths between instruction 
+of the same loop level, if not going through inner loop instruction, are 
+always free from unknown variables in their weights. Adhering to our proposed constraint
+essentially means we are only reordering instructions between which the simple paths are of statically known weights. 
+Consequently, no new symbolic variable would be added to the cycle
+weight after the reordering. An example is shown in figure~\ref{fig:safeReschdule}. Note this condition is not a necessary condition, in figure~\ref{fig:badsitu}, if the sender of \textit{outInd} is also scheduled to before \textit{loop\_inner}, we are not going to encounter the
+unresolvable deadlock. However, our proposed condition is easy to check against during HLS, and the liveness of the resulted hardware can  readily be guaranteed.
+
+
+
+\begin{comment}
+in constructing the weighted graph, $DepS$ edges going from an instruction to its predecessor in the same loop level all have weight $\vec{0}$. 
+%The weight of a $DepS$ edge from an outer loop instruction towards a preceding inner loop instruction has its leading element equals to the max number of inner loop iterations minus 1.
+%On the other hand,
+%The $DepS$ edge pointing to successors always has element -1 at 
+%the position of the vector corresponding to the outermost loop level among
+%the two instructions. 
+The weight of any path from an outer loop instruction to an inner loop instruction will not change if this constraint is observed. 
+
+In the weighted graph ($G_w$) representing the network of processes each scheduled according to $G(p)$, $DepS$ edges going from an instruction to its predecessor in the same loop level all have weight $\vec{0}$. The weight of a $DepS$ edge from an outer loop instruction towards a preceding inner loop instruction has its leading element equals to the max number of inner loop iterations minus 1.
 On the other hand,
 The $DepS$ edge pointing to successors always has element -1 at 
 the position of the vector corresponding to the outermost loop level among
 the two instructions. 
+
+
 
 In order to avoid creating unresolvable deadlocks,
 we shall disallow any reordering creating cycles whose weight has non-statically
@@ -629,10 +681,21 @@ processes is formed.
 \end{comment}
 
 
-\subsection{Effect of Bursted Memory Accesses}
-We have been modeling the memory as a special process who responds to the requests in a FCFS fashion. The use of bursted memory access can sometimes complicate this
-assumption.
+\subsection{Memory Access Representation}
+\label{memstrange}
+So far we have been modeling the memory request as an atomic action, i.e.
+%as a special process who responds to the requests in an atomic fashion. Also, 
+processes sending out memory requests
+wait for the responses before continuing. 
+However, the sending of requests and receiving of the responses can often
+be decoupled, as we have done in chapter~\ref{decoupleChap}. Even if they are assigned to the same process, instructions can also be scheduled between them.
+Now when the responses are sent back from the memory, their designated consumers
+may not be ready to execute, and more buffering is needed. To incorporate this
+into our model. 
 
+
+The use of bursted memory access can sometimes complicate this
+assumption. In essence, the bursted memory access
 
 
 

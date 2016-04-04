@@ -83,7 +83,7 @@ a stage in our pipeline.
 To maximize the performance of the resulted implementation, a few factors
 should be considered during our partitioning process. 
 First, circular dependencies between
-nodes need to be contained within each set. These strongly
+nodes of the innermost loop need to be contained within each set. These strongly
 connected components (SCCs) in CDFG are associated with
 loop carried dependencies, and are the limiting factors for how
 aggressively loop iterations can be overlapped. The initiation
@@ -202,6 +202,7 @@ memory space.
   \end{algorithmic}
 \end{algorithm}
 
+\subsection{Partitioning Algorithm}
 The first factor was one of the observations made 
 in~\cite{dswp}, where sequential programs were converted into multithreaded
 codes running on multicore processors. Their algorithm
@@ -227,6 +228,7 @@ a cycle. As Vivado HLS is eventually used as the backend for
 our HDL generation, it provides accurate annotations for our
 flow.
 
+\subsection{Insertion of Dependency Edges}
 The semantics of the input high level language often create
 dependencies implicitly carried by memory accesses.
 Given two statements in a program, Bernstein's conditions~\cite{4038883} described when
@@ -241,7 +243,7 @@ If two memory operations access the same location and one of them is a store, th
     writes exposes the wrong value to the subsequent reads, as illustrated in
     figure~\ref{}(c)
 \end{itemize}
- For every pair of operations whose ordering needs to be preserved, a special dependency edge is added between them. Since the generation of the sets is performed around strongly connected components in the original dataflow, it is important to avoid adding unnecessary memory dependency edges. To achieve this, our flow currently relies on alias analysis to perform partitioning of the memory space. Accesses to disjoint memory regions can be safely reordered. When the source code contains pointer arithmetic or irregular memory accesses, compile time alias analysis may produce overly conservative results, in which case user annotations can be used to provide hints to the tool, similar to~\cite{manycache}. This partitioning of memory space naturally leads to creation of multiple data access interfaces, whose interactions with the memory subsystem can be customized, as will be elaborated in section~\ref{sec:optmem}.
+ For every pair of operations whose ordering needs to be preserved, a special dependency edge is added between them. Since the generation of the sets is performed around strongly connected components in the original dataflow, it is important to avoid adding unnecessary memory dependency edges. To achieve this, our flow currently relies on alias analysis to perform partitioning of the memory space. Accesses to disjoint memory regions can be safely reordered. When the source code contains pointer arithmetic or irregular memory accesses, compile time alias analysis may produce overly conservative results, in which case user annotations can be used to provide hints to the tool, similar to~\cite{manycache}. This partitioning of memory space naturally leads to creation of multiple data access interfaces, whose interactions with the memory subsystem can be customized, as will be elaborated in section~\ref{sec:optmem}.  
 
 Another source of edges in our CDFG -- control dependency, also warrants some 
 discussion. The simplest way to add the control dependency edges is to have
@@ -256,7 +258,36 @@ earliest branch outcome which necessarily leads to the execution of an instructi
 flow looks for the nearest set of basic blocks $BB'$ who are not properly post dominated by $bb$,
 and insert the dependency edge from the branch instructions ending each member of $BB'$ and $i$.
 
+\subsection{Memory Barrier Insertion}
+Under certain circumstances, we do not want to directly add edges between memory operations
+as they hinder the CDFG partitioning. For the example in figure~\ref{}, during the execution of one outer loop iteration, the set of memory addresses accessed by the the load does not intersect
+with that of the store instruction. However, across different outer loop iterations, these
+two instructions can accesses the same locations. 
+We can conservatively make them dependent
+on each other, but this creates an SCC that ultimately prevents any partitioning, as can be
+seen in the figure.
 
+%become the performance bottleneck. 
+Alternatively, a memory barrier can be inserted after the completion of 
+each outer loop iteration. To implement the barrier in the pipeline, the stage containing
+the semantically earlier instruction sends tokens to stages who contain the successor
+instructions. Eventually during the RTL generation, the local schedule of instructions also needs to be constrained such that the sender of the barrier tokens is not reordered to before its predecessors, while the receivers execute before its semantic successors as well.
+
+The insertion of the sender/receiver of the barrier happens after the instruction partitioning. Depending on if a partition is the sender or receiver of the token,
+an extra store/load operation is introduced into the set of instructions, associated
+with the basic block where the barrier occurs.
+
+\begin{comment}
+Also, to ensure the barrier tokens are sent out only after the completion of preceding 
+memory operations, which are often signaled by special \textit{RESP} lines,  a special module is created to monitor and coordinate the transmission of the tokens. Its structure
+is shown~\ref{}, only when 
+As we are trying to ensure the semantically later instructions
+do not get ahead of their predecessors, the barrier is implemented by having the stage containing the later instruction sending tokens to an earlier stage in the pipeline. As the local schedule 
+\end{comment}
+
+%There is a possibility that the load instruction of an later outer loop iteration occurring 
+
+%in the inner most loop can be separated as the memory dependency edges do not form a circle. However, 
 
 
 \section{Construction of Pipeline of Subgraphs}
@@ -915,3 +946,6 @@ pipeline in the processing modules, resulting in area savings.
 %additional pipeline stages. 
 The overall change therefore depends on which factor plays a larger role, and is 
 ultimately application specific. 
+
+
+\section{Discussion}

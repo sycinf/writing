@@ -220,8 +220,8 @@ evolve accordingly, taking advantage of the reconfigurability of FPGAs.
 
 
 \section{Thesis Contributions}
-In this dissertation, we present a suite of tools for optimizing HLS generated accelerators and easing the integration
-of them into applications. 
+In this dissertation, we present tools and mechanisms for optimizing, analyzing and integrating HLS generated accelerators.
+%and easing the integration of them into applications. 
 
 \subsection{Synthesis of computational pipelines with decoupled memory access}
 
@@ -239,10 +239,21 @@ In chapter~\ref{decoupleChap}, the implementation details of this flow are prese
 the advantage of our approach, experimental results comparing it against state-of-the-art HLS tools
 are also presented.
 
+\subsection{Deadlock Prevention in Network of Statically Scheduled Processes}
+In synthesizing the decoupled computational pipeline, the original program
+is essentially converted to a network of processes, executed in a distributed manner. In chapter~\ref{liveprof}, we create a framework to analyze the property of this network, leveraging past research in Kahn process networks, to determine conditions for liveness of our generated pipeline. 
+Contrary to past simulation-based approach, we examine the interaction between the static scheduling by HLS and the sizing of the communication channels between the processes to find ways to prevent deadlock \textit{a priori}. We also
+discuss how our technique may be used in other more generalized context.
+\begin{comment}
+With the communication channels being fixed in size, 
 
+As each of these processes is eventually implemented using HLS, its schedule is statically generated. We generalize our approach to 
 As communication
 channels are implemented using FIFOs in the FPGA, the buffer space in our pipelines is always bounded. 
 A natural concern is the liveness of the pipeline. This is addressed with a formal proof in chapter~\ref{liveprof}.
+\end{comment}
+
+\begin{comment}
 
 \subsection{Tuning of processing pipeline using runtime profile}
 When the generated pipeline stages contain data-dependent control flow and memory access patterns, 
@@ -259,6 +270,7 @@ parallelization/better caching. The design is therefore evolving according the t
 load, taking advantage of the reconfigurability of FPGAs. Chapter~\ref{profileChap} describes the infrastructure for this automatic tuning
 of the pipeline based on its runtime behavior. Improvement on quality of results is also shown at the end
 of the chapter.
+\end{comment}
 
 \subsection{Accelerator generation and integration using program binaries}
 To push the limit in usability of FPGA platforms, we explored the generation and 
