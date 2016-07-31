@@ -4,7 +4,7 @@ As usability remains to be one of the most significant obstacles for adopting FP
 transparent flow for mapping applications to systems with reconfigurable components.
 Contrast with previous chapters where source codes in high level
 languages are used as inputs, here we try to only use the program binaries and their runtime profiles as the design entries. 
-The mechanism for integrating the accelerator back into the overall program execution is also examined. While the synthesis and tuning of the computational pipeline was an attempt to create better accelerators running on FPGA itself, in this chapter, we
+The mechanism for integrating the accelerator back into the overall program execution is also examined. While our computational pipeline synthesis flow was to create better compute engines running on FPGA itself, in this chapter, we
 further discuss the interaction between the software component and the FPGA accelerators. From the users' perspective, a flow based on
 program binaries requires no source rewriting
 nor recompilation, the effort needed to take advantage
@@ -44,14 +44,21 @@ the accelerator~\cite{sdaccel}. It's worth noting that this difference in progra
 is orthogonal to the actual physical configuration of the platform. For instance, CPU and FPGA located in two different sockets can have shared address space while a system based on a single chip SoC may associate the FPGA with a separate DRAM interface which are not directly
 accessible by CPU. 
 Given the flexibility of FPGAs, there are certainly ways to create a layer of abstraction conforming to either one of these schemes, regardless
-the original expected usage model. However in this work, we 
-do not make assumption about the underlying platform and try to
- devise a mechanism for each scheme. 
+the original expected usage model. 
+In this work, we assume a shared memory space between the CPU and the FPGA, 
+though a mechanism for explicit data movement is also outlined in section~\ref{makingAcc}.
+
+%However in this work, because of the nature
+%of our targeted applications, we are able to devise mechanisms to tackle explicit data
+
+%we 
+%do not make assumption about the underlying platform and try to
+% devise a mechanism for each scheme. 
 %we treat these
 %two schemes differently, as will be discussed in section~\ref{makingAcc}.
-Finally, in any CPU+FPGA coprocessor systems, the access of data memory by the programmable logic can be seen as adding to the communication overhead between the
-accelerated part and the software components, which is a key parameter
-in determining if a part of the program should be accelerated using hardware.
+%Finally, in any CPU+FPGA coprocessor systems, the access of data memory by the programmable logic can be seen as adding to the communication overhead between the
+%accelerated part and the software components, which is a key parameter
+%in determining if a part of the program should be accelerated using hardware.
 
 
 
@@ -69,7 +76,7 @@ intervention from the CPU, before signalling the completion of the task.
 The natural targets for our flow are therefore loop nests in the program
 binaries. To find the loops, we use the DyninstAPI~\cite{dyninst} to parse through
 the program binaries and construct the control flow graph (CFG). There may be cases where code segments are shared by multiple loops, making it harder to statically carve out the best code region for acceleration. For these
-scenarios, we leverage can runtime profile of the program to find the prevalent
+scenarios, we can leverage runtime profile of the program to find the prevalent
 loops and extract single-entry-multiple-exit loops which can undergo further
 optimizing transformations. 
 Meanwhile, due to the presence of statically unresolvable control flow, e.g. indirect jump,
@@ -134,7 +141,7 @@ constitute the iteration space. Figure~\ref{fig:inivis} visualizes these concept
 To exploit coarse grained parallelism in the loop nest, we need to ensure the
 absence of loop carried dependencies at a particular level in the loop nest. There are also simple transformations(e.g. loop interchange) which can move loop carried
 dependencies to other loop levels so only loop-independent dependencies are left. To enable the discovery of these opportunities, we need to find, in each statement's iteration space, if they intersect with other statements' accessed memory locations. In general, the memory addresses to be accessed can be arbitrary functions of loop indices and runtime data, which makes it impossible to statically determine if
-dependencies exist. There are, however, a large set of problems where
+dependencies exist. There are, however, a  set of problems where
 the memory referenced can be analyzed during compile time as the addresses are affine functions of the loop index variables. For loop nests of this kind,
 dependency analysis is essentially finding integer solutions for the problem:
 
@@ -161,8 +168,8 @@ a_1x_1-b_1y_1+...+a_nx_n-b_ny_n = b_0 - a_0
 \end{equation}
 \begin{equation*}
 \begin{aligned}
-& \text{ where}  & & x_{lb}_k \le x_k \le x_{ub}_k \\
-& & & y_{lb}_k \le y_k \le y_{ub}_k \\
+& \text{ where}  & & x_{lb_k} \le x_k \le x_{ub_k} \\
+& & & y_{lb_k} \le y_k \le y_{ub_k} \\
 \end{aligned}
 \end{equation*}
 
@@ -193,8 +200,9 @@ There are various techniques~\cite{banerjee}~\cite{gcd}, proposed over the years
 %dependencies exist between memory references. Essentially they are all trying %to find solutions for the problem:
 %Many techniques were proposed for compiling these problems onto variable %processors. 
 In our binary-based flow, we also try to target these analyzable loop nests, some of which are especially amenable to FPGA acceleration. 
-Identifying these regions from the program binaries, however, is not as
-simple as doing it from the source code.
+Identifying these regions from the program binaries, however, poses some challenges. 
+%however, is not as
+%simple as doing it from the source code.
 
 
 %This can be done by solving the
@@ -352,6 +360,13 @@ to be extracted. To establish independence between different loop iterations or 
 \end{comment}
 
 
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{chap6fig/analysisSteps.pdf}
+\caption{From Disassembled Binary to Synthesizable C Code
+\label{fig:mainSteps}}
+\end{center}
+\end{figure}
 
 \section{A Two Phased Approach for Accelerating Program Binaries Using FPGA}
 \label{makingAcc}
@@ -365,22 +380,75 @@ a verifying function is invoked before the accelerator, ensuring the correctness
 of the overall execution. 
 
 
-This online phase test is also one of the reasons why we choose Banerjee's method for our dependency testing.
-Banerjee's inequality tests for existence of any real solutions for the Diophantine's equations. Since it only tackles the non-integer relaxation of the ILP formulation, the results obtained are conservative.
+
+This online phase test is also one of the reasons why we choose Banerjee's method for our dependency testing even though it is not the most accurate dependency testing method
+available. The Banerjee's inequality tests for existence of any real solutions for the Diophantine's equations. Since it only tackles the non-integer relaxation of the ILP formulation, the results obtained are conservative.
 It will never report lack of dependencies when one exists,  but may report false dependencies, i.e. when all the real solutions are non-integral.
  More accurate tests like~\cite{omega} find integer solutions but are more costly. Since we are
 going to perform the test again using runtime data when the accelerator is actually
 being invoked, the faster, though more pessimistic, method is preferred.
 
+When applying Banerjee's method, a particular direction vector $\vec{v}$ is subjected to test, and the result reveals if a pair of memory accesses are dependent in $\vec{v}$'s direction. 
+%first used as the constraint and the result of the test reports if this vector may hold true for a pair of memory accesses. 
+%Therefore, 
+To find all the direction vectors for dependencies, a hierarchy
+of tests are therefore involved. For a pair of memory accesses in a two level loop nest, the possible tests are shown in figure~\ref{fig:testingHier}, where ``$\ast$" denotes a union of ``$<$", ``=" and ``$>$". Negative test result from any node in the hierarchy eliminates the necessity to continue testing its subnodes. A subset of these dependency direction vectors
+are true for each loop nest and dictates what kind of transformations are valid for accelerator synthesis.
 
 
-\subsection{Offline Phase: Parallelization and Accelerator Synthesis}
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.6\linewidth]{chap6fig/testingHier.pdf}
+\caption{Hierarchy of Dependency Testing for A Two-Level Loop Nest
+\label{fig:testingHier}}
+\end{center}
+\end{figure}
 
 
 
-When FPGA accelerators are synthesized through HLS, several techniques are used to exploit
-the coarse grained parallelism. For the inner most
-loop, it is generally very cost effective to pipeline the loop. If
+\subsection{Offline Phase: Accelerator Synthesis}
+
+\subsubsection{Dependency Analysis}
+To perform the offline dependency testing, we built an analysis pass within the LLVM framework. As LLVM takes C/C++ as input, a preprocessing step is performed
+to convert the binary of the selected loops to C functions. It is also in this step when we extract coefficients for the Diophantine equation and bounds for loop indices from past runtime profiles.
+The numbers obtained are substituted as constants into the C functions, enabling the subsequent analysis. 
+In the original binaries, these variables are often stored in the memory. 
+Thus in addition to examining their past values, we also perform a check to ensure their memory locations do not alias with any other references performed by the loop nest, again using the addresses observed from the profile. Most of the time, these locations can be
+recognized as part of the call stack, and are normally completely disjoint from
+the memory footprint of the actual loop. We can thus easily disambiguate them using a simple
+range test. Of course, when the accelerator is actually being invoked, this test would need to be run again, as will be detailed in section~\ref{onlinephase}.
+ 
+Figure~\ref{fig:mainSteps} illustrates the steps involved in converting binary to a synthesizable C function. 
+The original output from the disassembler is used to generate two
+different versions of C functions. The first, incorporating values collected from past runtime profile, can be analyzed by Banerjee's method. The results are the dependency directions between memory operations. In this particular case, the store and load operations are found to be non-aliasing. This information is then used to generate the final C function, where each memory access is associated with a different pointer. Whether we
+feed this version to conventional HLS or our pipeline generation flow, separate pointer
+arguments can be mapped to multiple memory ports, through which data requests can be initiated
+independently.
+
+%are applied to a loop doing simple vector addition.%example in figure~\ref{fig:mangledMem}.
+\subsubsection{Memory Level Parallelism}
+There are actually two levels of parallelization when it comes to scheduling memory accesses during HLS. As shown in the example above, the absence of dependencies between memory operations allows for their association with
+different pointers. The scheduling engine in the HLS tool can then schedule
+them without being constrained by the original program order. However, multiple pointers may still be assigned to a single physical memory  interface. The structural hazard would then dictate the action of the scheduler,
+as a single memory port may only accommodate one load and one store per cycle.
+To loosen this structural constraint, it is possible to create multiple memory
+ports, each assigned to a subset of pointer arguments. More aggressive scheduling, from the datapath's perspective, can then be performed. 
+
+
+The precondition for exploitation of any memory level parallelism is of course the non-overlapping of addresses accessed by memory operations. This is especially true if they are to be issued through multiple ports, 
+%they need to be completely independent from each other 
+as we assume the RTL generation backend, the interconnect and memory subsystem may all be aggressively reordering these requests -- by inferring burst accesses or buffering. Therefore, for every pair of accesses whose ordering matters (i.e. excluding load-load pair), we check the direction vector (*,*,...), and associate each access to a separate
+pointer if the test result is negative. In section~\ref{sec:pmd}, we described how memory barriers are inserted to prevent overly conservative dependency annotation.
+Similarly, in our binary based flow, if memory dependencies are carried by outer loops,
+memory barriers can also be inserted to facilitate the partitioning of memory access interfaces. The direction vector to test here is  (=,=,..,*,*),
+where "=" occupies all levels including and outside of the level of insertion. In essence, we are ensuring any reordering of memory operations within the loop level where the memory barrier is inserted will be valid. An example of this is shown in figure~\ref{fig:withOrWithoutBarrier}. 
+
+\subsubsection{Coarse Grained Parallelism}
+
+
+In addition to memory level parallelism, the loop shown in the example also has coarse grained parallelism between loop iterations. In general, a typical high level synthesis flow can employ several common mechanisms to parallelize loops, as illustrated in figure~\ref{fig:fpgaparal}. 
+For the inner most
+loop, it is generally very cost effective to pipeline the loop--starting a new iteration before the previous one finishes. If
 the iterations are parallelizable, the initiation interval would be 1.
 Assuming there are $M$ iterations, the total execution time of the loop
 would roughly be $M$ cycles. To further reduce this number, loop unrolling
@@ -390,7 +458,7 @@ The iteration count is reduced by the unroll factor ($U$) while the II does not 
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=0.7\linewidth]{chap6fig/fpgaParallel.pdf}
+\includegraphics[width=0.8\linewidth]{chap6fig/fpgaParallel.pdf}
 \caption{Parallelization in FPGA Accelerators
 \label{fig:fpgaparal}}
 \end{center}
@@ -408,8 +476,32 @@ underutilization of the memory bandwidth. In the presence of coarse grained para
 by the platform, as each datapath independently generates requests, whether
 its peers are stalled or not. 
 Certain platforms also provide multiple channels
-for off-chip memory access, which can be more easily utilized with duplicated datapaths.
-Figure~\ref{fig:fpgaparal} illustrates the described parallelization schemes for FPGA accelerators.
+for off-chip memory access, which can be more easily utilized with duplicated datapaths. 
+
+In our flow, the memory footprint of the computation is assumed to be
+much larger than the capacity of on-chip RAM. With the fetching of data
+from off-chip storage being a major task of the generated accelerator,
+thread-level parallelization is preferred to loop unrolling.
+Unrolled inner loop often contain multiple memory accesses which were
+initially folded as one operation. In a pipelined inner loop, this
+memory access is often converted to burst mode load or store, which is
+very efficient. Unrolled inner loop, on the other hand, prevents this burst
+inference from occurring as the original single stream of data is now broken
+into two interleaved streams.
+Loop unrolling makes more sense when the on-chip storage is partitioned into small scratchpad memories which can be accessed by the datapath simultaneously.
+Given the regularity of the targeted kernel, it is certainly possible to create a mechanism through which off-chip data gets prefetched and distributed into many distributed on-chip RAM. However, for the benchmarks where off-chip communication 
+is the main performance bottleneck, there is little benefit in doing this. 
+Also, the overhead of multiple datapath is only marginally higher than unrolled
+loop as the main overhead is only the extra control state machine.  
+
+%Figure~\ref{fig:fpgaparal} illustrates the described parallelization schemes for FPGA accelerators.
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1.1\linewidth]{chap6fig/threadSplit.pdf}
+\caption{Thread-level Parallelization 
+\label{fig:threadP}}
+\end{center}
+\end{figure}
 
 We can draw similarities between these techniques and the compiler optimizations targeting architectural features
 of various parallel processors. Loop pipelining was a scheduling technique
@@ -419,25 +511,49 @@ is now used to process multiple iterations simultaneously. The replication of
 datapath is essentially generating multithreaded implementation from a serial
 specification. Previous research in automatic parallelization can thus be
 leveraged for our flow. In this work, we are not trying to invent new techniques, but to enable past work to be applied to program binaries on FPGA
-platform. 
+platform. In fact, techniques like loop unrolling and loop pipelining are already built
+into commercial HLS tools, and can be easily applied using directives. For thread level parallelization, LLVM can again be used to create multiple functions from a single loop nest. As illustrated in figure~\ref{fig:threadP}, the parallelizable dimension of the iteration space
+is to be split evenly, a guard condition is also generated to ensure the validity 
+of the derived bounds for all the threads.
 
+
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.75\linewidth]{chap6fig/loopInterchange.pdf}
+\caption{Loop Interchange Based on Coefficient Value from Runtime Profile 
+\label{localityopt}}
+\end{center}
+\end{figure}
+\begin{comment}
+It is particularly interesting to look at the interaction between memory level parallelization and coarse grained parallelization. The pipelining of
+loops is a form of instruction reordering, in the absence of memory level
+parallelism, the amount of speed up achievable is rather limited~\cite{nwcache}. Similarly, when loops are unrolled, more memory operations are exposed in every iteration of the loop. The increased hardware cost is only justifiable if there are enough simultaneous data streams from the memory subsystem to satisfy the multiplied throughput provided by the wider datapath. The same constraint is applicable to thread-level parallelization as well. For regular computation kernels we target, it is
+possible to analytically estimate how much coarse grained parallelization
+should be performed given a memory bandwidth budget.
+\end{comment}
+
+
+
+\subsubsection{Optimization for Data Locality}
 While FPGAs can exploit parallelism in 
 multiple different ways, another important aspect to optimize for would be the temporal and spatial locality of data access. While multiple datapaths can
 easily saturate the offchip memory bandwidth, there might be wastage if opportunities for data reuse are missed. 
 Even in the absence of data reuse, requests for 
 contiguous segments or memory locations close to each other are more efficiently served by the caches and the memory subsystem.
-In our parallelization engine, we try to increase the ratio of computation per unit of data communicated with off-chip RAM. By performing loop interchange under the dependency constraints, we can generate multiple versions of a loop nest. To find the implementation with best locality, we would like to have the version with the smaller
-memory footprint (normalized by iteration count) at the inner loop level.
+Thus in our flow, we also try to increase the ratio of computation per unit of data communicated with off-chip RAM. By performing loop interchange under the dependency constraints, we can generate multiple versions of a loop nest. To find the implementation with best locality, we would like to have the version with the smaller memory footprint (normalized by iteration count) at the inner loop level.
 For our targeted loop nests, the memory addresses accessed are affine expressions of the loop index variables. The coefficient for each of them
 decides how large of a stride each iteration takes, which conveniently
 approximate how ``unlocal" the memory accesses are. 
 Thus for a particular loop index variable, the smaller the coefficient, the deeper its corresponding loop level should go.
 This is illustrated in figure~\ref{localityopt}. 
 
-The algorithm used in our parallelization engine is outlined in algorithm~\ref{algoPara}. This is a modified version of the \textit{codegen}
+
+
+The algorithm used to perform code transformation in our flow is outlined in algorithm~\ref{algoPara}. This is a modified version of the \textit{codegen}
 procedure from~\cite{Kennedy:2001:OCM:502981}, which targets vector machines.
 Our implementation, in addition to data level parallelism, also try to expose
-thread level parallelism at the outer level loop, which can then be easily exploited by multiple FPGA datapaths. 
+thread level parallelism at the outer level loop, which can then be exploited by multiple FPGA datapaths. 
 The results from our algorithm only provides a starting point for the design space exploration. Even for a single vectorized instruction, combinations of techniques illustrated in figure~\ref{fig:fpgaparal} can be applied to
 produce implementations of different performance area trade-off. Meanwhile, 
 the supporting infrastructure on the FPGA can also be modified on a per
@@ -451,10 +567,12 @@ to show the trade-off between different metrics.
 There are also other transformations which can be applied to extract additional parallelism or to achieve better data reuse. Loop fission and loop tiling, for instance, are techniques used in some optimizing compilers. 
 Their incorporation is certainly feasible with our general approach and will
 add more dimensions to the design space. 
+\begin{comment}
 
 The actual implementation of the parallelization engine is built
 on top of the LLVM framework. As LLVM takes C/C++ as input, we created a preprocessing step
-to convert the program binary to C functions. It is also in this step when we extract
+to convert the binary of the selected loops to C functions.
+It is also in this step when we extract
 coefficients for the Diophantine equation and bounds for loop indices from past runtime profiles.
 The numbers obtained are substituted as constants into the C functions, enabling the subsequent analysis. 
 In the original binaries, these variables are often stored in the memory. 
@@ -465,13 +583,31 @@ recognized as part of the call stack, and are normally completely disjoint from
 the memory footprint of the actual loop. We can thus easily disambiguate them using a simple
 range test. Of course, when the accelerator is actually being invoked, this test would need to be
 run again, as will be detailed in section~\ref{onlinephase}.
+
+
 FIXME:There are many existing compiler passes within LLVM which facilitates the analysis ....
 After the transformations, the LLVM IR is converted back to C, before HLS is used
 to generate the final circuits. Multiple independent C functions can be generated
 when multiple datapaths are desired in the final implementation. Vendor specific
 pragmas are also inserted to provide guidance for the HLS tool. An example output,
 which targets Vivado HLS backend, is shown in figure~\ref{}. 
+\end{comment}
 
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.85\linewidth]{chap6fig/sourceCodeAnalysis.pdf}
+\caption{Analyze Loop in C with Value from Past Profile 
+\label{fig:srcAna}}
+\end{center}
+\end{figure}
+
+It is worth noting that the approach taken in our \textit{offline phase} can actually parallelize certain functions which are not analyzable using only the source code. An example of this is shown in figure~\ref{fig:srcAna}. As the data structures
+are passed into the function using pointers, the constant terms (a, b and c) and the coefficient (dim) in the Diophantine equations are all unknown. Banerjee's method, in this case, does not produce affirmative result. On the other hand, with the help of runtime profile,  this function can also be analyzed and produce negative
+outcome when tested for the dependency vector (*) -- the loop is parallelizable. 
+
+So far the analysis and parallelization are all performed independent of the actual
+RTL generation. In essence we have devised a set of transformations applicable within the LLVM framework. A piece of disassembled binary is converted to synthesizable C code, which is ready to be processed by the hardware synthesis mechanism, be it conventional HLS or the previously described pipeline generation flow. The last part of the \textit{offline phase} involves pushing the RTL through traditional FPGA CAD flow. This step can take between tens of minutes to a few hours,
+depending on the size of the design and the utilization of the FPGA chip. 
 
 
 \begin{comment}
@@ -504,8 +640,12 @@ built into LLVM
 
 \subsection{Online Phase: Parallelism Validity Check and Accelerator Execution}
 \label{onlinephase}
-When applying Banerjee's test, a direction vector is first used as the constraint and result of the test reports if this vector may hold true for a pair of memory accesses. Therefore, to find the exact direction vectors, a hierarchy
-of dependency testing is involved. The hierarchy for a two level loop nest is shown in figure~\ref{fig:testingHier}, where ``$\ast$" denotes a union of ``$<$", ``=" and ``$>$". Negative test result from any node in the hierarchy eliminates the necessity to continue testing its subnodes.  
+\begin{comment}
+When applying Banerjee's method, a particular direction vector $\vec{v}$ is subjected to test, and the result reveals if a pair of memory accesses are dependent in $\vec{v}$'s direction. 
+%first used as the constraint and the result of the test reports if this vector may hold true for a pair of memory accesses. 
+%Therefore, 
+To find all the direction vectors for dependencies, a hierarchy
+of tests are therefore involved. For a pair of memory accesses in a two level loop nest, the possible tests are shown in figure~\ref{fig:testingHier}, where ``$\ast$" denotes a union of ``$<$", ``=" and ``$>$". Negative test result from any node in the hierarchy eliminates the necessity to continue testing its subnodes.  
 
 
 \begin{figure}[htp]
@@ -515,35 +655,105 @@ of dependency testing is involved. The hierarchy for a two level loop nest is sh
 \label{fig:testingHier}}
 \end{center}
 \end{figure}
-
+\end{comment}
 During the \textit{offline phase}, when the direction vectors based off past runtime profiles are assumed to be true, various transformations are performed. If any of these
-assumption is wrong, the generated accelerator will produce wrong results and should
-not be run. The \textit{online phase} therefore needs to check these assumptions. More
-specifically, it needs to check for the presence of any direction vectors which would
-invalidate the reordering the \textit{offline phase} has performed. Table~\ref{} lists
-all the tests we need to perform, given a particular transformation.
+assumptions is wrong, the generated accelerator will produce wrong results and should not be run. The \textit{online phase} therefore has to verify all the assumptions. More specifically, it needs to check for the presence of any direction vectors which would
+invalidate the instruction reordering the \textit{offline phase} has done. 
+There a few main components involved in devising this online checking mechanism:
+\begin{enumerate}
+    \item Constructing the list of vectors to test.  
+    \item Generating C code to test each vector. 
+    \item Compiling the vector testing C code into a software routine or a small hardware engine
+    \item Running the software routine or hardware engine created in the previous step
+\end{enumerate}
+
+The first three preparatory steps are all done offline,  after the synthesis of the accelerator. The last part though, is invoked right before the execution of the
+accelerator. Its result determines if the original software or the generated
+hardware should perform the computation.
+
+
+To enumerate the direction vectors to be checked, our flow examines all the 
+transformations performed during the \textit{offline phase}. These 
+%performed during the \textit{offline phase} 
+include separation of memory ports, thread-level parallelization and loop interchange. Loop pipelining is
+applied conservatively by Vivado HLS and in most cases, aggressive reordering only happens after separation of memory ports. Its validity check is therefore not invoked independently.  
+
+To ensure memory operations can be issued through multiple ports, they need to be completely independent from each other as we assume the RTL generation backend, the interconnect and memory subsystem may all be
+aggressively reordering these requests -- by inferring burst accesses or buffering. Therefore, for every pair of accesses whose ordering matters (excluding load-load pair), we check the direction vector (*,*,...), and only continue to execute the accelerator when the test result turns out to be negative. There are also cases where this requirement can be relaxed. In section~\ref{sec:pmd}, we described how memory barriers are inserted to prevent overly conservative dependency annotation.
+Similarly, in our binary based flow, the online check can be less conservative
+when the ordering of memory operations, each associated with different ports, is partially enforced by barriers.
+An example of this is shown in figure~\ref{fig:withOrWithoutBarrier}. 
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.85\linewidth]{chap6fig/ocwimb.pdf}
+\caption{Online Check with the Insertion of Memory Barriers 
+\label{fig:withOrWithoutBarrier}}
+\end{center}
+\end{figure}
+
+
+Memory barriers naturally preclude thread-level parallelization at its level in the loop nest, but memory ports can now be separated as long as the dependency is   carried at or outside the level of insertion. To determine where these barriers
+are to be inserted, we uses
+ 
+
+
+
+
+In a lot of regular computation kernels, data from a multi-dimensional array is read, processed and then written into a different array. Using Banerjee's test, we can obtain negative result for the direction vector (*,*,...), but an easier
+
+Table~\ref{tab:transftest} lists
+example tests we need to perform for a three level loop when various transformations were applied.
+
+\begin{table}[htbp]
+\caption{Direction Vector Checking for Transformations}
+\centering
+\begin{tabular}{| c | c | c |  }
+  \hline            
+ \cline{1-3} 
+ Example     & Sequence of Direction  & Description of \\
+ Transformations     & Vectors to Disprove & Conditions to Satisfy \\
+  %
+  %                 & LUT &FFs&  BRAM &  LUT &   FFs      & BRAM   \\
+  \hline    
+  Separate Memory Ports & (*,*,*)& No dependency\\
+  w/o Barriers & &  at every level\\
+  \hline
+  Separate Memory Ports & (*,*,*) $\rightarrow$ ($>$,*,*) & No dependency below \\  
+   with Barriers at level 2 & & the level with barrier\\
+  \hline
+  Parallelization at & (*,*,*) $\rightarrow$ ($<$,*,*) &\\
+  the outermost level & &\\
+  \hline     
+  Loop Interchange & &\\
+ 
+\hline                                                                                                           
+
+\end{tabular}
+\label{tab:transftest}
+
+\end{table}
 
 
 %These tests certainly introduce runtime overhead into our system. 
 Depending on how much actual computation is going on in the target loop nest, these tests may be incurring a significant runtime overhead, especially if they are run on the processor. On the other hand, these tests are highly parallelizable and can be potentially
 offloaded to the hardware completely. In either case, these checks reduce the overall
-speed up attainable with the accelerator. Together with the cost of data transfer, which
-will be described in section~\ref{dtransfer}, these overheads can nullify the benefit of computation offloading. Fortunately, we can statically devise a simple model to
-evaluate if the amount of computation justifies the invocation of the validity check and
-accelerator:
-
-$R_t(I)  D_t + T_t$
-
-$R_t(I)$ is a simple function estimating the reduction in execution time of the accelerated loop nest, given the size of the iteration space. Meanwhile $T_t$ and $D_t$ are functions
-estimating the time used for data transfer and the parallelism validity check. This model is
-generated during the offline phase and executed during the online phase. An example model
-is shown in figure~\ref{}. Note how the model can be reduced to a set of quick checks
-on the loop bounds, whose impact on execution time would be rather small.
+speed up attainable with the accelerator. %Together with the cost of data transfer, which will be described in section~\ref{dtransfer}, these overheads can nullify the benefit of computation offloading. 
+Fortunately, we can statically devise a simple model to
+evaluate if the amount of computation justifies the invocation of the validity check and accelerator:
+\begin{equation}
+& & S_t(I)-H_t(I) >>  D_t
+\end{equation}
+$S_t(I)$ and $H_t(I)$ are a pair of simple functions estimating the execution time of the loop nest in software and hardware respectively, while $D_t$ denotes the 
+runtime overhead of performing parallelization validity check. $D_t$ does not
+vary with the size of the iteration space $I$, while both $S_t$ and $H_t$ are normally simple functions of $I$. 
+%given the size of the iteration space. Meanwhile $T_t$ and $D_t$ are functions estimating the time used for data transfer and the parallelism validity check. 
+This model is
+generated during the offline phase and executed during the online phase. An example model is shown in figure~\ref{}. Evaluating this model takes time as well, but since it can be reduced to a set of quick checks on the loop bounds, its impact ($M$) on execution time would be rather small.
 
 
 The main steps for the execution of the accelerator-augmented program binaries is illustrated in figure~\ref{}. As the cost model is always evaluated, in the worst case, when
-the accelerated version of the loop nest is never executed, there would be a slight reduction in performance. It is therefore advisable to only apply our approach to loop nests whose
-past behavior exposes sufficiently sized iteration space.
+the accelerated version of the loop nest is never executed, there would be a slight increase of $M$ in execution time. It is therefore advisable to only apply our approach to loop nests whose past behavior exposes sufficiently sized iteration space.
 
 
 
@@ -552,23 +762,48 @@ past behavior exposes sufficiently sized iteration space.
 %to maximize data reuse, it can increase the ratio of computation v.s. off-chip memory bandwidth usage. 
 \subsection{Data Transfer and Address Translation}
 \label{dtransfer}
-Another particular important aspect in ensuring the efficient execution of the accelerators is in the management of data transfers.
+Another particular important aspect in ensuring the efficient execution of the accelerators is in the management of data transfers. %For the systems we are targeting, the CPU and accelerator can access the shared address space, explicit movement of data may not be necessary. On the other hand, 
 As the FPGA are used as an accelerator for binaries executed on CPU, the source
 and final destination of its working datasets both are the address space of
 the processor. Depending on the actual configuration of the system, the processor memory may or may not be directly accessible by the FPGA, as discussed in section~\ref{chartarg}. We thus need to provide mechanisms to enable
 the sharing of data between the two substrates.
 
 
-For the case where the FPGA can directly access the 
-CPU memory, the easiest way is to apply the transformation and
+For the cases where the FPGA can directly access the 
+CPU's address space, which are the primary targets of our flow, the easiest way is to apply the transformation and
 optimizations described in chapter~\ref{decoupleChap}. This would
 naturally create a set of address generators who pipeline requests into the 
 memory subsystem, as can be seen from figure~\ref{}. To benefit from the locality-driven optimization we 
 have performed, caches can also be inserted between the address outputs and the
 off-chip memory. 
 
+In a more complex scenario, the FPGA has its own address space into which program data need to be transferred first before accelerator execution can occur. 
+%and a hardware module accessing the CPU memory directly in master mode is implementable. 
+Many of the state-of-the-art platforms with this model
+are connected to the host through PCI-e connections and both FPGA vendors allow for
+OpenCL to be used to program some of these systems. We can thus devise
+a mechanism based on OpenCL's data communication model. 
+The steps needed include: 
+\begin{itemize}
+    \item Compute the range of memory addresses to be transferred to and from the FPGA device
+    \item Memory allocation on the target FPGA board: $clCreateBuffer$ 
+    \item Data transfer to FPGA: $clEnqueueWriteBuffer$
+    \item Invoke accelerator: $clEnqueueNDRangeKernel$
+    \item Data transfer back to CPU address space: $clEnqueueReadBuffer$
+\end{itemize} 
 
-The regularity of the memory access patterns in our targeted loop nests
+
+The range of addresses we would like to copy
+to the FPGA device needs to be explicitly specified, the size of the
+
+
+We need to explicitly specify the range of address we would like to copy to the
+FPGA device from the CPU
+In this case, we rely on the regularity of the memory access patterns in our targeted loop nests to derive a concise representation of the accessed address stream. 
+
+
+
+
 allows us to easily decouple the management of data transfer from the actual computation.
 We can derive concise representations of the accessed addresses by the accelerator without actually running it. 
 If the FPGA does not have direct access to the CPU memory, then explicit

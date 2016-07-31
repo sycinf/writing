@@ -73,7 +73,7 @@ thus occupy a unique space in the spectrum of computing devices.
 \begin{figure}[htp]
 \begin{center}
 \includegraphics[width=0.8\linewidth]{chap1fig/archsim.jpg}
-\caption{Simplified FPGA Architecture~\cite{}
+\caption{Simplified FPGA Architecture~\cite{fpgafun}
 \label{fig:fpgaArch}}
 \end{center}
 \end{figure}
@@ -81,7 +81,7 @@ thus occupy a unique space in the spectrum of computing devices.
 When CPUs are combined with FPGAs,
 the resulted heterogeneous platforms would allow the users to place workloads onto the most appropriate
 computing device to increase overall system efficiency.
-Inherently serial functions may not be able to make use of the FPGAs' abundance of computing resources and can have better speed on the CPUs, due to the high clock frequency.
+Inherently serial functions may not be able to make use of the FPGAs' abundance of computing resources and can have better speed on the CPUs, due to its high clock frequency.
 Meanwhile, functions with plenty of parallelism can take advantage of the
 spatial computing paradigm provided by the FPGAs.
 Application specific accelerators implementing these functions can offer
@@ -182,7 +182,79 @@ More often than not, the hardware infrastrucutre for data movement into and out 
 In most scenarios, there is still a trade-off between ease of use and the achieved quality of results. 
 It is thus important to provide methods in parallelism discovery, design space exploration and system integration
 to help the user better take advantage of this unique compute substrate.
+\section{Dissertation Organization}
 
+In this dissertation, we present tools and mechanisms for optimizing, analyzing and integrating HLS generated accelerators.
+%and easing the integration of them into applications. 
+
+\subsection{Synthesis of computational pipelines with decoupled memory access}
+
+The first flow we created transforms a sequential program into a computational pipeline consisted of multiple
+processing stages connected by communication channels. FPGA is especially efficient in implementing streaming 
+applications where data move through a cascade of pipeline stages. This is unfortunately not how a typical 
+C/C++ program describes its computation. By utilizing pipeline parallelism in sequential programs, 
+%we can drastically improve the performance of generated
+%accelerator.
+we generate elastic pipelines with much better tolerance towards data access latency.
+For programs with memory footprint greater than the on-chip RAM capacity, significant improvement in performance
+can be achieved. Within the same framework, conventional memory accesses are converted to a streaming model whenever
+possible, with customized caching and burst accesses to further boost the accelerator efficiency. 
+In chapter~\ref{decoupleChap}, the implementation details of this flow are presented. To demonstrate 
+the advantage of our approach, experimental results comparing it against state-of-the-art HLS tools
+are also presented.
+
+\subsection{Deadlock prevention in network of statically scheduled accelerators}
+In synthesizing the decoupled computational pipeline, the original program
+is essentially converted to a network of processes, each executed by a statically scheduled accelerator. In chapter~\ref{liveprof}, we create a framework to analyze the property of this network, leveraging past research in Kahn process networks, to determine conditions for liveness of our generated pipeline. 
+Contrary to past simulation-based approach, we examine the interaction between the static scheduling by HLS and the sizing of the communication channels between the processes to find ways to prevent deadlock \textit{a priori}. We also
+discuss how our technique may be used in other more generalized context.
+\begin{comment}
+With the communication channels being fixed in size, 
+
+As each of these processes is eventually implemented using HLS, its schedule is statically generated. We generalize our approach to 
+As communication
+channels are implemented using FIFOs in the FPGA, the buffer space in our pipelines is always bounded. 
+A natural concern is the liveness of the pipeline. This is addressed with a formal proof in chapter~\ref{liveprof}.
+\end{comment}
+
+\begin{comment}
+
+\subsection{Tuning of processing pipeline using runtime profile}
+When the generated pipeline stages contain data-dependent control flow and memory access patterns, 
+it becomes difficult to optimize as the program behavior cannot be analyzed statically. 
+%To guide the design space exploration, runtime behavior of the pipeline is captured and analyzed. The design can then
+%evolve accordingly, taking advantage of the reconfigurability of FPGAs.
+The runtime behavior of the pipeline must be captured and examined to identify the performance bottleneck and
+guide the design space exploration. More specifically,
+%Given the data-dependent nature of control flows in applications and thus in the generated processing stages,
+%it is hard to statically analyze and identify performance bottle neck in the computation pipeline. 
+by observing the distribution of occupancy of the communication channels over time, we can infer how heavily loaded
+each part of our pipeline is. More hardware may be dedicated to heavily loaded processing stages for more aggressive 
+parallelization/better caching. The design is therefore evolving according the the characteristics of the
+load, taking advantage of the reconfigurability of FPGAs. Chapter~\ref{profileChap} describes the infrastructure for this automatic tuning
+of the pipeline based on its runtime behavior. Improvement on quality of results is also shown at the end
+of the chapter.
+\end{comment}
+
+\subsection{Accelerator generation and integration using program binaries}
+To push the limit in usability of FPGA platforms, we explored the generation and 
+integration of accelerators with just program binaries. 
+%It makes the FPGA completely 
+%transparent to the user and can be used even in the absence of source code. 
+%Of course, the scope of applications this approach can be applied to is relatively narrow. Only regular computation kernels can be converted to FPGA accelerators.
+This approach is only beneficial for more regular applications,
+where the memory access patterns are analyzable and coarse grained paralellism can be extracted.
+With program binary analysis and instrumentation, it becomes possible to integrate the FPGA-accelerated parts into the original application
+in a user transparent way. Neither recompilation of the original program nor the source code
+is required. Performing all the analysis based on program binary does introduce more uncertainty
+than a source code based approach. Thus we have devised a two phase mechanism to have parts of the 
+analysis done during the runtime to ensure correctness. The details are described
+in chapter~\ref{instrumentChap}. 
+
+\subsection{}
+\vspace{-30.0pt}
+Finally in chapter~\ref{concluChap}, we conclude our dissertation and discuss potential directions for
+future studies. 
 %\subsection{}
 %\vspace{-10pt}
 \begin{comment}
@@ -220,6 +292,24 @@ evolve accordingly, taking advantage of the reconfigurability of FPGAs.
 
 
 \section{Thesis Contributions}
+
+In summary, the main contributions of my thesis include the following:
+\begin{itemize}
+    \item Advancing the state of the art for high level synthesis by devising a systematic
+    method to generate elastic processing pipeline from sequential programs. The pipeline
+    parallelism in the source code is effectively harnessed to create higher performance
+    accelerators.
+    \item Creating an analysis framework for the generated pipeline, which is formulated as a process network. It is then possible to examine the interaction between scheduling and buffer sizing in this network, allowing detection and resolution of deadlocks statically.
+    \item Improving the usability of FPGAs by creating a flow which synthesize
+    accelerators from program binaries. Various aspects of integrating the accelerators with the original program are also discussed. It is now possible to offload computation to FPGAs in an user-transparent fashion.
+    \item Quantifying the benefits of the proposed flows using off-the-shelf FPGA SoCs. The
+    performance and area consumption for the benchmarks are presented. Design space exploration is also performed to demonstrate the trade-off between execution time and resource usage.
+    
+    
+\end{itemize}
+
+
+\begin{comment}
 In this dissertation, we present tools and mechanisms for optimizing, analyzing and integrating HLS generated accelerators.
 %and easing the integration of them into applications. 
 
@@ -244,6 +334,11 @@ In synthesizing the decoupled computational pipeline, the original program
 is essentially converted to a network of processes, executed in a distributed manner. In chapter~\ref{liveprof}, we create a framework to analyze the property of this network, leveraging past research in Kahn process networks, to determine conditions for liveness of our generated pipeline. 
 Contrary to past simulation-based approach, we examine the interaction between the static scheduling by HLS and the sizing of the communication channels between the processes to find ways to prevent deadlock \textit{a priori}. We also
 discuss how our technique may be used in other more generalized context.
+\end{comment}
+
+
+
+
 \begin{comment}
 With the communication channels being fixed in size, 
 
@@ -272,6 +367,8 @@ of the pipeline based on its runtime behavior. Improvement on quality of results
 of the chapter.
 \end{comment}
 
+
+\begin{comment}
 \subsection{Accelerator generation and integration using program binaries}
 To push the limit in usability of FPGA platforms, we explored the generation and 
 integration of accelerators with only program binaries. 
@@ -291,7 +388,7 @@ in chapter~\ref{instrumentChap}.
 \vspace{-30.0pt}
 Finally in chapter~\ref{concluChap}, we conclude our research and discuss potential directions for
 future studies. 
-
+\end{comment}
 %\begin{itemize}
  %   \item \textit{Automatic refactoring of computation kernals into pipelines with decoupled memory access.}
 %		FPGA is especially efficient in implementing streaming applications where data move through

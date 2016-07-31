@@ -1,9 +1,14 @@
 
 \chapter{Decoupled Computational Pipeline as a Process Network}
 \label{liveprof}
-To facilitate the analysis of the pipeline of subgraphs generated from the original sequential program,
-we relate it to a different model of computation, Kahn process network(KPN). which
-provides the theoretical context for looking at issues such as deadlock and FIFO sizing in our pipeline. 
+When multiple processes are communicating with each other through finite communication channels, deadlocks may happen. The pipeline of subgraphs we have generated can be seen as a network
+of communicating processes, and thus may become deadlocked under certain circumstances.
+To facilitate the analysis of our pipeline, 
+%the pipeline of subgraphs generated from the original sequential program,
+we relate it to a different model of computation, Kahn process network(KPN), which
+provides the theoretical context for looking at these issues. Eventually we are to
+develop a systematic approach to find solutions ensuring liveness and correctness of our pipeline.
+%such as deadlock and FIFO sizing in our pipeline. 
 
 
 The KPN is an inherently
@@ -207,7 +212,7 @@ produces tokens for the corresponding $p$ to consume.
 
 \begin{definition}
 Let $I$ be the set of instructions in the original $S$. For every $i \in I$, each
-execution of $i$ is defined as a instruction instance $i_k$, where $k \in \Bbb{Z}$.
+execution of $i$ is defined as a instruction instance $i_k$, where $k \in \mathbb{Z}$.
  In each $p \in P$, 
 every instruction $j \in J^p$ corresponds to one $i$ in $S$, and every execution of this instruction $j_k$ corresponds to one $i_k$ in $S$. Let 
 each of the placeholder/consumer instructions in $p$ be $\underline{j}$, and each instruction actually producing value to transmit be $\overline{j}$, every instance
@@ -233,7 +238,7 @@ Whenever a instruction instance $i_k$  of $i$ is executed in $S$, we find its co
 For each element $j \in J^p, p \in P$ in this set:
 \begin{itemize}
     \item If $j \not\in \overline{J^p} \cup \underline{J}^p$, we can just schedule $j_k$.
-    \item If $j \in \overline{J^p}$, i.e. it is a ``producer" instruction, $j_k$ is scheduled and then the instructions in $f_i$ are scheduled (assuming there is fanout), followed by all the other ``consumer" instructions $j' \in \underline{J}^p', p' \in P\setminus p$.
+    \item If $j \in \overline{J^p}$, i.e. it is a ``producer" instruction, $j_k$ is scheduled and then the instructions in $f_i$ are scheduled (assuming there is fanout), followed by all the other ``consumer" instructions $j' \in \underline{J}^{p'}, p' \in P\setminus p$.
     
 
 %If $i_k^p \in \overline{I^p}$, the fanout process $f_i$, if there is any, is then scheduled. Subsequently, all the $\widetilde{i_k^p'}$ are scheduled.
@@ -308,13 +313,13 @@ and therefore the scenario for artificial deadlock can never occur.
 
 %The memory subsystem, being FCFS, always produces response tokens some processes are waiting to consume, there is no possibility of it being blocked on write, and thus being
 %part of the dependency cycle causing the deadlock. 
-Note in $G(p)$, each memory
-access is atomic -- the sending of the address is immediately followed by the receiving of response, both of which happen in the same process $p$.
+Note each memory operation is just one instruction in $G(p)$, the
+access is therefore modeled as an atomic action -- the sending of the address is immediately followed by the receiving of response, both of which happen in the same process $p$.
 The memory process thus always produces response tokens some processes are waiting to consume, precluding the possibility of it being blocked on write. %and thus being
 %part of the dependency cycle causing the deadlock.
 It therefore will not be part of the dependency cycle causing the deadlock.
-However, when we optimize the memory access mechanism by pipelining the requests, this is no longer the case. 
-We will elaborate the change in our model later in section~\ref{memstrange}.
+However, when we optimize the memory access mechanism by pipelining the requests, this may no longer be the case. 
+We will elaborate the implication of this change later in section~\ref{memstrange}.
 
 
 
@@ -598,7 +603,7 @@ It was proven that if every process is run according to $G(p)$, there will be no
 \begin{figure}[htp]
 \begin{center}
 \includegraphics[width=1.0\linewidth]{chap4fig/safeRule.pdf}
-\caption{Reordering without Introducing Unresolvable Deadlock
+\caption{Safe Reordering of Instructions
 \label{fig:safeReschdule}}
 \end{center}
 \end{figure}
@@ -606,7 +611,7 @@ It was proven that if every process is run according to $G(p)$, there will be no
 
 A sufficient condition to ensure this is to disallow
 outer loop instruction to be locally reordered with respect to inner loop instruction.
-It should be noted that according to our scheme, all the simple paths whose weights contain symbolic variables are ones going from an outer loop instruction to inner loop ones.
+According to our scheme, all the simple paths whose weights contain symbolic variables are ones going from an outer loop instruction to inner loop ones.
 Meanwhile,
 simple paths between instruction 
 of the same loop level, if not going through inner loop instruction, are 
@@ -680,22 +685,138 @@ consumer instruction instance is always scheduled before the cycle of blocked
 processes is formed.
 \end{comment}
 
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{chap4fig/outstandingSchedule.pdf}
+\caption{Deadlock Involving Memory Access
+\label{fig:ff}}
+\end{center}
+\end{figure}
+
 
 \subsection{Memory Access Representation}
 \label{memstrange}
-So far we have been modeling the memory request as an atomic action, i.e.
+So far we have been modeling the memory operations as atomic actions.
 %as a special process who responds to the requests in an atomic fashion. Also, 
-processes sending out memory requests
-wait for the responses before continuing. 
+The process sending out memory requests
+waits for the responses before continuing. 
 However, the sending of requests and receiving of the responses can often
-be decoupled, as we have done in chapter~\ref{decoupleChap}. Even if they are assigned to the same process, instructions can also be scheduled between them.
+be decoupled, as we have done in chapter~\ref{decoupleChap}. In the case when they are assigned to the same process, to accommodate the latency of data access, instructions can also be scheduled between them. 
 Now when the responses are sent back from the memory, their designated consumers
-may not be ready to execute, and more buffering is needed. To incorporate this
-into our model. 
+may not be ready to execute, and more buffering is needed. This behavior can be easily incorporated into our model. 
 
 
-The use of bursted memory access can sometimes complicate this
-assumption. In essence, the bursted memory access
+As shown in figure~\ref{fig:ff}, corresponding to each memory access, a \textit{send\_req/receive\_resp} pair is created in the schedule.  Because multiple \textit{send\_req}s are scheduled
+before \textit{receive\_resp}, i.e. due to aggressive loop pipelining, the memory subsystem must be able to buffer/serve multiple outstanding memory requests to prevent deadlock. In the example schedule, 4 \textit{send\_req}s are scheduled before the first \textit{receive\_resp}, while the memory subsystem (with the associated FIFOs) 
+can only accommodate three, a deadlock is thus created. This is detected as the
+positively weighted cycle in the graph. Just like for normal processes, increasing
+the FIFO size resolves the issue. When the \textit{send\_req} and \textit{receive\_resp}
+are partitioned into two different processes, a similar graph can be created and the minimal amount of space for deadlock avoidance can be computed.
+
+\begin{comment}
+Connected to this 
+pair is a single node \textit{$N_m$} representing the memory. The label on the outgoing edge from \textit{send\_req} denotes the number of outstanding requests allowed on this port.
+In the original scenario, the weight of the cycle containing the \textit{send\_req/receive\_resp} pair and
+the $N_m$ node has a negative leading element as long as the port can accommodate one
+outstanding memory request, which is always true. We thus did not need to be concerned
+about the memory accesses causing deadlock. In figure~\ref{}b, for instance, 2 extra \textit{send\_req} are scheduled before the first \textit{receive\_resp}. The weight of the edge would need to be $(-3)$ to ensure the cycle has weight with a negative leading element, which exactly corresponds to the buffering of three outstanding requests. 
+\end{comment}
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.95\linewidth]{chap4fig/burstDependence.pdf}
+\caption{Weighted Graph for Burst Mode Memory Access (a) send\_req and receive\_resp in a single process (b) send\_req and receive\_resp are decoupled
+\label{fig:burstDep}}
+\end{center}
+\end{figure}
+
+Another common optimization in memory access is the use of burst mode.
+As described in chapter~\ref{decoupleChap}, to concatenate
+memory requests across loop iterations into one burst access, the \textit{send\_req} operation is hoisted to one level out of the original loop. 
+The \textit{receive\_resp}, meanwhile, remains in the initial loop level. Figure~\ref{fig:burstDep} shows how a weighted graph can be used to represent the transformed program. In (a), only a single process is involved, while (b) demonstrates
+the weighted graph when the memory access is decoupled into two processes. In both cases, all the cycle weights have negative leading element even when each FIFO is assumed to be of size one. No deadlocks would occur in this case. A more interesting
+scenario is when two memory accesses are converted to burst mode and the interaction
+between them causes deadlocks. This is illustrated in figure~\ref{fig:burstDepCop}.
+
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1.0\linewidth]{chap4fig/burstDepCoupling.pdf}
+\caption{Deadlock Due to Interaction Between Two Burst Mode Memory Accesses
+\label{fig:burstDepCop}}
+\end{center}
+\end{figure}
+
+Besides the usual dependence edges, an extra burst dependency edge is added between \textit{Push(data2)}
+to \textit{Push(data1)}. This edge signifies the head-of-line blocking caused by the
+large amount of data carried by one response.
+In this particular example, the request for $data1$ is responded
+with $B$ tokens, which have to be consumed/buffered before the response for the next
+request ($data2$) is accessible by its \textit{receive\_resp} operation. This information is encoded
+in the weight of the newly added edge.
+To resolve the deadlock shown in the figure, the capacity of the FIFO between \textit{Push(data2)} and \textit{receive\_resp(data2)} should be increased by $B$, such
+that the weight of the deadlock-causing cycle becomes (0,-1). In essence, the head-of-line 
+burst mode responses need to be buffered entirely to ensure the subsequent 
+$receive\_resp$ is getting data, and the whole datapath can then continue executing.
+
+The actual value of $B$ depends on a few factors. In chapter~\ref{decoupleChap}, we mentioned the burst access adapter which generates
+multiple burst mode requests according to the parameters of the $send\_req$ operation. For the
+process in figure~\ref{fig:burstDepCop}, this means two stream of requests $S_1$ and $S_2$, corresponding to \textit{send\_req(arr1,N)} and \textit{send\_req(arr2,N)}  respectively.
+Assume the arbiter for memory subsystem implements a policy which can potentially take in and serve multiple ($K$) consecutive requests from one stream, we can compute $B$ to be $BurstSize_{max}*K$. 
+In the case of a round-robin schedule, $B = BurstSize_{max}$ and for our experiment platform which uses AXI bus protocal, this number is 256. 
+
+When multiple burst mode accesses are distributed across different accelerators, 
+depending on the exact graph generated, the required buffer size can be a lot smaller
+and in certain cases, not at all affected by the size of the burst. This is shown in figure~\ref{}. By decoupling the memory accesses and duplicate the loop counters, we essentially have two separate reduction engines running independently. As their schedules are completely
+decoupled, there are no cycles containing the burst dependency edge. Thus even with
+small buffer space, no deadlocks will occur.
+
+ 
+
+\section{Discussion and Future Work}
+In this chapter, we devised a proof for the absence of artificial deadlock in a pipeline of processes
+generated by our flow, assuming each of them is executed according to the original program order. A framework is then proposed to compute the minimum FIFO size needed to avoid deadlocks when the processes are synthesized into accelerators, which aggressively parallelize/reorder operations. This approach is proposed to reason about the properties of our accelerator pipeline, generated by
+splitting a single CDFG. However, it may also be applied to network of statically scheduled processes
+created using other methods.
+
+
+The weighted graph constructed in our analysis is based on 1) the scheduling of sender and receiver operators within each process, and 2) the point-to-point communication between pairs of sender and receiver instructions in different processes.
+The first part can be easily extracted from any statically scheduled accelerators. 
+The second part is  applicable to a subset of communication patterns, where each FIFO is read/written to by only one instruction locally, or more precisely, at a single time slot allocated in the local schedule. 
+If a process network satisfy the second condition, appropriate FIFO
+sizes for deadlock avoidance can be derived statically.
+
+
+In commercial high level synthesis tools~\cite{}, for instance, computations can be manually structured into a series of functions which are annotated to allow the generation of a streaming pipeline. However, the problem of artificial deadlock is left to be addressed by the users as no systematic approach is provided by the vendor for sizing the FIFOs. If within every function, only one instruction accesses each FIFO interface, we can generate our weighted graph and perform deadlock analysis. Of course there are cases where this is not true, then the simulation based approach or communication buffers other than FIFOs may need to be used.
+
+
+In many cases, the minimal FIFO sizes for deadlock avoidance may not be ideal for performance purposes. The decoupled computational pipeline works well when its member accelerators
+can execute out of sync with each other. Very small FIFO sizes potentially allow the progress
+of one process to interfere with that of the others. Figure~\ref{} provides a good example
+of this. Assuming only a small amount of buffer space is allocated between the memory
+and the two accelerators, the head-of-line blocking would force one process to wait for
+the computation in the other. One accelerator's slow rate of data consumption can thus 
+prevent its peer from accessing data, which is part of the original problem we tried to address.
+On the other hand, with FIFO large enough to store the entire burst, the two accelerator
+can progress simultaneously, greatly increase the overall throughput of the pipeline.
+
+To address the performance issue brought about by insufficient channel capacity, we can potentially tune our pipeline based on its run time behavior. 
+Every 
+FIFO can be instrumented with a histogram generator
+which tracks its occupancy. 
+In the case of 
+memory interface buffers, as the data count may not be directly available, we look at the percentage time when an available data is not immediately pulled into the data path. These statistics can help us detect the
+point of inefficiency in the pipeline. More specifically, a FIFO channel fully occupied most of
+the time indicates the downstream/consumer accelerator
+is not consuming tokens fast enough, where
+
+
+An example of this is shown in figure~\ref{}. In essence, we want to monitor the backlog of data
+in every communication channel. 
+
+
+
+
 
 
 

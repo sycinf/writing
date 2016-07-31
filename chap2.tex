@@ -61,7 +61,8 @@ tool.
 
 In certain application domains where memory access patterns
 can be statically analyzed, concise mathematical models can be used to represent data dependencies and mathematical 
-transformation~\cite{Ancourt:1991:SPL:109625.109631}\cite{putpolyd2work}\cite{polymorewidely}\cite{girbal2006semi}\cite{pugh1991uniform}\cite{wolf1991loop}. These techniques were employed in program compilation targeting parallel machines of various memory hierarchies\cite{feautrier1988semantical}\cite{}, and are now used by the HLS community~\cite{Zuo:2013:IPC}\cite{Pouchet:2013}\cite{}
+transformation~\cite{Ancourt:1991:SPL:109625.109631}\cite{putpolyd2work}\cite{polymorewidely}\cite{girbal2006semi}\cite{pugh1991uniform}\cite{wolf1991loop}. These techniques were employed in program compilation targeting parallel machines of different kind% of various memory hierarchies
+\cite{Bacon:1994:CTH:197405.197406}\cite{Hiranandani:1991:COF:125826.125886}\cite{feautrier1988semantical}, and are now used by the HLS community~\cite{Zuo:2013:IPC}\cite{Pouchet:2013}\cite{4785342}.
 
 
 Another body of work explored transformations from imperative descriptions in
@@ -76,34 +77,81 @@ general purpose processor, which is essential in the context of
 generating closely coupled CPU+accelerator systems.
 Other tools requires the user to directly construct application
 in more parallel description of computation to facilitate hardware
-generation~\cite{hlfp}\cite{MARC}. 
+generation~\cite{hlfp}\cite{5226333}\cite{MARC}. 
 
 An important aspect of the HLS-generated accelerators lies in their interaction
 with the data stored in the memory.
 It is a common design practice to have data explicitly moved in and out of chip through
 instantiation of DMA engines~\cite{vivado_hls:appnoteMMult}, and coordinate the computation with transfer of data
-through using software. There are also tools~\cite{coram} which hide the 
+using software. There are also tools~\cite{coram} which hide the 
 complexity of managing memory
 hierarchy from the user by providing a standard abstraction
 of data access interfaces. The FPGA designers can use the
 provided primitives to explicitly manage data movement between
 the on-board memory and the SRAM on-chip, allowing
-locally-addressed memory access by the computation pipeline.
+locally-addressed memory accesses by the computation pipeline.
 A set of regular kernels are synthesized to this architecture
 in~\cite{c2coram}, demonstrating its applicability in the context of high level
 synthesis.
 
 \section{Hardware Platforms with Reconfigurable Components}
 \label{hetero}
+In terms of the actual physical substrates containing reconfigurable elements, 
+there were many different architectures proposed over the years.  As the
+programmable logic portions of the systems vary in size, the models for their use also
+differ. Several platforms use programmable logic as function units~\cite{Carrillo:2001:ERU:360276.360328}~\cite{1266409}~\cite{1240967}~\cite{717456}, tightly integrated
+with the processor pipeline. These reconfigurable functional units (RFUs) are given access
+to the internal states of the processors and can be used to speed up fine grained 
+tasks. The proximity of the programmable logic to the CPU also allows for strong interaction
+between the accelerated parts of the computation and the software execution flow. 
+To better take advantage of the enhanced architecture, compilers~\cite{10.1109/FPGA.2000.2} were constructed to map operations expressed in high level languages to configurations for the RFUs.
+
+In contrast with those highly integrated architectures, some platforms have loosely
+coupled reconfigurable arrays, used in co-processor mode~\cite{624600}~\cite{Lee:2000:DIM:344169.344172}~\cite{chips:viipro}. To effectively
+leverage the capabilities of the programmable arrays, computation-intensive coarse grained 
+tasks need to be extracted and offloaded. 
+Even further along this direction of loose coupling,
+many commercial reconfigurable devices are actually used in stand-alone FPGA boards~\cite{boards:alpha}~\cite{boards:terasic}.
+Their interaction with the host CPU is even more costly but the capacity of the
+arrays themselves are usually higher. Traditionally, HDL programming is the preferred
+way to access these devices, however high level synthesis tools can also be used~\cite{839323}~\cite{Singh:2013:HPF:2435264.2435268}.
 
 
-In contrast with the systems with reconfigurable functional unit~\cite{Carrillo:2001:ERU:360276.360328}~\cite{1266409}, which 
-boasts low communication overhead between the RFU and the processor pipeline, the targeted platform has much greater capacity in accommodating coarser grained accelerators.
+%larger reconfigurable arrays are
+%often used in the co-processor model, where
+
+%In contrast with the systems with reconfigurable functional unit~\cite{Carrillo:2001:ERU:360276.360328}~\cite{1266409}, which 
+%boasts low communication overhead between the RFU and the processor pipeline, the targeted platform has much greater capacity in accommodating coarser grained accelerators.
 
 
 
-\section{Binary Based Parallelization}
+\section{Binary Translation and Optimization}
 \label{binpar}
+Another research area related to our effort is binary translation, where
+the program binary gets modified before it is actually executed on the processor.
+This process can happen statically~\cite{chen2008static}~\cite{shen2012llbt}, or dynamically while the application is running.
+In a lot of cases, the purpose of translating at the program binary level is to
+bridge the gap between existing software and newer hardware. In the late 90s and early 2000s, for instance, several VLIW machines provide their own dynamic binary translation (DBT) layer to ensure the compatibility of their processor with existing executables~\cite{Ebcioglu:1997:DDC:264107.264126}~\cite{Dehnert:2003:TCM:776261.776263}~\cite{Baraz:2003:IEL:956417.956550}. 
+There are also DBT systems where the target ISA and source ISA are the same~\cite{Bala:2000:DTD:358438.349303}~\cite{deaver1999wiggins}, 
+and the translation is performed to optimize the performance of the program.
+In the case of just-in-time compilation~\cite{adl1998fast}, the source binary is for a virtual machine. By translating Java bytecode to the native ISA, the runtime can achieve performance
+close to that of a natively compiled binary~\cite{Gherardi:2012:JVC:2428224.2428245}.
+
+With the advent of parallel computers, binary translation also gets used to parallelize sequential programs. In~\cite{yang2011feasibility}, feasibility of dynamic binary parallelization is studied. Traces of instructions are parallelized to run on simulator of multicore machines. 
+The system described in~\cite{yardimci2008dynamic}  performs both static analysis and dynamic recompilation of ``super-blocks" to better take advantage of CMP and vector machines.
+A more recent project~\cite{7363680} aims to dynamically convert the older Intel SSE instruction set to the newer AVX one.
+There are also a few projects which perform the parallelization off-line.
+Vizer~\cite{cooper2002vizer} provides a framework which statically vectorizes Intel x86 binaries, targeting a very restrictive set of loops. SecondWrite~\cite{Kotha:2010:APB:1934902.1934997} is binary rewriter which generate multithreaded code for affine loops. It also showed there is but a small difference in
+performance improvement when the binaries, instead of the source code, are used
+as the starting point for parallelization. 
+
+Our approach described in chapter~\ref{instrumentChap} adopts and modifies some of the ideas in these past research projects, making them applicable to FPGA accelerators.
+
+
+\begin{comment}
+Optimizations targeting the native ISA can often be performed during translation, potentially providing performance improvement in a user transparent way. Systems like Dynamo~\cite{} Pin
+
+
 Thus, most existing
 software dynamic translation (SDT) systems, such as Dynamo [14], DynamoRio [15], Transmeta [26],
 and Daisy [27], only perform alias analysis in the form of instruction inspection, which disambiguates
@@ -111,4 +159,4 @@ two memory references if they access either different memory regions or their ad
 same base register and different offsets.
 Polyhedral Parallelization of Binary
 Code
-
+\end{comment}

@@ -227,45 +227,42 @@ cycles while a 32 bit integer addition can be completed within
 a cycle. As Vivado HLS is eventually used as the backend for
 our HDL generation, it provides accurate annotations for our
 flow.
-
-\subsection{Insertion of Dependency Edges}
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{chap3fig/order.pdf}
+\caption{Three Types of Memory Dependencies
+\label{fig:memorder}}
+\end{center}
+\end{figure}
+ 
+\subsection{Preserving Memory Dependency }
+\label{subsec:pmd}
 The semantics of the input high level language often create
 dependencies implicitly carried by memory accesses.
 Given two statements in a program, Bernstein's conditions~\cite{4038883} described when
 they are independent and can be executed in parallel or out of order.
 If two memory operations access the same location and one of them is a store, their order in the original program execution must be preserved. More specifically, three types of dependencies need to be observed:
 \begin{itemize}
-    \item Read-after-write (RAW) -- When the same memory location is written by one statement and read by the other, there is a dataflow dependence (or true dependence) between them. Performing them out of order results in the outdated operand to be used by the consumer statement, as illustrated in 
-    figure~\ref{}(a).
-    \item Write-after-read (WAR) -- When a memory location is read by the first statement and subsequently written by the second, there is an anti-dependence between them. Performing them out of order overwrites
-    the correct operand prematurely. An example of a WAR violation is shown in figure~\ref{}(b).
-    \item Write-after-write (WAW) -- When both statements write to the same location, there is an output dependence between them. Reordering the two
-    writes exposes the wrong value to the subsequent reads, as illustrated in
-    figure~\ref{}(c)
+    \item Read-after-write (RAW) -- When the same memory location is written by one statement and read by the other, there is a dataflow dependence between them (figure~\ref{fig:memorder}a). Performing them out of order results in the outdated operand to be used by the consumer statement. 
+    
+    \item Write-after-read (WAR) -- When a memory location is read by the first statement and subsequently written by the second, there is an anti-dependence between them (figure~\ref{fig:memorder}b). Performing them out of order overwrites
+    the correct operand prematurely. 
+    \item Write-after-write (WAW) -- When both statements write to the same location, there is an output dependence between them (figure~\ref{fig:memorder}c). Reordering the two
+    writes exposes the wrong value to the subsequent reads.
 \end{itemize}
  For every pair of operations whose ordering needs to be preserved, a special dependency edge is added between them. Since the generation of the sets is performed around strongly connected components in the original dataflow, it is important to avoid adding unnecessary memory dependency edges. To achieve this, our flow currently relies on alias analysis to perform partitioning of the memory space. Accesses to disjoint memory regions can be safely reordered. When the source code contains pointer arithmetic or irregular memory accesses, compile time alias analysis may produce overly conservative results, in which case user annotations can be used to provide hints to the tool, similar to~\cite{manycache}. This partitioning of memory space naturally leads to creation of multiple data access interfaces, whose interactions with the memory subsystem can be customized, as will be elaborated in section~\ref{sec:optmem}.  
 
-Another source of edges in our CDFG -- control dependency, also warrants some 
-discussion. The simplest way to add the control dependency edges is to have
-every instruction dependent on the control transfer instructions of the immediate
-predecessors of its container basic blocks. For a loop nest, this will necessarily
-create a single SCC with all the branch instructions of the basic blocks within the loop nest. Essentially, a control flow ``backbone" is generated and the branch
-tag tokens will need to be sent to all other modules whose instructions are predicated on these branches. The pipeline thus generated, while valid, may
-have higher communication channel count and less opportunities for optimization
-within each module, which will be elaborated more in section~\ref{sscf}. We thus
-perform a more aggressive predication/control edge insertion by looking for the
-earliest branch outcome which necessarily leads to the execution of an instruction. Given an instruction $i$ and its container basic block $bb$, our
-flow looks for the nearest set of basic blocks $BB'$ who are not properly post dominated by $bb$,
-and insert the dependency edge from the branch instructions ending each member of $BB'$ and $i$.
 
-\subsection{Memory Barrier Insertion}
+
 Under certain circumstances, we do not want to directly add edges between memory operations
-as they hinder the CDFG partitioning. For the example in figure~\ref{}, during the execution of one outer loop iteration, the set of memory addresses accessed by the the load does not intersect
+as they hinder the CDFG partitioning. For the example in figure~\ref{fig:barrier}, during the execution of one outer loop iteration, the set of memory addresses accessed by the the load does not intersect
 with that of the store instruction. However, across different outer loop iterations, these
 two instructions can accesses the same locations. 
 We can conservatively make them dependent
 on each other, but this creates an SCC that ultimately prevents any partitioning, as can be
 seen in the figure.
+
+
 
 %become the performance bottleneck. 
 Alternatively, a memory barrier can be inserted after the completion of 
@@ -276,6 +273,31 @@ instructions. Eventually during the RTL generation, the local schedule of instru
 The insertion of the sender/receiver of the barrier happens after the instruction partitioning. Depending on if a partition is the sender or receiver of the token,
 an extra store/load operation is introduced into the set of instructions, associated
 with the basic block where the barrier occurs.
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1.0\linewidth]{chap3fig/barrier.pdf}
+\caption{Barrier for Enforcing Order of Memory Accesses
+\label{fig:barrier}}
+\end{center}
+\end{figure}
+
+\subsection{Control Dependency Edges}
+Another source of edges in our CDFG -- control dependency, also warrants some 
+discussion. The simplest way to add the control dependency edges is to have
+every instruction dependent on the control transfer instructions of the immediate
+predecessors of its container basic blocks. For a loop nest, this will necessarily
+create a single SCC with all the branch instructions of the basic blocks within the loop nest. Essentially, a control flow ``backbone" is generated and the branch
+tag tokens will need to be sent to all other modules whose instructions are predicated on these branches. The pipeline thus generated, while valid, may
+have higher communication channel count and less opportunities for optimization
+within each module, which will be elaborated more in section~\ref{sscf}. We thus
+perform a more aggressive predication/control edge insertion by looking for the
+earliest branch outcome which necessarily leads to the execution of an instruction. Given an instruction $i$ and its container basic block $bb$, our
+flow looks for the nearest set of basic blocks $BB'$ who are not properly post-dominated by $bb$,
+and insert the dependency edge between the branch instructions ending each member of $BB'$ and $i$.
+
+
+
 
 \begin{comment}
 Also, to ensure the barrier tokens are sent out only after the completion of preceding 
@@ -467,7 +489,8 @@ other subgraph.
 \end{figure}
 
 \subsection{Duplication over Communication}
-A very apparent overhead our flow introduces comes from the mechanisms added
+\label{dupvscomm}
+An apparent overhead our flow introduces comes from the mechanisms added
 for different subgraphs to communicate with each other. In hardware accelerators,
 these are manifested as resource overhead in implementing the extra load and
 store operations in each subgraph and more importantly, the FIFOs
@@ -478,32 +501,37 @@ For each subgraph, each of the nodes preceding it in the DAG used for
 instruction partitioning may be duplicated. By copying some of
 these nodes into the subgraph, the edges cut by the subgraph boundaries
 also change and there can be an overall saving. 
+%Figure~\ref{fig:gc} shows how we can formulate this problem as in graph representation. The initial cut, for instance, cut through the edge between
+%node $D$ and $subG$, which carries a cost $W_H$. If the combined cost of node $D$ and edge $AD$ ($W_L$) is lower than $W_H$, we can duplicate 
 In this graph cut problem (figure~\ref{fig:gc}), we want to minimize the sum of the cost of the cut edges
 and the duplicated nodes.  Since we are duplicating instead
 of moving, the tokens produced by the nodes involved are used locally and do
 not need to be sent to other subgraphs.
-Thus the edges going out of the subgraph from the duplicated node do not need to be included in our cost computation. 
+Thus the edges going out of the subgraph from the duplicated node do not need to be included in our cost computation. In the figure, for instance,
+the initial partition  cuts through the edge between
+node $D$ and $subG$, which carries a cost $W_H$. If the combined cost of node $D$ and edge $AD$ ($W_L$) is lower than $W_H$, we can duplicate node $D$ into
+$subG$ and obtain a lower cost design.
 
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=0.65\linewidth]{chap3fig/graphCut.pdf}
+\includegraphics[width=0.75\linewidth]{chap3fig/graphcut2.pdf}
 \caption{Duplicating Nodes into Subgraph 
 \label{fig:gc}}
 \end{center}
 \end{figure}
 
-We can formulate this as an integer programming problem, where
+More formally, we can write this as an integer programming problem, where
 each node $i$ is associated with a binary variable $p_i$. $p_i = 0$ if $i \in T$
 and $p_i = 1$ if $i \in S$. Similarly, each edge $ij$ is associated with
-a binary variable $d_{ij}$ which takes the value 1 if $i \in S$ and $j \in T$, and 0 otherwise. Finally, $c_{ij}$ is used to represent the cost of edge $ij$
-while $w_i$ represents the cost of the node $i$.
+a binary variable $d_{ij}$ which takes the value 1 if $i \in S$ and $j \in T$, and 0 otherwise. Finally, $w_{ij}$ is used to represent the cost of edge $ij$
+while $c_i$ represents the cost of the node $i$.
 
 
 \begin{equation*}
 \begin{aligned}
 \label{ilpopt}
-& {\text{Minimize}} & & \underset{ij \in E}\sum c_{ij}d_{ij} +  \underset{j \in T}\sum w_j \\
+& {\text{Minimize}} & & \underset{ij \in E}\sum w_{ij}d_{ij} +  \underset{j \in T}\sum c_j \\
 & \text{subject to }
 & & d_{ij} - p_i+p_j \ge 0, & ij \in E \\
 & &  & p_i \in \{0,1\}, & i \in V \\
@@ -514,7 +542,7 @@ while $w_i$ represents the cost of the node $i$.
 
 
 
-We do not wish to duplicate memory operations, thus a very large weight
+We do not wish to duplicate memory operations, thus a very large cost
 is associated with each of the memory accesses. For all other nodes,
 The resource consumed are obtained using the report generated
 by our backend, Vivado HLS. 
@@ -579,7 +607,7 @@ latencies, resulting in a underutilization of the bandwidth.
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=0.8\linewidth]{chap3fig/memTrans.pdf}
+\includegraphics[width=1.0\linewidth]{chap3fig/memTrans2.pdf}
 \caption{Pipelining Memory Transactions 
 \label{fig:memTrans}}
 \end{center}
@@ -587,36 +615,46 @@ latencies, resulting in a underutilization of the bandwidth.
 
 To resolve this issue, our flow splits the involved
 memory access operation into two disjoint portions:
-push addr and send req. As shown in figure~\ref{fig:memTrans}, \textit{Push\_addr}
-takes the place of the load instruction in the original subgraph,
-and pushes the addresses onto a newly added FIFO. As our
-algorithm always terminates a cluster after adding a memory
-access, the response data are immediately pushed to a FIFO
-linked to the downstream subgraphs. The data count of this FIFO
-is monitored by the \textit{Send\_req} module. When enough space
-is present, an address is popped off the address FIFO and
-a new memory transaction is initiated. Data returned from
-the memory subsystem are routed directly to the downstream
-FIFO. Store instructions are dealt with in a similar fashion,
-with two new FIFOs accommodating incoming addresses
-and data respectively. With this special transformation, each
+\textit{send\_req} and \textit{receive\_resp}. %push addr and send req. 
+As shown in figure~\ref{fig:memTrans}, \textit{send\_req}%\textit{Push\_addr}
+ takes the place of the load instruction in the original subgraph,
+and pushes the addresses into the memory subsystem. %onto a newly added FIFO. 
+As our partitioning
+algorithm creates a new set 
+%always terminates a cluster 
+after adding a memory
+access, the returned data are %immediately pushed to a FIFO linked
+thus consumed by the corresponding downstream subgraph.
+%directly routed 
+%to the downstream subgraphs. %The data count of this FIFO
+%is monitored by the \textit{Send\_req} module. When enough space
+%is present, an address is popped off the address FIFO and
+%a new memory transaction is initiated. Data returned from
+%the memory subsystem are routed directly to the downstream
+%FIFO. 
+The response port can thus be directly connected to the downstream module.
+Store instructions can also be dealt with in a similar fashion, though
+the write response only matters in the presence of memory dependencies. 
+%except the 
+%with two  accommodating incoming addresses and data respectively. 
+With this special transformation, each
 memory access node is capable of pipelining many outstanding
 requests so long as the memory interface is ready.
-Not all memory accesses undergo the above transformation.
+Note not every memory access undergoes the modification.
 There are cases where the result of a load, or the completion of
-a store is necessary for the execution to proceed, as determined
-by the dependency constraints. A classic example is the pointer
+a store is needed by another operation in the same subgraph.
+A classic example is the pointer
 chasing in linked list traversal, where the address for the
 subsequent memory request would not be available until the
 current load gets its response. In general, if a memory access
-is in a dependency cycle carried by the innermost loop, our
-flow categorizes it as non-optimizable. Here we assume that
+flow categorizes it as non-optimizable, and during our partitioning process,
+it would also have been buried inside one of the SCCs. Here we assume that
 the input to our tool has already undergone potentially helpful
 high level optimizations. It is well known that for regular
 applications with statically analyzable memory access patterns,
 techniques like loop interchange can move the dependency
 cycle to the outer loops~\cite{Kennedy:2001:OCM:502981}. The applicability of these
-transformations, however, is independent from the work presented here.
+transformations, however, is independent from the work presented in this chapter.
 
 
 \subsubsection{Customization of Data Access Mechanism}
@@ -628,15 +666,15 @@ various applications. The flexibility of the FPGAs, on the other
 hand, allows for customization of the data access mechanism.
 
 
+
+
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=0.65\linewidth]{chap3fig/memOptConv.pdf}
-\caption{Optimized Data Access Mechanism
-\label{fig:from2}}
+\includegraphics[width=1.0\linewidth]{chap3fig/inferburst.pdf}
+\caption{Transformation for Burst Memory Access
+\label{fig:stream}}
 \end{center}
 \end{figure}
-
-
 
 In our flow, partitioning of the memory space has provided
 an opportunity to create better hardware for memory access
@@ -649,8 +687,18 @@ ideal structure connecting the accelerators and the external memory.
 For instance, there is no reuse of data for streaming type accesses, our flow therefore does not allocate
 an on-FPGA buffer. Rather, the \textit{send\_req} module shown in
 figure~\ref{fig:memTrans} is modified to send burst requests, concatenating
-multiple load/store in the original program execution. On the
-other hand, if there is a cycle of dependency through memory,
+multiple load/store in the original program execution. 
+In this mode, a single request sent corresponds with  many instances of \textit{receive\_resp}, which get executed by a loop.  We therefore move the \textit{send\_req} operation to outside of the loop, and send the memory address with the total size of the requested data. As the memory interface limits the maximum
+burst size, an adapter module is created to break the request into ones with appropriate sizes. These are then streamed into the memory, as illustrated in
+figure~\ref{fig:stream}. To automatically generate burst memory accesses, the iteration count needs to be computable within the subgraph. The duplication
+of SCCs described earlier in this section often copies loop counters into
+the subgraph firing off the memory requests, enabling this transformation.
+
+
+
+
+
+When there is a cycle of dependency through memory, 
 an on-FPGA buffer would be beneficial. Our flow currently
 adds a general purpose cache in this case, but if the particular
 address stream is analyzable and the reuse distance can be
@@ -661,6 +709,14 @@ solution, its size and associativity can be adjusted according
 to a runtime profile.
 
 
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.65\linewidth]{chap3fig/memOptConv.pdf}
+\caption{Optimized Data Access Mechanism
+\label{fig:from2}}
+\end{center}
+\end{figure}
 Shown in figure~\ref{fig:from2} is an example where the described techniques are applied to one of our benchmarks.
 The cache added between the accelerator and the memory subsystem was originally shared by the five memory
 interfaces. However,
@@ -730,29 +786,79 @@ pipeline generation flow are summarized in figure~\ref{fig:allsteps}.
 \end{figure}
 
 %\section{Proof of Liveness}
-\section{Experimental Results}
+\section{Experimental Evaluation}
 \label{sec:er}
+\subsection{Experiment Setup }
 To demonstrate the benefits of our approach, processing pipelines
-are synthesized from several benchmark kernels. These benchmarks
-are non-regular, as their control flow and data access patterns 
-depend on the runtime data. The sparse matrix vector (SpMV) multiply uses
-compressed sparse row (CSR) format to store the matrix. 
+are synthesized and physically implemented on FPGA. The particular device used for the experiments is the Zynq-7000 XC7Z020 FPGA
+SoC from Xilinx, installed on the ZedBoard evaluation platform. 
+The SoC is divided into two parts: an ARM-processor based processing system (PS), and the programmable logic (PL). 
+The baseline 
+for our evaluation is the performance of each software kernel running
+on the ARM core in the SoC. It is an out of order, dual issue hard
+processor running at 667MHz. The Zynq platform also provides two
+options for the reconfigurable accelerators to access the main memory subsystem: 
+through the accelerator coherence port (ACP), or the high performance (HP) port. 
+The former connects to the snoop control unit in the processing system and 
+thus uses/modifies the processing system's on chip cache. The HP port connects
+directly to the memory controller, which necessitates the flushing of cache lines 
+by the processor if a cached data structure is accessed by the accelerator.
+In either case, if memory states are also buffered in the reconfigurable array with caches, they 
+need to be explicitly pushed to the processing system side after the accelerator finishes running. As both ACP
+and HP are slave ports, they provide no mechanisms to extract data from the FPGA
+when the ARM processor is running. The interaction between the generated accelerators
+and the main pieces of the FPGA SoC is shown in figure~\ref{fig:ippf}.
+
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.7\linewidth]{chap3fig/ippf.pdf}
+\caption{Implementation of Computational Pipeline in FPGA SoC  
+\label{fig:ippf}}
+\end{center}
+\end{figure} 
+In our study, Vivado HLS, a state-of-the-art high level synthesis tool provided by Xilinx,
+is used for generating the conventional accelerator (Con.ACC) as well as the individual
+modules in our decoupled computational pipeline (DCP). With the target clock period set to 
+8ns during HLS, the tightest timing constraints post place \& route implementations managed to meet range from 111 to 150MHz. 
+All design points shown in this section 
+use the highest achievable frequency as the actual operating clock frequency. 
+
+\subsection{Benchmark Descriptions}
+The target application of our flow are algorithms where control flow and
+data access patterns depend on run time data or results of computation.
+The four irregular kernels listed below are pushed through our flow:
+%from several benchmark kernels. These benchmarks
+%are non-regular, as their control flow and data access patterns 
+%depend on the runtime data. 
+\begin{itemize}
+    \item \textbf{Sparse matrix vector (SpMV) multiply} is a computation kernel that has been studied, transformed
+and benchmarked many different ways in various research projects. Our purpose here is not to produce the best-performing SpMV multiply using special data structure and memory allocation schemes. Rather, we use the most basic and widely used algorithm and storage format to evaluate how much benefit our flow can provide.
+The input matrix is stored in
+compressed sparse row (CSR) format. 
 Loads from
 an index array are performed before numbers can be fetched
 for the actual floating point multiply. 
-Knapsack is a problem in combinatorial optimization. Given a collection of
-items each with its own weight and value, knapsack tries to select a subset of them such that the total profit
-is maximized while the weight limit is not violated.
-Floyd-Warshall takes a graph as input and computes the shortest distances between any pairs
-of vertices. For both knapsack and Floyd-Warshall, the memory addresses accessed come from the result
-of computations. Iterative depth first search is again a widely used graph algorithm. The version used for our experiment
- makes use of a stack and operates on pointer based data structures. 
-The irregularity in
-memory access and execution path in these benchmarks makes it hard for existing
-HLS tools to generate efficient hardware. The conventional accelerators, when
-implemented on the FPGA, are also very sensitive to the latency
-of data access, due to the high ratio of memory operations to computation.
 
+\item \textbf{Knapsack } is a problem in combinatorial optimization. Given a collection of
+items, each with its own weight and value, knapsack tries to select a subset of them such that the total profit is maximized while the weight limit is not violated.
+It is a classic problem which is often solved using dynamic programming, where the memory addresses accessed come from computation.
+It is therefore hard to prefetch the needed data unless the entire dataset fits
+in on chip buffer.
+%only available during run time, and therefore the exact locations where the variable opt_without is loaded from are not known a priori. 
+
+\item \textbf{Floyd-Warshall} takes a graph as input and computes the shortest distances between any pairs of vertices. Similar to knapsack, it is solved by
+dynamic programming. Even though all memory references are regular, i.e. simple functions of the loop indices, the control flow depends on the results of computation.
+
+\item \textbf{Iterative depth first search} is again a widely used graph algorithm. The version used for our experiment makes use of a stack and operates on pointer based data structures. 
+ 
+\end{itemize}
+
+The irregularity in
+memory accesses and execution paths in these benchmarks makes it hard for existing
+HLS tools to directly generate efficient hardware. The conventional accelerators, when
+implemented on the FPGA, are also very sensitive to the latency
+of data accesses, due to the high ratio of memory operations to computation.
 
 \begin{table}[htbp]
 \caption{Input Data Set for the Benchmarks}
@@ -760,7 +866,7 @@ of data access, due to the high ratio of memory operations to computation.
 \begin{tabular}{| c | c | c | }
   \hline            
   
- \multirow{2}{*}{\bf Benchmark}   &   \multirow{2}{*}{Description of Input Data} & \multirow{2}{*}{Total Size of Input Data}\\
+ \multirow{2}{*}{Benchmark}   &   \multirow{2}{*}{Description of Input Data} & \multirow{2}{*}{Total Size of Input Data}\\
  &       &   \\
   \hline            
   \hline            
@@ -796,54 +902,77 @@ significant role in determining the final performance, the input data size are c
 to be much larger than typical on-FPGA cache. For smaller problems where the
 entire input data set can be buffered on chip, the conventional DMA+accelerator approach,
 as described in~\cite{vivado_hls:appnoteMMult}, would not suffer from variable data access
-latency and our decoupled processing pipelines would offer little advantage.
+latency and our decoupled computational pipelines would offer little advantage.
 
 
-
-The physical device used for the experiments is the Zynq-7000 XC7Z020 FPGA
-SoC from Xilinx, installed on the ZedBoard evaluation platform. The baseline 
-for our evaluation is the performance/energy of each software kernel running
-on the ARM core in the SoC. It is an out of order, dual issue hard
-processor running at 667MHz. The Zynq platform also provides two
-options for the reconfigurable accelerators to access the main memory subsystem: 
-through the accelerator coherence port (ACP), or the high performance (HP) port. 
-The former connects to the snoop control unit in the processing system and 
-thus uses/modifies the processing system's on chip cache. The HP port connects
-directly to the memory controller, which necessitates the flushing of cache lines 
-by the processor if a cached data structure is accessed by the accelerator.
-In either case, if memory states are also buffered in the reconfigurable array with caches, they 
-need to be explicitly pushed to the processing system side after the accelerator finishes running. As both ACP
-and HP are slave ports, they provide no mechanisms to extract data from the FPGA
-when the ARM processor is running. The interaction between the generated accelerators
-and the main pieces of the FPGA SoC is shown in figure~\ref{fig:ippf}.
 
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=0.7\linewidth]{chap3fig/ippf.pdf}
-\caption{Implementation of Computational Pipeline in FPGA SoC  
-\label{fig:ippf}}
+\includegraphics[width=1.0\linewidth]{chap3fig/thesis_perf.pdf}
+\caption{Performance of Conventional Accelerators and Decoupled Computational Pipelines
+\label{fig:acpraw}}
 \end{center}
-\end{figure} 
-In our study, Vivado HLS, a state-of-the-art high level synthesis tool provided by Xilinx,
-is used for generating the conventional accelerator (Con.ACC) as well as the individual
-modules in our decoupled computational pipeline (DCP). With the target clock period set to 
-8ns during HLS, the tightest timing constraints post place \& route implementations managed to meet range from 111 to 150MHz. 
-All design points shown in this section 
-use the highest achievable frequency as the actual operating clock frequency. 
+\end{figure}
+
+
 
 \subsection{Performance Comparisons}
-In figure~\ref{fig:acpraw}, 
-performance of the different implementations are presented. 
-Conventional accelerators and decoupled processing pipelines with different memory subsystem
-configurations are compared. All the performance numbers are normalized to the baseline.
+\begin{comment}
+To provide context for our comparison and highlight the weakness of accelerators generated directly using HLS, we show the performance of a set of conventional accelerators in figure~\ref{}. All the numbers in the figure are normalized to the baseline (software running
+on hard ARM core).
 
+These conventional accelerators are supported with different configurations of the memory subsystem. Direct connection to HP port generally incurs the highest memory access latency as
+the data are not cached in the PS or the PL. The latency is reduced when ACP is used. To
+bring the data even closer to the accelerator, caches can be instantiated on PL. Our implementations use Xilinx system cache IP, configured to be 64KB and 2 way associative.
+
+From this figure, there is a very clear trend that the overall performance increases significantly as the data get cached closer to the accelerators. Across the four benchmarks, the ratio of the fastest to the slowest design points is, on average, 2.4x. The throughput is apparently rather sensitive to the memory access latency. Meanwhile, even the fastest configurations here are slower compared to the baseline. With caches on PL, the conventional accelerators, on average, only achieves throughput about 40\% that of the baseline.
+The superscalar, out-of-order ARM core is capable of exploiting instruction level parallelism to a good extent and also has a high performance on-chip cache.
+The additional parallelism extracted by the HLS tool is evidently not enough
+to compensate for the clock frequency advantage the hard processor core has over the programmable logic and the longer data access latency from the reconfigurable array. 
+
+
+Now we look at the performance of the decoupled computational pipelines (figure~\ref{}).
+Similar to the conventional accelerators, these pipeline's throughput also increase
+as the data latency reduces. However, the differences between the different memory subsystem
+configurations are significantly smaller. The fastest configuration is only 1.7x better than 
+the slowest, which demonstrate how the effect of data access latency is reduced in our
+generated pipelines. Also, compared to the baseline, the DCPs provide much better performance.
+On average, the 
+
+To highlight the difference in raw performance, the fastest conventional accelerators and the decoupled computational pipelines are compared side by side in figure~\ref{}. There is a very
+clear performance advantage
+
+
+
+To understand the pros and cons of different optimization options and support infrastructure configurations, we have generated an array of different design points for each benchmark.
+Every design point represents a different trade off between performance and area cost. 
+
+\subsubsection{Sparse Matrix Vector Multiply}
+Sparse matrix vector (SpMV) multiply is a computation kernel that has been studied, transformed
+and benchmarked many different ways in various research projects. Our purpose here is not to produce the best-performing SpMV multiply using special data structure and memory allocation schemes. Rather, we want to see, given the most basic and widely used algorithm description, how
+much benefit our flow can provide.
+
+To provide 
+
+We want to examine how the partitioning of operations and the subsequent optimization affect the performance and area. Here we connect a few different instances of the DCPs generated to the HP port of the processing system, and compare them against the directly generated Con.ACCs.
+
+
+Figure~\ref{}, shows the performance and area of a few design points
+\end{comment}
+
+In figure~\ref{fig:acpraw}, performance of the conventional accelerators and decoupled computational pipelines are compared, all the numbers are normalized to the baseline.
+Both Con.ACC and DCPs are supported with different memory subsystem configurations.
+%Conventional accelerators and decoupled computational pipelines with different memory subsystem
+%configurations are compared.  
+Direct connections to the HP port generally incur the highest memory access latency as
+the data are not cached in the PS or the PL. This latency is reduced when ACP is used. To
+bring the data even closer to the accelerator, cache IPs can be instantiated on the PL. Our implementations use Xilinx's system cache IP, configured to be 64KB and 2 way associative.
 
 
 In all four benchmarks, accelerators generated directly from software kernels using conventional HLS flow
-actually result in a performance degradation compare to running the kernels on the hard processor. Even with
-on-PL caches, 
-these accelerators only manage to achieve throughput less than 50\% that of the baseline. 
+actually result in a performance degradation compare to running the kernels on the hard processor. The fastest Con.ACC implementations with
+on-PL caches, only manage to achieve throughput less than 50\% that of the baseline. 
 The superscalar, 
 out-of-order ARM core is capable of exploiting instruction level parallelism to a good extent 
 and also has a high performance on-chip cache.
@@ -853,15 +982,11 @@ latency from the reconfigurable array.
 
 With our methodology, the computational pipelines generated 
 are rather competitive against the hard processor, even
-without a reconfigurable cache. For SpMV multiply, knapsack and Floyd-Warshall, when access pattern customized DPPs are directly connected to the PS through the ACP, 
+without a reconfigurable cache. For SpMV multiply, knapsack and Floyd-Warshall, when DCPs are directly connected to the PS through the ACP, 
 the average performance is 2.3 x that of the baseline---representing
 an 8.4 x gain over the conventional accelerators.
-Upon the addition of caches,  
-the average runtime of DCPs was reduced by 18.7\%,  while that of the conventional
-accelerators was cut by 45.4\%. The gap between their performance is thereby reduced from 8.4 to 5.6 times. 
-%This difference is due to conventional accelerators' sensitivity to the latency of data accesses, which
-%is also manifested by its performance degradation of 40\% when the uncached HP port is used instead of ACP. 
-
+Upon the addition of on-PL caches,  
+the average runtime of DCPs was further reduced by 18.7\%, making the DCPs about 2.9x faster than the baseline.
 
 It is also apparent that our approach has its limitations, as demonstrated by its ineffectiveness in the benchmark depth first search.
 The kernel performs very little computing but lots of memory accesses.
@@ -870,6 +995,20 @@ and consequently, the performance is fundamentally limited by the latency of mem
 Thus there were only small differences between the performance of the conventional accelerator and the decoupled computational pipeline. Besides, the memory access pattern
 does not provide many opportunities for optimizations. As a result, DCP and Con.ACC achieves performance far below that of the baseline, 
 which has a much higher clock frequency and a faster cache.     
+
+
+The figure also allows us to examine the effect of different memory configurations on the overall performance of the design. There is a general trend that the performance improves as the 
+data get cached closer to the computation engine. For conventional accelerators, the ratio of the fastest to the slowest design points is, on average, 2.4x. For decoupled computational pipeline,
+this ratio is reduced to 1.7x. The relative insensitivity of the DCPs towards data access latency
+is rather evident from this difference.
+\begin{comment}
+The throughput is apparently rather sensitive to the memory access latency.
+
+while that of the conventional
+accelerators was cut by 45.4\%. The gap between their performance is thereby reduced from 8.4 to 5.6 times. 
+%This difference is due to conventional accelerators' sensitivity to the latency of data accesses, which
+%is also manifested by its performance degradation of 40\% when the uncached HP port is used instead of ACP. 
+\end{comment}
 
 Overall, for kernels suitable for FPGA acceleration, there is a significant performance advantage in using
 decoupled computational pipelines. If we compare the best results using DCP to conventional accelerators, we see improvement
@@ -880,9 +1019,9 @@ of 3.3 to 9.1 times, with an average of 5.6.
 \centering
 \begin{tabular}{| c | c | c | c | c | c | c | c| }
   \hline            
-  \multirow{2}{*}{} &  &   \multicolumn{3}{c|}{\bf ACP  } & \multicolumn{3}{c|}{\bf ACP + 64KB Cache }   \\
+  \multirow{2}{*}{} &  &   \multicolumn{3}{c|}{ACP  } & \multicolumn{3}{c|}{ ACP + 64KB Cache }   \\
  \cline{3-8} 
- {\bf Benchmark}   &    & LUT& FFs& BRAM & LUT &	 FFs    	& BRAM    \\
+ {Benchmark}   &    & LUT& FFs& BRAM & LUT &	 FFs    	& BRAM    \\
   %
   %                 & LUT &FFs&  BRAM &  LUT &	 FFs    	& BRAM   \\
   \hline            
@@ -949,3 +1088,27 @@ ultimately application specific.
 
 
 \section{Discussion}
+The experimental results have validated the general approach we have proposed and implemented. 
+Decoupling of execution between different part of the control dataflow graph can yield
+significant benefits. How the graph should be split however, is a space worth exploring.
+
+The algorithm we have devised is simplistic and easy to implement.
+It is also very aggressive in that all separable memory accesses are assigned to a new partition.
+Furthermore, as we perform topological sort on the nodes before partitioning them, many
+edges might be cut when a new subgraph is created, especially when the dependencies between instructions are relatively denser.
+Therefore, as the input kernels increase in size, our algorithm may result in pipelines with prohibitively high number of communication channels. The optimization we described in section~\ref{dupvscomm}
+partially addresses this issue, but it does not reduce the total number of subgraphs.
+
+
+\begin{comment}
+To alleviate this particular issue, we can make the whole pipeline generation process more
+flexible. While the instruction partitioning step can be changed and various techniques can be
+experimented with, the construction of executable subgraphs and the synthesis of hardware
+are invariant across different partitioning schemes. Optimizations like pipelining of memory
+requests can still be applied if it can be accommodated by the structure of the reconstructed
+subgraphs. Within this context, several possible partitioning heuristics may be worth trying out
+in the future.
+
+The algorithm we have implemented ensures the data tokens always flow forward, as the
+partitioning is performed on a directed acyclic graph. The benefit si
+\end{comment}
