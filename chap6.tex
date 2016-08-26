@@ -360,14 +360,6 @@ to be extracted. To establish independence between different loop iterations or 
 \end{comment}
 
 
-\begin{figure}[htp]
-\begin{center}
-\includegraphics[width=0.9\linewidth]{chap6fig/analysisSteps.pdf}
-\caption{From Disassembled Binary to Synthesizable C Code
-\label{fig:mainSteps}}
-\end{center}
-\end{figure}
-
 \section{A Two Phased Approach for Accelerating Program Binaries Using FPGA}
 \label{makingAcc}
 As the accelerator synthesis, which also includes the traditional FPGA CAD flow,
@@ -417,6 +409,16 @@ Thus in addition to examining their past values, we also perform a check to ensu
 recognized as part of the call stack, and are normally completely disjoint from
 the memory footprint of the actual loop. We can thus easily disambiguate them using a simple
 range test. Of course, when the accelerator is actually being invoked, this test would need to be run again, as will be detailed in section~\ref{onlinephase}.
+
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{chap6fig/analysisSteps.pdf}
+\caption{From Disassembled Binary to Synthesizable C Code
+\label{fig:mainSteps}}
+\end{center}
+\end{figure}
+
  
 Figure~\ref{fig:mainSteps} illustrates the steps involved in converting binary to a synthesizable C function. 
 The original output from the disassembler is used to generate two
@@ -427,21 +429,33 @@ independently.
 
 %are applied to a loop doing simple vector addition.%example in figure~\ref{fig:mangledMem}.
 \subsubsection{Memory Level Parallelism}
+\label{subsec:mlp}
 There are actually two levels of parallelization when it comes to scheduling memory accesses during HLS. As shown in the example above, the absence of dependencies between memory operations allows for their association with
 different pointers. The scheduling engine in the HLS tool can then schedule
 them without being constrained by the original program order. However, multiple pointers may still be assigned to a single physical memory  interface. The structural hazard would then dictate the action of the scheduler,
 as a single memory port may only accommodate one load and one store per cycle.
 To loosen this structural constraint, it is possible to create multiple memory
-ports, each assigned to a subset of pointer arguments. More aggressive scheduling, from the datapath's perspective, can then be performed. 
+ports, each assigned to a subset of pointer arguments. More aggressive scheduling, from the datapath's perspective, can then be performed. In addition, certain memory operation inside a loop can be converted to burst
+access when it does not have to share the port with others. This frequently boost the efficiency of the off-chip bandwidth usage.
 
 
 The precondition for exploitation of any memory level parallelism is of course the non-overlapping of addresses accessed by memory operations. This is especially true if they are to be issued through multiple ports, 
 %they need to be completely independent from each other 
 as we assume the RTL generation backend, the interconnect and memory subsystem may all be aggressively reordering these requests -- by inferring burst accesses or buffering. Therefore, for every pair of accesses whose ordering matters (i.e. excluding load-load pair), we check the direction vector (*,*,...), and associate each access to a separate
-pointer if the test result is negative. In section~\ref{sec:pmd}, we described how memory barriers are inserted to prevent overly conservative dependency annotation.
+pointer if the test result is negative. In section~\ref{subsec:pmd}, we described how memory barriers are inserted to prevent overly conservative dependency annotation.
 Similarly, in our binary based flow, if memory dependencies are carried by outer loops,
 memory barriers can also be inserted to facilitate the partitioning of memory access interfaces. The direction vector to test here is  (=,=,..,*,*),
 where "=" occupies all levels including and outside of the level of insertion. In essence, we are ensuring any reordering of memory operations within the loop level where the memory barrier is inserted will be valid. An example of this is shown in figure~\ref{fig:withOrWithoutBarrier}. 
+
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{chap6fig/memOrMemBarrier.pdf}
+\caption{Partitioning of Memory Access Interface with Insertion of Memory Barriers 
+\label{fig:withOrWithoutBarrier}}
+\end{center}
+\end{figure}
+
 
 \subsubsection{Coarse Grained Parallelism}
 
@@ -478,21 +492,6 @@ its peers are stalled or not.
 Certain platforms also provide multiple channels
 for off-chip memory access, which can be more easily utilized with duplicated datapaths. 
 
-In our flow, the memory footprint of the computation is assumed to be
-much larger than the capacity of on-chip RAM. With the fetching of data
-from off-chip storage being a major task of the generated accelerator,
-thread-level parallelization is preferred to loop unrolling.
-Unrolled inner loop often contain multiple memory accesses which were
-initially folded as one operation. In a pipelined inner loop, this
-memory access is often converted to burst mode load or store, which is
-very efficient. Unrolled inner loop, on the other hand, prevents this burst
-inference from occurring as the original single stream of data is now broken
-into two interleaved streams.
-Loop unrolling makes more sense when the on-chip storage is partitioned into small scratchpad memories which can be accessed by the datapath simultaneously.
-Given the regularity of the targeted kernel, it is certainly possible to create a mechanism through which off-chip data gets prefetched and distributed into many distributed on-chip RAM. However, for the benchmarks where off-chip communication 
-is the main performance bottleneck, there is little benefit in doing this. 
-Also, the overhead of multiple datapath is only marginally higher than unrolled
-loop as the main overhead is only the extra control state machine.  
 
 %Figure~\ref{fig:fpgaparal} illustrates the described parallelization schemes for FPGA accelerators.
 \begin{figure}[htp]
@@ -532,6 +531,23 @@ parallelism, the amount of speed up achievable is rather limited~\cite{nwcache}.
 possible to analytically estimate how much coarse grained parallelization
 should be performed given a memory bandwidth budget.
 \end{comment}
+
+
+In our flow, the memory footprint of the computation is assumed to be
+much larger than the capacity of on-chip RAM. With the fetching of data
+from off-chip storage being a major task of the generated accelerator,
+thread-level parallelization is preferred to loop unrolling.
+Unrolled inner loop often contain multiple memory accesses which were
+initially folded as one operation. In a pipelined inner loop, this
+memory access is often converted to burst mode load or store, which is
+very efficient. Unrolled inner loop, on the other hand, prevents this burst
+inference from occurring as the original single stream of data is now broken
+into two interleaved streams.
+Loop unrolling makes more sense when the on-chip storage is partitioned into small scratchpad memories which can be accessed by the datapath simultaneously.
+Given the regularity of the targeted kernel, it is certainly possible to create a mechanism through which off-chip data gets prefetched and distributed into many distributed on-chip RAM. However, for the benchmarks where off-chip communication 
+is the main performance bottleneck, there is little benefit in doing this. 
+Also, the overhead of multiple datapath is only marginally higher than unrolled
+loop as the main overhead is only the extra control state machine.  
 
 
 
@@ -663,34 +679,44 @@ There a few main components involved in devising this online checking mechanism:
 \begin{enumerate}
     \item Constructing the list of vectors to test.  
     \item Generating C code to test each vector. 
-    \item Compiling the vector testing C code into a software routine or a small hardware engine
-    \item Running the software routine or hardware engine created in the previous step
+    \item Compiling the vector testing C code into a software routine ($SW_{check}$) or a small hardware engine ($HW_{check}$)
+    \item Running $SW_{check}$ or $HW_{check}$ created in the previous step
 \end{enumerate}
 
 The first three preparatory steps are all done offline,  after the synthesis of the accelerator. The last part though, is invoked right before the execution of the
-accelerator. Its result determines if the original software or the generated
-hardware should perform the computation.
-
+accelerator. Its result determines if the original software binary or the generated
+hardware accelerator should perform the computation.
 
 To enumerate the direction vectors to be checked, our flow examines all the 
 transformations performed during the \textit{offline phase}. These 
 %performed during the \textit{offline phase} 
-include separation of memory ports, thread-level parallelization and loop interchange. Loop pipelining is
+include memory-level parallelism, loop interchange and thread-level parallelization. Loop pipelining is
 applied conservatively by Vivado HLS and in most cases, aggressive reordering only happens after separation of memory ports. Its validity check is therefore not invoked independently.  
 
-To ensure memory operations can be issued through multiple ports, they need to be completely independent from each other as we assume the RTL generation backend, the interconnect and memory subsystem may all be
-aggressively reordering these requests -- by inferring burst accesses or buffering. Therefore, for every pair of accesses whose ordering matters (excluding load-load pair), we check the direction vector (*,*,...), and only continue to execute the accelerator when the test result turns out to be negative. There are also cases where this requirement can be relaxed. In section~\ref{sec:pmd}, we described how memory barriers are inserted to prevent overly conservative dependency annotation.
-Similarly, in our binary based flow, the online check can be less conservative
-when the ordering of memory operations, each associated with different ports, is partially enforced by barriers.
-An example of this is shown in figure~\ref{fig:withOrWithoutBarrier}. 
+To ensure memory operations can be reordered or even issued through multiple ports, they need to be completely independent from each other as we have explained previously. The vectors tested during the \texit{offline phase}, (*,*...) or (=...,*...) with barrier insertion, are again included for online testing. For thread-level parallelization,
+we have to ensure the level at which the iteration space is split does not carry dependency. That is, for any load-store or store-store pair, the direction vector
+cannot have leading $``<"$ at this level. An example is shown in figure~\ref{}.
 
-\begin{figure}[htp]
-\begin{center}
-\includegraphics[width=0.85\linewidth]{chap6fig/ocwimb.pdf}
-\caption{Online Check with the Insertion of Memory Barriers 
-\label{fig:withOrWithoutBarrier}}
-\end{center}
-\end{figure}
+For loop interchange to be valid, the resultant direction vectors would need to have
+leading elements not being $``>"$. To achieve this, we first check if the element being moved outward is $``>"$. If it is, then we check if all the levels outside of it are $``="$. If the test result is affirmative, then the loop interchange has violated the 
+original program order and the accelerator should not be invoked. This process
+is illustrated in figure~\ref{}.
+
+One efficiency optimization, which
+is applicable for both phases, is to replace Banerjee's test with a simple address range test. When two data structures occupied different ranges in the address space, it is
+computationally very cheap to just compare the upper and lower bounds of the accessed
+addresses.
+
+\begin{comment}
+
+we assume the RTL generation backend, the interconnect and memory subsystem may all be
+%aggressively reordering these requests -- by inferring burst accesses or buffering. Therefore, for every pair of accesses whose ordering matters (excluding load-load pair), we check the direction vector (*,*,...), and only continue to execute the accelerator when the test result turns out to be negative. There are also cases where this requirement can be relaxed. In section~\ref{subsec:pmd}, we described how memory barriers are inserted to prevent overly conservative dependency annotation.
+%Similarly, in our binary based flow, the online check can be less conservative
+%when the ordering of memory operations, each associated with different ports, is partially enforced by barriers.
+%An example of this is shown in figure~\ref{fig:withOrWithoutBarrier}. 
+
+In separating 
+
 
 
 Memory barriers naturally preclude thread-level parallelization at its level in the loop nest, but memory ports can now be separated as long as the dependency is   carried at or outside the level of insertion. To determine where these barriers
@@ -733,7 +759,7 @@ example tests we need to perform for a three level loop when various transformat
 \label{tab:transftest}
 
 \end{table}
-
+\end{comment}
 
 %These tests certainly introduce runtime overhead into our system. 
 Depending on how much actual computation is going on in the target loop nest, these tests may be incurring a significant runtime overhead, especially if they are run on the processor. On the other hand, these tests are highly parallelizable and can be potentially
@@ -744,15 +770,14 @@ evaluate if the amount of computation justifies the invocation of the validity c
 \begin{equation}
 & & S_t(I)-H_t(I) >>  D_t
 \end{equation}
-$S_t(I)$ and $H_t(I)$ are a pair of simple functions estimating the execution time of the loop nest in software and hardware respectively, while $D_t$ denotes the 
-runtime overhead of performing parallelization validity check. $D_t$ does not
+$S_t(I)$ and $H_t(I)$ are a pair of simple functions estimating the execution time of the loop nest as software binary and hardware accelerator respectively, while $D_t$ denotes the 
+runtime overhead of performing parallelization validity check, be it in $SW_{check}$ or $HW_{check}$. $D_t$ does not
 vary with the size of the iteration space $I$, while both $S_t$ and $H_t$ are normally simple functions of $I$. 
 %given the size of the iteration space. Meanwhile $T_t$ and $D_t$ are functions estimating the time used for data transfer and the parallelism validity check. 
-This model is
-generated during the offline phase and executed during the online phase. An example model is shown in figure~\ref{}. Evaluating this model takes time as well, but since it can be reduced to a set of quick checks on the loop bounds, its impact ($M$) on execution time would be rather small.
+This model is again generated during the offline phase and executed during the online phase. An example model is shown in figure~\ref{}. Evaluating this model takes time as well, but since it can be reduced to a set of quick checks on the loop bounds, its impact ($M$) on execution time would be rather small.
 
 
-The main steps for the execution of the accelerator-augmented program binaries is illustrated in figure~\ref{}. As the cost model is always evaluated, in the worst case, when
+The main steps for the execution of the accelerator-augmented program binaries is illustrated in figure~\ref{pieces}. As the cost model is always evaluated, in the worst case, when
 the accelerated version of the loop nest is never executed, there would be a slight increase of $M$ in execution time. It is therefore advisable to only apply our approach to loop nests whose past behavior exposes sufficiently sized iteration space.
 
 
@@ -763,8 +788,8 @@ the accelerated version of the loop nest is never executed, there would be a sli
 \subsection{Data Transfer and Address Translation}
 \label{dtransfer}
 Another particular important aspect in ensuring the efficient execution of the accelerators is in the management of data transfers. %For the systems we are targeting, the CPU and accelerator can access the shared address space, explicit movement of data may not be necessary. On the other hand, 
-As the FPGA are used as an accelerator for binaries executed on CPU, the source
-and final destination of its working datasets both are the address space of
+As the FPGA are used as an accelerator for binaries executed on CPU, both the source
+and final destination of its working datasets are the address space of
 the processor. Depending on the actual configuration of the system, the processor memory may or may not be directly accessible by the FPGA, as discussed in section~\ref{chartarg}. We thus need to provide mechanisms to enable
 the sharing of data between the two substrates.
 
@@ -777,7 +802,8 @@ memory subsystem, as can be seen from figure~\ref{}. To benefit from the localit
 have performed, caches can also be inserted between the address outputs and the
 off-chip memory. 
 
-In a more complex scenario, the FPGA has its own address space into which program data need to be transferred first before accelerator execution can occur. 
+In a more complex scenario, the FPGA has its own address space into which program data need to be transferred first before accelerator execution can occur. The output from the accelerator
+is also moved explicitly back to the host CPU's address space.
 %and a hardware module accessing the CPU memory directly in master mode is implementable. 
 Many of the state-of-the-art platforms with this model
 are connected to the host through PCI-e connections and both FPGA vendors allow for
@@ -791,6 +817,13 @@ The steps needed include:
     \item Invoke accelerator: $clEnqueueNDRangeKernel$
     \item Data transfer back to CPU address space: $clEnqueueReadBuffer$
 \end{itemize} 
+
+It is worth noting that shared virtual memory (SVM) support has been introduced in OpenCL2.0 where the data movement between the host CPU and the FPGA device can be implicitly handled by the runtime. However, even
+in platforms supporting SVM, a buffer is to be allocated explicitly and populated with the appropriate data. For our 
+binary based flow, there is still a need to perform the address range computation, memory allocation and kernel(accelerator) invocation. The difference is that now the explicit data transfer between devices gets
+replaced by memcpy between the already allocated memory of the original program binary and the SVM buffer just created. 
+
+The 
 
 
 The range of addresses we would like to copy

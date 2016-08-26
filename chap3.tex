@@ -126,7 +126,7 @@ memory space.
      \State curNode $\gets$ topoSortedNodes.pop()
      \State curSet $\gets$ curSet $\cup$ curNode
     
-     \If{curNode $\in$ MemLongSCC}
+     \If{curNode $\in$ memLongSCC}
      %\If{$curSubG \cap MemLongSCC \ne \emptyset$}
     \State allSets $\gets$ allSets $\cup$ curSet
     \State curSet $\gets$ \{\}
@@ -266,13 +266,19 @@ seen in the figure.
 
 %become the performance bottleneck. 
 Alternatively, a memory barrier can be inserted after the completion of 
-each outer loop iteration. To implement the barrier in the pipeline, the stage containing
-the semantically earlier instruction sends tokens to stages who contain the successor
-instructions. Eventually during the RTL generation, the local schedule of instructions also needs to be constrained such that the sender of the barrier tokens is not reordered to before its predecessors, while the receivers execute before its semantic successors as well.
+each outer loop iteration. 
+%To implement the barrier in the pipeline, the stage containing
+%the semantically earlier instruction sends tokens to stages who contain the %successor instructions. In figure~\ref{fig:barrier}, 
+To implement the barrier in the pipeline, the stage in charges of the last 
+memory operation before the barrier broadcasts ``barrier" tokens to pipeline stages who contain memory operations following the barrier. 
+Eventually during the RTL generation, the local schedule of instructions also needs to be constrained such that the sender of the barrier tokens is not reordered to before its memory accessing predecessors, while the receivers of barrier tokens must execute before their memory accessing successors in the original program order as well.
+In figure~\ref{fig:barrier}, the store operation (A[i][j] = tmp) is followed by the sender of the barrier token, whereas the load operation (tmp = A[i-1][j]) in the other pipeline stage waits for the reception of barrier token for the previous outer loop iteration.
+
 
 The insertion of the sender/receiver of the barrier happens after the instruction partitioning. Depending on if a partition is the sender or receiver of the token,
 an extra store/load operation is introduced into the set of instructions, associated
 with the basic block where the barrier occurs.
+
 
 \begin{figure}[htp]
 \begin{center}
@@ -646,15 +652,26 @@ a store is needed by another operation in the same subgraph.
 A classic example is the pointer
 chasing in linked list traversal, where the address for the
 subsequent memory request would not be available until the
-current load gets its response. In general, if a memory access
+current load gets its response (figure~\ref{fig:memInDepCyc}). In general, if a memory access is in a dependency cycle carried by the innermost loop, our
 flow categorizes it as non-optimizable, and during our partitioning process,
 it would also have been buried inside one of the SCCs. Here we assume that
 the input to our tool has already undergone potentially helpful
 high level optimizations. It is well known that for regular
 applications with statically analyzable memory access patterns,
 techniques like loop interchange can move the dependency
-cycle to the outer loops~\cite{Kennedy:2001:OCM:502981}. The applicability of these
-transformations, however, is independent from the work presented in this chapter.
+cycle to the outer loops~\cite{Kennedy:2001:OCM:502981}. With the insertion
+of memory barriers, some of these non-optimizable memory accesses can become pipelinable. However, as the benchmarks we use for this chapter is non-regular, the applicability
+of these high level transformations is not investigated.
+
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1.0\linewidth]{chap3fig/memDepCycle.pdf}
+\caption{Non-optimizable Memory Access
+\label{fig:memInDepCyc}}
+\end{center}
+\end{figure}
+
 
 
 \subsubsection{Customization of Data Access Mechanism}
@@ -729,7 +746,7 @@ will be quantified in section~\ref{sec:er}.
 
 To create the RTL implementation from each subgraph,
 we convert the LLVM intermediate representation back to C
-syntax and then feed it to an existing HLS tool. By building a
+syntax and then feed the obtained function to an existing HLS tool. By building a
 source to source transformation flow, we can ensure portability
 across different back-end RTL generation tools.
 At the instruction level, the LLVM to C translation is rather
@@ -746,6 +763,11 @@ to the output variable of $\phi$. The $\phi$
 instruction itself can be removed. An example of this conversion is
 shown in figure~\ref{fig:phi2c}.
 
+When synthesizing each C functions using Vivado HLS, every pointer argument through which actual memory references occur is converted to a independent memory port. These
+are to be connected to the memory subsystem, as will be described later in section~\ref{sec:er}. Other pointer arguments are used for inter-subgraph communication,
+they are associated with pragmas directing the creation of FIFO interfaces. In terms of
+the scheduling computation in each function, we ensure the inner loops are
+all aggressively pipelined, while the barriers are contained in non-inlinable function such that operations are not reordered with respect to them.
 
 \begin{figure}[htp]
 \begin{center}
@@ -1090,14 +1112,18 @@ ultimately application specific.
 \section{Discussion}
 The experimental results have validated the general approach we have proposed and implemented. 
 Decoupling of execution between different part of the control dataflow graph can yield
-significant benefits. How the graph should be split however, is a space worth exploring.
+significant benefits. With different parts of the graph each having their own controller, non-statically schedulable stalls get isolated and more opportunities for
+optimization can be exploited. Unfortunately, these benefits do not come for free. We observed significant area increase when generating our decoupled computational pipeline.
+How to strike the right balance between performance gain and the area cost by devising different ways to partition the CDFG is an interesting dimension for future exploration.
 
-The algorithm we have devised is simplistic and easy to implement.
+The algorithm we have implemented in this chapter is rather simplistic. 
 It is also very aggressive in that all separable memory accesses are assigned to a new partition.
 Furthermore, as we perform topological sort on the nodes before partitioning them, many
 edges might be cut when a new subgraph is created, especially when the dependencies between instructions are relatively denser.
 Therefore, as the input kernels increase in size, our algorithm may result in pipelines with prohibitively high number of communication channels. The optimization we described in section~\ref{dupvscomm}
 partially addresses this issue, but it does not reduce the total number of subgraphs.
+
+A more general framework, the application of which is left for future work, involves the
 
 
 \begin{comment}

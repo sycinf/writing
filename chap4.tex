@@ -273,7 +273,9 @@ This induces artificial deadlock as described in~\cite{}.
 When an artificial deadlock occurs, a circular dependency is formed among
 processes, none of whom can make progress. At least one of the processes
 in the cycle is blocked on write -- therefore the deadlock is ``artificially''
-introduced by the size limit of FIFOs. 
+introduced by the size limit of FIFOs. Examples of this is shown in figure~\ref{artificalDL}. 
+
+
 
 Being a network of sequential processes and memory connected together by
 bounded FIFOs, the computational pipeline synthesized may experience
@@ -814,6 +816,15 @@ is not consuming tokens fast enough, where
 An example of this is shown in figure~\ref{}. In essence, we want to monitor the backlog of data
 in every communication channel. 
 
+
+Another way to look at what we have developed so far is a framework to generate and analyze a process network from a sequential program. The algorithm through which
+the partitioning of instruction is but just one pluggable component in this flow.
+Algorithm~\ref{algo1} is devised to cater to the characteristics of the FPGA substrate and has demonstrated considerable advantage. On the other hand, a platform
+where compute elements are organized differently can use a different algorithm.
+The CFG reconstruction, the analysis framework and the C generation backend don't 
+have to change, assuming C being the input language of the specific compilers used.
+
+As an example, in the hypothetical architecture shown in figure~\ref{}, the hard core has a cache with much higher clock frequency and proximity to the off-chip RAM, while the FPGA is great in processing data in a streaming fashion. The application shown in figure~\ref{} can be partitioned to two parts. The core part of the depth first search, where the latency of the memory system cannot be hidden or amortized, gets mapped onto the processor side while the data processing for each of the node found is performed on the FPGA side. An partitioning algorithm performing this division of labor can take advantage of the  
 
 
 
