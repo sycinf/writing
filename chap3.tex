@@ -333,13 +333,16 @@ association of the instructions with the current set.
     \item For every instruction $j$  $i$ depends on, 
     recreate its container basic block if it's not already
     in the current subgraph.
-    \item If $j$ is associated with another subgraph, a load operation
-    is created locally as a placeholder in its container basic block.
+    \item If $j$ is associated with another subgraph, a ``pop" function call
+    is added locally as a placeholder in its container basic block.
+    %a load operation
+    %is created locally as a placeholder in its container basic block.
     \item If $i$ is producing operands for instructions assigned to 
-    other sets, a store operation is inserted after $i$.
+    other sets,  a ``push" function call is inserted after $i$.
+    %a store operation is inserted after $i$.
 \end{itemize}
 The set of recreated basic blocks $B$ are thus associated with either the instructions
-assigned to the subgraph, or the placeholder instruction supplying them with operands. To mirror the relevant execution path in the original program, a few more steps need to be taken.
+assigned to the subgraph, or the placeholder function call supplying them with operands. To mirror the relevant execution path in the original program, a few more steps need to be taken.
 \begin{itemize}
     \item In the control flow of the original program, find the nearest common dominator $d$ of all the recreated basic blocks $B$, and add $d$ to $B$. It will be the entry block of our
     control flow in this subgraph.
@@ -367,7 +370,9 @@ is completely contained within our subgraph.  If there is any path in the second
 of the path within the subgraph
 will be repetitively activated by the availability of the proper tokens.
 
-The insertion of load and store operations is necessitated by various
+The insertion of %load and store 
+``pop" and ``push"
+operations is necessitated by various
 dependencies between the generated subgraphs. Other than data and control (branch) tokens we have mentioned, special tokens are also sent when ordering
 of memory accesses needs to be enforced. Each of the inserted operations corresponds to a hardware queue between the decoupled modules, the flow of
 tokens ensures the execution path are synchronized across different subgraphs
@@ -377,14 +382,37 @@ pipeline.
 The dependencies between the generated subgraphs necessitate the insertion of communication primitives. In our case, these correspond to the load and store operations to/from a hardware queue between the decoupled modules.  
 Other than the explicit data flows, control dependencies are also communicated using branch target tags, such that the local branch operations can synchronize across different subgraphs. Lastly, in the case where ordering of memory accesses needs to be enforced, special tokens are sent between modules.
 \end{comment}
-Eventually, in the hardware module synthesized from each subgraph, these loads and stores are blocking, as they operate on standard FIFO interfaces. Flow control between different pipeline stages are thus naturally introduced. 
+Eventually, in the hardware module synthesized from each subgraph, these ``pop" and ``push" operations %loads and stores 
+are blocking, as they operate on standard FIFO interfaces. Flow control between different pipeline stages are thus naturally introduced. The execution of the entire processing pipeline is completed when all modules are idling waiting for inputs and all hardware queues are empty. The runtime behavior of this pipeline thus resembles a streaming processing engine, with uncertainties introduced by memory access nodes smoothed out by FIFOs.
 
 
 
-The implementation of our partitioning algorithm and the insertion of the communication primitives leverage the LLVM infrastructure~\cite{llvmflow}. The LLVM front end converts the instructions in the original program to the single static assignment (SSA) form, which makes it easy to track dependencies and thus facilitates all the steps in our algorithm.
-In figure~\ref{fig:totalFlow}, the conversion process from the example function (in SSA form) to the final pipeline of subgraphs is illustrated. For better readability, we have converted the LLVM intermediate representation to a less verbose, C-like version. Operators not available in C are explained in the figure.
+The implementation of our partitioning algorithm and the insertion of the communication primitives leverage the LLVM infrastructure~\cite{llvmflow}. The LLVM front end converts the instructions in the original program to the single static assignment (SSA) form, which makes it easy to track dependencies and thus facilitates all the steps in our algorithm. Figure~\ref{fig:totalFlow} shows the SSA form
+of our example function and how the instruction partitioning and subgraph reconstruction can be easily performed given the explicit representation of
+dependencies. For better readability, we have converted the LLVM SSA intermediate representation (IR) to a less verbose, C-like version. Operators not available in C are explained in the figure. The inserted communication primitives are highlighted,
+the parameters to these ``push" and ``pop" invocations include the names of the associated queues and the data variables.
+%To highlight
+%the inserted communication primitives, we show them as ``push" and ``pop" function %calls taking in the queue name and the data variable name as the parameters.  
+
+
+It is worth noting that transformations in LLVM framework are organized as ``passes". Well-formed LLVM IR should be fed to and obtained from each of these passes. For our flow, a single loop-containing LLVM function is broken into multiple LLVM functions who communicate with each other and collectively perform the same computation as the original subroutine. To ensure each of the generated
+ LLVM functions is well-formed, pointers are added to its argument list to represent the FIFO interfaces the token loads/stores act upon. The original subroutine, on the other hand, has all its computation replaced by invocation of these generated functions，in addition to allocation of memory spaces as placeholders for communication channels. This is illustrated in figure~\ref{}.
+ As our pipeline is represented in proper LLVM IR, additional optimization or analysis passes can be applied to it.
+ 
+\begin{comment} 
+In figure~\ref{fig:totalFlow}, the conversion process from the example function (in SSA form) to the final pipeline of subgraphs is illustrated. For better readability, we have converted the LLVM intermediate representation (IR) to a less verbose, C-like version. Operators not available in C are explained in the figure.
 To highlight
-the inserted communication primitives, we show them as ``push" and ``pop" function calls taking in the queue name and the data vairable name as the parameters. The execution of the entire processing pipeline is completed when all modules are idling waiting for inputs and all hardware queues are empty. The runtime behavior of this pipeline thus resembles a streaming processing engine, with uncertainties introduced by memory access nodes smoothed out by FIFOs.
+the inserted communication primitives, we show them as ``push" and ``pop" function calls taking in the queue name and the data variable name as the parameters. The execution of the entire processing pipeline is completed when all modules are idling waiting for inputs and all hardware queues are empty. The runtime behavior of this pipeline thus resembles a streaming processing engine, with uncertainties introduced by memory access nodes smoothed out by FIFOs.
+\end{comment}
+
+
+
+
+
+
+
+
+
 %As shown in figure 2, subgraphs whose first instruction reads value off a FIFO should be placed in an infinite loop to ensure it is repeated the right number of times, which is especially important if the subgraph is strictly within a loop. The execution of the entire processing pipeline is completed when all modules are idling waiting for inputs and all hardware queues are empty. The runtime behavior of this pipeline thus resembles a streaming processing engine, with uncertainties introduced by memory access nodes smoothed out by FIFOs.
 
 % Figure 2 illustrates the result of clustering on our earlier example. Each of the generated subgraphs (SGs) corresponds to a decoupled stage in figure 1. For better readability, we have converted the LLVM intermediate representation to a less verbose, C-like version. Operators not available in C are explained in the figure.
@@ -411,8 +439,7 @@ The detailed steps involved are shown in Algorithm 1.
 % mention compaan compiler and affine loop
 
 \section{Optimization of Computational Pipeline}
-Having an initial implementation of the computational pipeline, there are a few simple
-optimizations we can perform to improve its overall efficiency. 
+With an initial implementation of the computational pipeline, there are a few simple optimizations we can perform to improve its overall efficiency. 
 
 \subsection{Simplification of Subgraph Control Flow}
 \label{sscf}
@@ -743,15 +770,38 @@ will be quantified in section~\ref{sec:er}.
 
 
 \section{Hardware Generation}
+As mentioned in section~\ref{sec:consp}, LLVM is used for implementing the synthesis flow for the computational pipeline. 
+%More specifically, we convert one loop-containing LLVM function into multiple LLVM functions communicating with each other.
+To create the final hardware, we translate each of the generated functions back to C syntax and then feed it to an existing HLS tool.
 
-To create the RTL implementation from each subgraph,
-we convert the LLVM intermediate representation back to C
-syntax and then feed the obtained function to an existing HLS tool. By building a
-source to source transformation flow, we can ensure portability
-across different back-end RTL generation tools.
-At the instruction level, the LLVM to C translation is rather
-straightforward. Most LLVM IR instructions can be mapped
-directly to C statements, as seen in figure~\ref{fig:totalFlow}. The only nontrivial
+%The original sequential function, which is now a top level wrapper containing invocations of the generated sub
+%In essence, we have built a source to source
+%transformation flow, 
+%taking in one sequential, loop-containing C function and generating multiple C functions, all contained within a .
+%To create the RTL implementation from each subgraph,
+%we convert these LLVM intermediate representation back to C
+%syntax and then feed the obtained function to an existing HLS tool. By building a
+%source to source transformation flow, 
+
+%With this functionally equivalent C implementation of the decoupled computational pipeline, We can easily test the result of our
+%transformation flow with a software implementation. The portability
+%across different back-end HLS tools is also guaranteed.
+
+\subsection{LLVM to C translation}
+As the computational pipeline is represented as well formed LLVM IR, it's translation to C is just another LLVM pass we write and apply within the LLVM framework. 
+
+
+Values in LLVM IR can take on types not recognized by standard C compiler.
+For instance, integer types can be of arbitrary width (1-$2^{23}-1$ bits), most of which does not have equivalence in C language. A vast majority of them do not occur
+in our flow since the original input is in C. The branch tag tokens and memory
+dependency tokens, however, generally have very narrow width. These types
+are supported by some HLS tools, but not standard software compilers. Thus we also generate a separate mapping file containing a list of C macros, rounding up the width of the data to one of the standard ones. Consequently, for every synthesized LLVM function, i.e. a stage in the computational pipeline, we can start generating a C implementation which can also be compiled with conventional compilers.
+
+The conversion of functional signature from LLVM to C is rather trivial.
+Similarly, at the instruction level, 
+%the LLVM to C translation is rather straightforward. 
+most of the LLVM IR can be mapped
+directly to C statements, as illustrated in figure~\ref{fig:totalFlow}. One
 transformation we perform is in dealing with the $\phi$ operations, which generate
  values of variables based on the the incoming control edges.  In the case where the source instruction for an operand is within the same subgraph, instead of
  producing to the operand, this source instruction writes directly to the output
@@ -762,8 +812,42 @@ where the data is produced, but again assigning the result directly
 to the output variable of $\phi$. The $\phi$
 instruction itself can be removed. An example of this conversion is
 shown in figure~\ref{fig:phi2c}.
+\begin{comment}
+To create a well-formed LLVM function, the queue names in the inserted ``push" ``pop" function calls need to be added to the argument list of LLVM functions as pointers. Each of these added pointers is only accessed by a single 
 
-When synthesizing each C functions using Vivado HLS, every pointer argument through which actual memory references occur is converted to a independent memory port. These
+Within each subgraph, the values can take on types not recognized by standard
+C compiler. For our flow, this occurs frequently when branch tag tokens or memory
+dependency tokens are generated. The 
+
+To create a well-formed LLVM function, the queue names in the inserted ``push" ``pop" function calls need to be added to the argument list of LLVM functions as pointers. Depending on the type of tokens transmitted between functions, data types of non-standard width are sometimes used. This is especially true for some of the integer tokens used (e.g. one bit branch tag token for communicating branch destination). This is supported by LLVM and can be accommodated by some HLS tools, but not the standard C compiler tool chain.
+We thus constructed a separate macro mapping file for the software implementation of the generated C, rounding up the with of the data to one of the standard ones. 
+\end{comment}
+
+
+
+
+\subsection{Testing with Multithreaded Software Implementation}
+We have so far created a C implementation for each
+stage in the decoupled computational pipeline. 
+%this functionally equivalent C implementation of the decoupled computational pipeline, We can easily test the result of our
+%transformation flow with a software implementation. The portability
+%across different back-end HLS tools is also guaranteed.
+To test the functional equivalence of the synthesized pipeline with the original
+function, our flow also creates a multithreaded software implementation using the
+$pthread$ library. Each of
+the generated stages is assigned to a separate thread, running concurrently with 
+all other stages. Channels connecting different stages are implemented as instantiations of a special C++ data structure. An templated array is used to represent a FIFO. A channel can contain multiple arrays when it fans out to
+more than one consumer threads. Each array is protected with a mutex and associated
+with a conditional variable. Blocking reads and writes are implemented with $pthread\_cond\_wait$ while $pthread\_cond\_signal$ wakes up blocked threads when
+token/space becomes available. 
+
+The original sequential function, which has all its computation replaced by
+LLVM function invocations, is examined and converted to a top level wrapper. 
+It sets up the 
+
+
+\subsection{Generating System with Xilinx Vivado Tools}
+When synthesizing each C functions using Xilinx's Vivado HLS, every pointer argument through which actual memory references occur is converted to a independent memory port. These
 are to be connected to the memory subsystem, as will be described later in section~\ref{sec:er}. Other pointer arguments are used for inter-subgraph communication,
 they are associated with pragmas directing the creation of FIFO interfaces. In terms of
 the scheduling computation in each function, we ensure the inner loops are
@@ -776,6 +860,8 @@ all aggressively pipelined, while the barriers are contained in non-inlinable fu
 \label{fig:phi2c}}
 \end{center}
 \end{figure}
+
+
 \begin{comment}
 As each subgraph contains instructions from only a subset
 of the basic blocks in the original program, it does not always
@@ -1109,7 +1195,7 @@ The overall change therefore depends on which factor plays a larger role, and is
 ultimately application specific. 
 
 
-\section{Discussion}
+\section{Discussion and Future Work}
 The experimental results have validated the general approach we have proposed and implemented. 
 Decoupling of execution between different part of the control dataflow graph can yield
 significant benefits. With different parts of the graph each having their own controller, non-statically schedulable stalls get isolated and more opportunities for
