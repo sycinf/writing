@@ -5,7 +5,7 @@ When multiple processes are communicating with each other through finite communi
 of communicating processes, and thus may become deadlocked under certain circumstances.
 To facilitate the analysis of our pipeline, 
 %the pipeline of subgraphs generated from the original sequential program,
-we relate it to a different model of computation, Kahn process network(KPN), which
+we relate it to a different model of computation, Kahn process network (KPN), which
 provides the theoretical context for looking at these issues. Eventually we are to
 develop a systematic approach to find solutions ensuring liveness and correctness of our pipeline.
 %such as deadlock and FIFO sizing in our pipeline. 
@@ -70,7 +70,7 @@ a conventional process in the network.
 In particular, while a normal process blocks when reading from an empty
 channel, the absence of requests at one input port never prevents the memory from serving requests from other ports. In another word, it can choose
 which port to read depending on the availability of input tokens.
-In YAPI~\cite{}, a ``select" function is added as an extension to the Kahn process network to support non-deterministic events. The behavior of
+In YAPI~\cite{deKock:2000:YAM:337292.337511}, a ``select" function is added as an extension to the Kahn process network to support non-deterministic events. The behavior of
 the shared memory subsystem can be accommodated with this primitive as well. 
 
 With the introduction of ``select", the semantics of the original KPN is violated.
@@ -206,23 +206,48 @@ More specifically, given a sequential program $S$ in single static assignment fo
 Also, as mentioned in chapter~\ref{decoupleChap}, if an instruction is assigned to
 $p$ and it is taking in tokens from instructions in other processes, a placeholder
 instruction (and its owner basic block) is instantiated local to $p$, whose sole purpose is to receive
-the actual token from the producer/fanout process. For $M$, it can be seen as containing a mirroring of all the memory accessing
-instructions distributed among $P$, and each of its mirrored instructions 
-produces tokens for the corresponding $p$ to consume.
-
+the actual token from the producer/fanout process. For $M$, it can be seen as executing a mirroring of each of the memory access
+instructions distributed among $P$, producing tokens for the corresponding $p$ to consume.
+\begin{comment}
 \begin{definition}
 Let $I$ be the set of instructions in the original $S$. For every $i \in I$, each
 execution of $i$ is defined as a instruction instance $i_k$, where $k \in \mathbb{Z}$.
- In each $p \in P$, 
-every instruction $j \in J^p$ corresponds to one $i$ in $S$, and every execution of this instruction $j_k$ corresponds to one $i_k$ in $S$. Let 
+ In each $p \in P$, every added ``push" and ``pop" primitives is associated with
+ one $i$ in $S$. 
+ 
+ 
+every instruction $j \in J^p$ corresponds to one $i$ in $S$, and every execution of this instruction $j_k$ corresponds to one $i_k$ in $S$. Similarly, The added ``push" and ``pop" primitives within each process are also linked to 
+
+Let 
 each of the placeholder/consumer instructions in $p$ be $\underline{j}$, and each instruction actually producing value to transmit be $\overline{j}$, every instance
 of $\underline{j}$/$\overline{j}$ in the same process reads from/writes to the same FIFO channel. Note for each $\overline{j} \in J^p$,
 there will be one or more  $\underline{j} \in J^{p'}$ where $p' \in P\setminus p$, and they are connected either directly or through $f_i \in F$. Also let the set of $\overline{j}$
  and $\underline{j}$ in $p$ be $\overline{J^p}$ and $\underline{J}^p$ respectively,
  we then have $\overline{J^p} \cup \underline{J}^p \subseteq J^p$ as some instructions may be strictly used locally.
 \end{definition}
+\end{comment}
 
 
+\begin{definition}
+Let $I$ be the set of instructions in the original $S$. For $i \in I$, each
+execution of $i$ is defined as a instruction instance $_{(k)}i$, where $k \in \mathbb{Z}$.
+ In $p \in P$, the set of instructions is $I^p$. Within $I^p$, each ``push" and ``pop" primitive added is associated with
+ one $i$ in $S$, i.e. the instruction generating the tokens to be transmitted. Every execution of these $_{push}{i^p} \in _{push}{I^p}$ or $_{pop}{i^p} \in _{pop}{I^p} $ is defined
+ as $_{(k)push}{i^p}$ or $_{(k)pop}{i^p}$, corresponding to $_{(k)}i$. Similarly,
+ for all other instructions in $I^p$, denoted as $_nI^p$, each $_ni^p$ is linked to a specific $i$ and its instances are denoted as $_{(k)n}i^p$, also associated with $_{(k)}i$. 
+ %Note for every $_{(k)}_{pop}{i^p}$, $k \in \mathbb{Z}$, the
+ %same FIFO channel is read. Same for every
+%every instruction $j \in J^p$ corresponds to one $i$ in $S$, and every execution of this instruction $j_k$ corresponds to one $i_k$ in $S$. Let 
+%each of the consumer instructions in $p$ be $_{pop}{j}$, and each instruction %transmitting tokens be $_{push}{j}$, every instance
+%of $\underline{j}$/$\overline{j}$ in the same process reads from/writes to the same FIFO %channel. Note for each $\overline{j} \in J^p$,
+%there will be one or more  $\underline{j} \in J^{p'}$ where $p' \in P\setminus p$, and they are connected either directly or through $f_i \in F$. Also let the set of $\overline{j}$
+ %and $\underline{j}$ in $p$ be $\overline{J^p}$ and $\underline{J}^p$ respectively,
+ %we then have $\overline{J^p} \cup \underline{J}^p \subseteq J^p$ as some instructions may be strictly used locally.
+\end{definition}
+
+Note for each  $_{(k)push}{i^p}$, there can be one or more  $_{(k)pop}{i^p}$
+in $p'$ where $p' \in P\setminus p$. They are connected either directly or  
+through $f_i \in F$.
 
 \begin{lemma}
 \label{bounded}
@@ -234,27 +259,35 @@ Any instance of network $N$ is bounded with FIFO space required for each channel
 
 To prove Lemma~\ref{bounded}, we can constructively create an execution schedule $H$
 which does not overflow the FIFOs of size 1. This can be performed by following the original program order in $S$. 
-Whenever a instruction instance $i_k$  of $i$ is executed in $S$, we find its corresponding set in $P$, these are instructions distributed among one or more processes.
-For each element $j \in J^p, p \in P$ in this set:
+Whenever a instruction instance $i_k$  of $i$ is executed in $S$, we find its associated set of instruction instances in all of $P$, distributed among one or more processes.
+For each element $_{(k)}j$ 
+%\in J^p, p \in P$ 
+in this set:
 \begin{itemize}
-    \item If $j \not\in \overline{J^p} \cup \underline{J}^p$, we can just schedule $j_k$.
-    \item If $j \in \overline{J^p}$, i.e. it is a ``producer" instruction, $j_k$ is scheduled and then the instructions in $f_i$ are scheduled (assuming there is fanout), followed by all the other ``consumer" instructions $j' \in \underline{J}^{p'}, p' \in P\setminus p$.
+    \item If $_{(k)}j \not\in _{(k)push}{I^p} \cup _{(k)pop}{I^p}$, we can just schedule $_{(k)}j$.
+    \item If  $_{(k)}j \in _{(k)push}{I^p}$, i.e. this is a ``producer" instruction,
+    $_{(k)}j$ is scheduled and then the instructions in $f_i$ are scheduled (assuming there is fanout), followed by all the other ``consumer" instruction instances $_{(k)}j' \in _{(k)pop}{I^{p'}}, p' \in P\setminus p$.
+    
+    %$j \in \overline{J^p}$, i.e. it is a ``producer" instruction, $j_k$ is scheduled and then the instructions in $f_i$ are scheduled (assuming there is fanout), followed by all the other ``consumer" instructions $j' \in \underline{J}^{p'}, p' \in P\setminus p$.
     
 
 %If $i_k^p \in \overline{I^p}$, the fanout process $f_i$, if there is any, is then scheduled. Subsequently, all the $\widetilde{i_k^p'}$ are scheduled.
-    \item If $j_k$ accesses memory, then the instructions in $M$ is immediately scheduled to serve the request before everything else.
-    \item If $j \in \underline{J}^p$, do not schedule it directly, wait for the producer instruction and $f_i$ to be scheduled.
+    \item If $_{(k)}j$ accesses memory, then the instructions in $M$ is immediately scheduled to serve the request before everything else.
+    \item If $_{(k)}j \in _{(k)pop}{i^{p}}$, do not schedule it directly, wait for the producer instruction and $f_i$ to be scheduled.
 \end{itemize}
-Since the consumers of the tokens are always executed immediately after the producer instruction, the FIFOs will not see a backlog of tokens.
+In essence, for every instruction executed in the original program, we schedule the process network's instructions derived from it in $H$. If these instructions are involved in communication, the source of the data tokens is scheduled first, immediately followed by the token sinks. It should be apparent that only one slot is needed
+in each communication channel for the process network to execute, since the produced tokens are promptly consumed and no backlog of tokens would occur in the FIFOs.
+
+%Since the consumers of the tokens are always executed immediately after the producer instruction, the FIFOs will not see a backlog of tokens.
 
 \begin{definition}
 Let the schedule of instructions in each $p \in P \cup F$ be $G(p)$, we say $G(p)$ is locally consistent with $H$ if
 and only if
-$j'_x \prec j''_y$ in $H$ $\Rightarrow$ $j'_x \prec j''_y$ in $G(p)$
-, $\forall j', j'' \in J^p$, 
+$_{(x)}j' \prec _{(y)}j''$ in $H$ $\Rightarrow$ $_{(x)}j' \prec _{(y)}j''$ in $G(p)$
+, $\forall j', j'' \in I^p$, 
 $x, y \in \Bbb{Z}$. Additionally, if we have a schedule $H_s$ for a set of instruction instances  which can belong to different processes, we say $H_s$ is globally consistent with
-$H$ if and only if $j'_x \prec j''_y$ in $H$ $\Rightarrow$ $j'_x \prec j''_y$ in $H_s$
- where  $x,y \in \Bbb{Z}, j' \in J^{p1}, j'' \in J^{p2}, p1 \in P \cup F, p2 \in P \cup F$.
+$H$ if and only if $_{(x)}j' \prec _{(y)}j''$ in $H$ $\Rightarrow$ $_{(x)}j' \prec _{(y)}j''$ in $H_s$
+ where  $x,y \in \Bbb{Z}, j' \in I^{p1}, j'' \in I^{p2}, p1 \in P \cup F, p2 \in P \cup F$.
 \end{definition}
 
 
@@ -269,12 +302,21 @@ do not violate data dependencies imposed by $S$.
 \section{Artificial Deadlock in Process Network}
 In actual implementation of KPN where FIFOs have fixed sizes, blocking
 writes are introduced so that processes block when trying to write to a full FIFO.
-This induces artificial deadlock as described in~\cite{}. 
+This induces artificial deadlock as described in~\cite{Geilen:2003:REK:1765712.1765736}. 
 When an artificial deadlock occurs, a circular dependency is formed among
 processes, none of whom can make progress. At least one of the processes
 in the cycle is blocked on write -- therefore the deadlock is ``artificially''
-introduced by the size limit of FIFOs. Examples of this is shown in figure~\ref{artificalDL}. 
+introduced by the size limit of FIFOs. Examples of this is shown in figure~\ref{fig:artificalDeadlock}. 
 
+
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.8\linewidth]{chap4fig/artificialDeadlock.pdf}
+\caption{Limited FIFO Size Causes Artificial Deadlock
+\label{fig:artificalDeadlock}}
+\end{center}
+\end{figure}
 
 
 Being a network of sequential processes and memory connected together by
@@ -302,15 +344,15 @@ artificial deadlock will not occur in $N$.
 
 Assume there is an artificial deadlock, we can go around the dependency
 cycle and examine the blocked processes $P_b \subseteq P \cup F$. For a process $p_b$
-to be blocked at instruction instance $j_k$, $j_k \in J^p$ is either reading from an empty
+to be blocked at instruction instance $_{(k)}j$, $_{(k)}j \in _{(k)push}{I^p} \cup _{(k)pop}{I^p}$ is either reading from an empty
 FIFO, or writing to a full FIFO. For the former case, the FIFO is empty because the producer of the token
-$j'_k \in J^{p'}$ cannot execute, which indicates an earlier instruction 
-instance $l_m$ in $G(p')$ is blocked. For the later case, the FIFO is full because the consumer $j''_{k-1} \in J^{p''}$ of the earlier token produced by
-$j_{k-1}$ cannot execute, which also indicates an earlier instruction in $G(p'')$
+$_{(k)}j' \in _{(k)push}I^{p'}$ cannot execute, which indicates an earlier instruction 
+instance $_{(m)}l$ in $G(p')$ is blocked. For the later case, the FIFO is full because the consumer $_{(k-1)}j'' \in _{(k-1)pop}I^{p''}$ of the earlier token produced by
+$_{(k-1)push}j$ cannot execute, which also indicates an earlier instruction in $G(p'')$
 is blocked. Apply this reasoning recursively around the circle of dependencies,
-we have a chain of instructions instances $j_k \succ l_m \succ ... \succ j_k$
-or $j_k \succ j''_{k-1} \succ ... \succ j_k$ in $H$, as each pair in the chain
-comes from a schedule locally consistent with $H$. This chain is self-contradictory
+we have a chain of instructions instances $_{(k)}j \succ _{(m)}l \succ ... \succ _{(k)}j$
+or $_{(k)}j \succ _{(k-1)}j'' \succ ... \succ _{(k)}j$ in $H$, as each pair in the chain
+comes from a schedule locally or globally consistent with $H$. This chain is self-contradictory
 and therefore the scenario for artificial deadlock can never occur. 
 
 %The memory subsystem, being FCFS, always produces response tokens some processes are waiting to consume, there is no possibility of it being blocked on write, and thus being
@@ -340,7 +382,7 @@ the  effect of instruction reordering on the liveness of our pipeline.
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=1.0\linewidth]{chap4fig/cycleInstances.pdf}
+\includegraphics[width=0.8\linewidth]{chap4fig/cycleInstances2.pdf}
 \caption{a) partitioning of the original program into two processes; b) each process executes according to the program order; c) instructions in process 1 are reordered statically
 \label{fig:deadlockfig}}
 \end{center}
@@ -349,9 +391,46 @@ the  effect of instruction reordering on the liveness of our pipeline.
 \section{Liveness in HLS-generated Computational Pipeline }
 Figure~\ref{fig:deadlockfig} shows a simple example of a otherwise deadlock free network becomes problematic
 when the instructions are statically reordered in individual processes by HLS. 
+
+Figure~\ref{fig:deadlockfig}(a) shows how the example sequential program is decoupled into two independently running processes. Due to the size limit of the FIFOs, which is assumed to be one here, the execution
+of the producer instruction (``push") is dependent on the completion of the previous instance
+of the consumer instruction (``pop"). 
+When both \textit{Process 1} and \textit{Process 2} are running according to the original program order,  there is no cycle of dependency, and therefore no deadlocks during the execution of the network, as illustrated by~\ref{fig:deadlockfig}(b).
+
+However, in~\ref{fig:deadlockfig}(c), 
+a common HLS technique, loop pipelining, is applied to \textit{Process 1}, where
+iterations of the loop are aggressively overlapped. Every cycle, a new iteration is started. Because of the long latency of load from \textit{in[i]} and
+the multiplication, the sending of the first \textit{r2} token, $_{(0)}$push(r2Q,r2), is scheduled
+after many instruction invocations for later iterations. It can not execute until after $_{(2)}$push(r1Q,r1), whose
+writing to the FIFO r1Q cannot happen unless the previous token has been consumed by 
+$_{(1)}$pop(r1Q,r1). Because of the scheduling in process 2, this read from r1Q
+occurs after $_{(0)}$pop(r2Q,r2), which cannot complete unless $_{(0)}$push(r2Q,r2)
+can send the token.  An artificial deadlock is therefore created. 
+
+In this particular example, if the size of r1Q is increased
+from 1 to 2, then the execution of $_{(2)}$push(r1Q,r1) would be dependent on 
+$_{(0)}$pop(r1Q,r1) instead of $_{(1)}$pop(r1Q,r1). The
+channel can now buffer the tokens produced by $_{(0)}$push(r1Q,r1) and $_{(1)}$push(r1Q,r1) before $_{(0)}$pop(r1Q,r1) needs to be invoked to create empty slot. With this increase in buffer space, the cycle of dependence is broken as there will be no path of dependence from 
+$_{(0)}$pop(r1Q,r1) to $_{(0)}$push(r1Q,r1)
+%INS $\underline{A_1}$
+%to INS $\overline{B_1}$. 
+The deadlock no longer exists.
+
+%The cycle of dependence is broken as there will be no path of dependence from $_{(0,0)}$load(r1Q)
+%to $_{(0,0)}$store(r2Q,r2). The deadlock no longer exists.
+
+
+%In this particular example, if the size of FIFO for r1Q is increased
+%from 1 to 3, then the execution of INS $\overline{A_4}$ would be dependent on 
+%INS $\underline{A_1}$ instead of INS $\underline{A_3}$. The
+%channel can now buffer the tokens produced by INS $\overline{A_1}$ -- INS $\overline{A_3}$ before INS $\underline{A_1}$ needs to be invoked to create empty slot. With this increase in buffer space, the cycle of dependence is broken as there will be no path of dependence from INS $\underline{A_1}$
+%to INS $\overline{B_1}$. The deadlock no longer exists.
+
+\begin{comment}
 Due to the size limit of the FIFOs, which is assumed to be one here, the execution
 of the producer instruction is dependent on the completion of the previous instance
-of the consumer instruction. In figure~\ref{fig:deadlockfig}(c), when the instructions in process 1 is statically reordered, a circular dependency is formed
+of the consumer instruction. 
+In figure~\ref{fig:deadlockfig}(c), when the instructions in process 1 is statically reordered, a circular dependency is formed
 between instructions: INS $\overline{B_1}$ cannot execute unless
 INS $\overline{A_4}$ completes, and INS $\overline{A_4}$ cannot execute until
 INS $\underline{A_3}$ consumes the token from INS $\overline{A_3}$. But INS $\underline{A_3}$ cannot happen until INS $\underline{B_1}$ occurs, and
@@ -363,19 +442,20 @@ from 1 to 3, then the execution of INS $\overline{A_4}$ would be dependent on
 INS $\underline{A_1}$ instead of INS $\underline{A_3}$. The
 channel can now buffer the tokens produced by INS $\overline{A_1}$ -- INS $\overline{A_3}$ before INS $\underline{A_1}$ needs to be invoked to create empty slot. With this increase in buffer space, the cycle of dependence is broken as there will be no path of dependence from INS $\underline{A_1}$
 to INS $\overline{B_1}$. The deadlock no longer exists.
+\end{comment}
 
-
-Indeed, this is the classic approach in resolving artificial deadlock~\cite{}. 
+Indeed, this is the classic approach in resolving artificial deadlock~\cite{boundedwrite}. 
 When artificial deadlock is detected, the process which is write blocked is found, the full FIFO it tries to write to is given more capacity. 
 However, in a network implemented in hardware, the FIFO size cannot be easily increased.
 %As the producer and consumer instruction instances are rescheduled differently with
 %respect to other instructions in their own process, blocking write causes
 %artificial deadlock. Increasing the number of slots in the FIFO can help resolve
 %this problem. 
-To determine the needed buffer space in the channels \textit{a priori}, simulations are sometimes used~\cite{}. It relies 
+To determine the needed buffer space in the channels \textit{a priori}, simulations are sometimes used~\cite{buck1994ptolemy}. It relies 
 on using representative dataset as input and for certain type of problems, simulation results may not provide any guarantee, especially if the control flow is runtime data dependent. In this section, we want to analyze the interaction between FIFO
 sizing and intra-process instruction scheduling, 
-so we can better understand
+so we can 
+better understand
 their joint effect on the liveness of the process network. 
 %what kind of reordering can be permitted and its effect on the FIFO space needed.
 \begin{comment}
@@ -391,7 +471,10 @@ processes is formed.
 In our networks derived from sequential programs, given each process' schedule and each FIFO's size, it is possible
 to find out if a potential artificial deadlock can arise without running simulation. As demonstrated in figure~\ref{fig:deadlockfig}, we can add $DepS$ edges between instruction instances belonging to the same process, and $DepF$ edges between
 producer/consumer instruction instances writing/reading from the same FIFO.
-Note for a FIFO of size $s$, $DepF$ edges are added between $\overline{j_k}$ and $\underline{j_{k-s}}$ to indicate that the producer instruction instance is disabled
+Note for a FIFO of size $s$, $DepF$ edges are added between 
+%$\overline{j_k}$ and $\underline{j_{k-s}}$ 
+$_{(k)push}j$ and $_{(k-s)pop}j$ 
+to indicate that the producer instruction instance is disabled
 until the consumer instruction instance is invoked. The graph thus obtained
 can be checked for cycles, which indicate the occurrence of artificial deadlock.
 
@@ -409,8 +492,12 @@ Figure~\ref{fig:singlelevelLoopCylce} shows a more concise
 representation of the schedule we have in figure~\ref{fig:deadlockfig}(c).
 Various dependency edges are associated with weights to 
 represent the difference between the subscripts of the pair of instruction
-instances. For instance, as INS $\overline{A_4}$ is 
-scheduled before INS $\overline{B_1}$ in process 1, the edge from INS $\overline{B}$ to INS $\overline{A}$ carries
+instances. For instance, as $_{(2)}$push(r1Q, r1) is 
+scheduled before $_{(0)}$push{r2Q, r2} in process 1, the edge from INS push{r2Q, r2} %$\overline{B}$ 
+to 
+%INS $\overline{A}$ 
+push(r1Q, r1)
+carries
 a weight of 3, meaning the occurrence of INS $\overline{B_x}$ depends on the completion of INS $\overline{A_{x+3}}$. Similarly, when the channel between 
 INS $\overline{A}$ in process 1 and INS $\underline{A}$ in process 2 are of size one, INS $\overline{A_x}$ depends on the completion of INS $\underline{A_{x-1}}$, 
 which is represented by the $-1$ weight of the edge representing this
@@ -434,7 +521,7 @@ deadlock detection, we can further trim the graph by omitting any $DepS$ edges h
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=0.7\linewidth]{chap4fig/singlelevelLoopCycle.pdf}
+\includegraphics[width=0.7\linewidth]{chap4fig/singlelevelLoopCycle2.pdf}
 \caption{Deadlock Detection using Graph with Weighted Edge
 \label{fig:singlelevelLoopCylce}}
 \end{center}

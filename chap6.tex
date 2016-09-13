@@ -46,7 +46,7 @@ accessible by CPU.
 Given the flexibility of FPGAs, there are certainly ways to create a layer of abstraction conforming to either one of these schemes, regardless
 the original expected usage model. 
 In this work, we assume a shared memory space between the CPU and the FPGA, 
-though a mechanism for explicit data movement is also outlined in section~\ref{makingAcc}.
+though a mechanism for explicit data movement is also outlined in section~\ref{dtransfer}.
 
 %However in this work, because of the nature
 %of our targeted applications, we are able to devise mechanisms to tackle explicit data
@@ -777,7 +777,7 @@ vary with the size of the iteration space $I$, while both $S_t$ and $H_t$ are no
 This model is again generated during the offline phase and executed during the online phase. An example model is shown in figure~\ref{}. Evaluating this model takes time as well, but since it can be reduced to a set of quick checks on the loop bounds, its impact ($M$) on execution time would be rather small.
 
 
-The main steps for the execution of the accelerator-augmented program binaries is illustrated in figure~\ref{pieces}. As the cost model is always evaluated, in the worst case, when
+The main steps for the execution of the accelerator-augmented program binaries is illustrated in figure~\ref{pieces-doModel-doOnline-doInvoke}. As the cost model is always evaluated, in the worst case, when
 the accelerated version of the loop nest is never executed, there would be a slight increase of $M$ in execution time. It is therefore advisable to only apply our approach to loop nests whose past behavior exposes sufficiently sized iteration space.
 
 
@@ -787,6 +787,7 @@ the accelerated version of the loop nest is never executed, there would be a sli
 %to maximize data reuse, it can increase the ratio of computation v.s. off-chip memory bandwidth usage. 
 \subsection{Data Transfer and Address Translation}
 \label{dtransfer}
+\subsubsection{Communication between CPU and FPGA Memory Spaces}
 Another particular important aspect in ensuring the efficient execution of the accelerators is in the management of data transfers. %For the systems we are targeting, the CPU and accelerator can access the shared address space, explicit movement of data may not be necessary. On the other hand, 
 As the FPGA are used as an accelerator for binaries executed on CPU, both the source
 and final destination of its working datasets are the address space of
@@ -798,7 +799,7 @@ For the cases where the FPGA can directly access the
 CPU's address space, which are the primary targets of our flow, the easiest way is to apply the transformation and
 optimizations described in chapter~\ref{decoupleChap}. This would
 naturally create a set of address generators who pipeline requests into the 
-memory subsystem, as can be seen from figure~\ref{}. To benefit from the locality-driven optimization we 
+memory subsystem, as can be seen from figure~\ref{show3demuPipeline}. To benefit from the locality-driven optimization we 
 have performed, caches can also be inserted between the address outputs and the
 off-chip memory. 
 
@@ -823,8 +824,37 @@ in platforms supporting SVM, a buffer is to be allocated explicitly and populate
 binary based flow, there is still a need to perform the address range computation, memory allocation and kernel(accelerator) invocation. The difference is that now the explicit data transfer between devices gets
 replaced by memcpy between the already allocated memory of the original program binary and the SVM buffer just created. 
 
-The 
+The analyzability required for coarse grained parallelism discovery 
+also enables the \textit{a priori} calculation of the  memory footprint for the accelerated loop nests. As the referenced addresses are always affine functions of the loop indices, for a given part of the iteration space, the boundaries of the accessed range of memory by an instruction can always be
+computed. This computation would become another part of the $online$ $phase$, supplying parameters for the actual data movement mechanisms. 
 
+
+Depending on
+the exact computation, the compute of memory ranges and transfer of data
+may involve certain trade-offs.
+In the best case scenario, every address between the lower and higher boundaries is accessed by the accelerated loop nests. A single memcpy ...
+sparse, multiple memcpy may reduce wasted bandwidth for transfer, but increases the overhead in invocation data transfer mechanisms. Application-specific exploration
+
+
+
+With the data finally resident in the FPGA's address space, every original access can be translated to a memory reference in the new context by adding/removing an offset. Depending on how the original working
+dataset is broken down into memory objects, this offset is computed differently. An example is shown in  figure~\ref{a-memory-reference-get-offseted}. 
+In essence, the data transfer mechanism constructs functions for mapping addresses in CPU memory to tuples of (memory object, address) in FPGA memory space. The affine function mapping points in the iteration space to addresses in CPU memory can be composed with these newly constructed function to 
+
+
+\subsubsection{Handling Virtual Addresses}
+When virtual addressing is involved, another layer of complexity is added to the communication between the hardware accelerator and the CPU's memory address space. The CPU's address translation mechanism is normally not accessed by the FPGA, whose outgoing memory requests therefore must use
+physical addresses. The generation of addresses by the FPGA accelerator, however, was based off virtual addresses extracted from the software running on the CPU before the accelerator's invocation. It thus becomes necessary to map the virtual addresses generated by the hardware logic to the physical addresses used by the memory subsystem.
+
+In the case where the CPU's memory is not accessible to FPGA
+directly and explicit data movement is needed, as just described above, this is less of a problem. One part of the translation happened on the CPU side when the transfer occurs, the virtually referenced data structure get extracted and placed contiguously into the FPGA's physically addressed memory. The remaining part of the translation, as described in part~\ref{dtransfer}, is mere
+
+On the other hand, if the FPGA is to directly generate the addresses used to access the CPU's memory, virtual to physical address translation would need to happen
+
+several different mechanisms might be devised.
+Previous projects~\cite{6718414}\cite{7459405}\cite{4042434} 
+
+\begin{comment}
 
 The range of addresses we would like to copy
 to the FPGA device needs to be explicitly specified, the size of the
@@ -889,6 +919,8 @@ The approach described in chapter~\ref{decoupleChap} may be used but provides li
 
 Our parallelization engine attempt to  
 
+\end{comment}
+
 \begin{comment}
 The variety of hardware templates gives another dimension in the accelerator design space, in addition to the software domain optimizations like loop interchange, loop tiling etc. 
 
@@ -898,7 +930,6 @@ possibilities
 As mentioned in section~\ref{sec:fdtp}, we use Banerjee's tests to find 
 direction vectors between different statements in the loop nest. There are 
 a few additional techniques employed to make runtime check cheaper
-\end{comment}
 
 
 
@@ -912,6 +943,7 @@ facilitates the calculation of the exact memory footprint for the accelerated co
 
 
 The approach described in chapter~\ref{decoupleChap} may be used but provides little advantage for these computation. 
+\end{comment}
 
 \begin{comment}
 At a high level, the approach we are proposing in accelerating program binaries
@@ -947,8 +979,11 @@ of the assumed parallelism.
 
 
 
-
-
+\section{Discussion and Future Work}
+If OpenCL is actually being used to perform hardware generation, the analysis work we have done to extract coarse grained parallelism would still work.
+At the same time...packaging the transferred data into the memory objects can affect the final performance as well. Having everything in a single 
+object in openCL's global memory space ------ not good, less memory level parallelism even though the data transfer between host and FPGA platform
+is easier. 
 
 
 

@@ -396,7 +396,7 @@ the parameters to these ``push" and ``pop" invocations include the names of the 
 
 
 It is worth noting that transformations in LLVM framework are organized as ``passes". Well-formed LLVM IR should be fed to and obtained from each of these passes. For our flow, a single loop-containing LLVM function is broken into multiple LLVM functions who communicate with each other and collectively perform the same computation as the original subroutine. To ensure each of the generated
- LLVM functions is well-formed, pointers are added to its argument list to represent the FIFO interfaces the token loads/stores act upon. The original subroutine, on the other hand, has all its computation replaced by invocation of these generated functions，in addition to allocation of memory spaces as placeholders for communication channels. This is illustrated in figure~\ref{}.
+ LLVM functions is well-formed, pointers are added to its argument list to represent the FIFO interfaces the token reads/writes act upon. The original subroutine, on the other hand, has all its computation replaced by invocation of these generated functions，in addition to allocation of communication channels. This is illustrated in figure~\ref{}.
  As our pipeline is represented in proper LLVM IR, additional optimization or analysis passes can be applied to it.
  
 \begin{comment} 
@@ -795,13 +795,14 @@ Values in LLVM IR can take on types not recognized by standard C compiler.
 For instance, integer types can be of arbitrary width (1-$2^{23}-1$ bits), most of which does not have equivalence in C language. A vast majority of them do not occur
 in our flow since the original input is in C. The branch tag tokens and memory
 dependency tokens, however, generally have very narrow width. These types
-are supported by some HLS tools, but not standard software compilers. Thus we also generate a separate mapping file containing a list of C macros, rounding up the width of the data to one of the standard ones. Consequently, for every synthesized LLVM function, i.e. a stage in the computational pipeline, we can start generating a C implementation which can also be compiled with conventional compilers.
+are supported by some HLS tools, but not standard software compilers. Thus we also generate a separate mapping file containing a list of C macros, rounding up the width of the data to one of the standard ones. Subsequently, for every synthesized LLVM function, i.e. a stage in the computational pipeline, we can also have a software implementation compatible with conventional compilers.
 
-The conversion of functional signature from LLVM to C is rather trivial.
-Similarly, at the instruction level, 
+The actual conversion of LLVM to C involves just a few simple steps.
+The function signature in LLVM is very similar to that of a normal C function. The conversion is thus rather trivial.
+Meanwhile, at the instruction level, 
 %the LLVM to C translation is rather straightforward. 
-most of the LLVM IR can be mapped
-directly to C statements, as illustrated in figure~\ref{fig:totalFlow}. One
+most of the LLVM IR can also be directly mapped
+to C statements, as illustrated in figure~\ref{fig:totalFlow}. One
 transformation we perform is in dealing with the $\phi$ operations, which generate
  values of variables based on the the incoming control edges.  In the case where the source instruction for an operand is within the same subgraph, instead of
  producing to the operand, this source instruction writes directly to the output
@@ -812,6 +813,7 @@ where the data is produced, but again assigning the result directly
 to the output variable of $\phi$. The $\phi$
 instruction itself can be removed. An example of this conversion is
 shown in figure~\ref{fig:phi2c}.
+
 \begin{comment}
 To create a well-formed LLVM function, the queue names in the inserted ``push" ``pop" function calls need to be added to the argument list of LLVM functions as pointers. Each of these added pointers is only accessed by a single 
 
@@ -823,6 +825,13 @@ To create a well-formed LLVM function, the queue names in the inserted ``push" `
 We thus constructed a separate macro mapping file for the software implementation of the generated C, rounding up the with of the data to one of the standard ones. 
 \end{comment}
 
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.7\linewidth]{chap3fig/SSA2C.pdf}
+\caption{Converting $\phi$ Operator to C
+\label{fig:phi2c}}
+\end{center}
+\end{figure}
 
 
 
@@ -843,8 +852,14 @@ token/space becomes available.
 
 The original sequential function, which has all its computation replaced by
 LLVM function invocations, is examined and converted to a top level wrapper. 
-It sets up the 
+In addition to allocating and initializing the channels, this wrapper also initializes
+each thread with a pointer to a packaged list of function arguments. After starting
+each thread, it synchronizes at the end to ensure all threads are completed. With this setup, we can easily compare the outcome from calling the original function v.s. the transformed wrapper function, any differences signify flaws in our pipeline generation flow.
 
+An interesting aspect in the software implementation is the sizing of the FIFOs. In chapter~\ref{liveprof}, we will discuss how size of the channels affect the behavior
+of the pipeline. For our software implementation, as long as each FIFO contains more than
+one slot, the execution of the pipeline should produce the same result as the
+original code. However, greater number of slots in the FIFOs would allow each thread to run for longer before going into wait state.
 
 \subsection{Generating System with Xilinx Vivado Tools}
 When synthesizing each C functions using Xilinx's Vivado HLS, every pointer argument through which actual memory references occur is converted to a independent memory port. These
@@ -853,13 +868,6 @@ they are associated with pragmas directing the creation of FIFO interfaces. In t
 the scheduling computation in each function, we ensure the inner loops are
 all aggressively pipelined, while the barriers are contained in non-inlinable function such that operations are not reordered with respect to them.
 
-\begin{figure}[htp]
-\begin{center}
-\includegraphics[width=0.7\linewidth]{chap3fig/SSA2C.pdf}
-\caption{Converting $\phi$ Operator to C
-\label{fig:phi2c}}
-\end{center}
-\end{figure}
 
 
 \begin{comment}
@@ -1197,7 +1205,7 @@ ultimately application specific.
 
 \section{Discussion and Future Work}
 The experimental results have validated the general approach we have proposed and implemented. 
-Decoupling of execution between different part of the control dataflow graph can yield
+Decoupling of execution between different parts of the control dataflow graph can yield
 significant benefits. With different parts of the graph each having their own controller, non-statically schedulable stalls get isolated and more opportunities for
 optimization can be exploited. Unfortunately, these benefits do not come for free. We observed significant area increase when generating our decoupled computational pipeline.
 How to strike the right balance between performance gain and the area cost by devising different ways to partition the CDFG is an interesting dimension for future exploration.
@@ -1207,12 +1215,56 @@ It is also very aggressive in that all separable memory accesses are assigned to
 Furthermore, as we perform topological sort on the nodes before partitioning them, many
 edges might be cut when a new subgraph is created, especially when the dependencies between instructions are relatively denser.
 Therefore, as the input kernels increase in size, our algorithm may result in pipelines with prohibitively high number of communication channels. The optimization we described in section~\ref{dupvscomm}
-partially addresses this issue, but it does not reduce the total number of subgraphs.
+partially addresses this issue, but it does not reduce the total number of subgraphs. Similarly, it is possible to model the instruction partitioning
+step as a multiterminal cut problem~\cite{}, which is an NP-hard problem with
+a few known approximation algorithms, but the number of subgraphs
+can still get large, incurring high area overhead.
 
-A more general framework, the application of which is left for future work, involves the
+One possible direction for future exploration is to generalize our approach by incorporating, as a parameter, the set
+of nodes which must be decoupled from each other. It would then become possible to optimize for the right number of subgraphs, each centered around a group of memory access nodes or strongly connected components. It is of course a huge search space, so we might
+need to rely on randomized algorithms such as simulated annealing to search towards
+a good solution. A challenge there is to come up with a quick estimator of benefit from an instruction partitioning. Unlike the cost of communication channels introduced between separated instruction groups, which can be easily annotated into the edges of the original CDFG, the performance gain of decoupling instruction nodes is harder to model. Empirically, certain quantities can be precomputed or profiled to assist the estimation process. The initiation intervals associated with a strongly connected component can be used to estimate how fast an inner loop memory access node, if being placed in the same partition, can initiate new requests. Meanwhile, if more locality can be observed from the profiled memory access pattern of a particular load/store instruction, the performance hit it incurs on its partition is likely to be smaller, due to a lower cache miss rate.
+To the first order, decoupling nodes exhibiting strong locality into separate partitions has small performance benefit while isolating node withe completely random access pattern can bring about significant gain. In our
+motivating example, for instance, isolating the data fetch (assumed to target random addresses) is more meaningful than separating floating point multiply and the sequential write at the end of the inner loop. On the other hand, 
+off-chip communication bandwidth also imposes an upper bound on how much concurrent data
+requests from the generated pipeline can be accommodated. After a certain point, having more partitions/subgraphs each firing off memory requests independently into a saturated channel would not increase the overall throughput of the computational pipeline. 
+To integrate all these effects into a proper formulation, more in-depth investigation is required to figure out how to best link these quantities with each other and associate appropriate coefficients with them.
+
+
 
 
 \begin{comment}
+
+One of the difficulties lies in modeling the performance gain of decoupling two nodes which sometimes also depends on how other parts of the CDFG interact with each other. It may not be realistic to capture all this information with a static graph, which is a
+natural representation of computation and can be easily annotated with weights to express cost of partitioning instructions. 
+
+
+On the other hand, if a quick estimator can be devised to evaluate the final performance from an instruction partitioning, randomized algorithms like simulated annealing may help direct the search towards a good solution. The challenge of
+quickly quantifying the benefit of separating two nodes into independently running pipeline stages. 
+
+To this end, a few quantities might be precomputed or profiled to assist the performance estimation for the generated pipeline. 
+ In addition, off-chip communication bandwidth imposes an upper bound on how 
+
+
+and the less  locality it has with respect to other instructions, the more beneficial it is to have it decoupled from other part of the CDFG. For our motivating example, 
+
+quantities like the initiation intervals 
+corresponding to each strongly connected component, might be precomputed
+
+To this end, we can precompute the initiation intervals corresponding to each strongly connected components in the graph and profile the access pattern of each load/store node to estimate their
+cache miss rate for a particular cache configuration. With this information, when presented with a particular instruction partitioning, 
+we can quickly 
+
+
+
+A more general framework, the development of which is left for future work, involves exploring the performance benefit v.s. area overhead by gradually
+increase the number of subgraphs generated. 
+
+
+The interaction between the memory accessing parts of the CDFG and the memory subsystem is hard to model with
+a simple weighted graph
+
+
 To alleviate this particular issue, we can make the whole pipeline generation process more
 flexible. While the instruction partitioning step can be changed and various techniques can be
 experimented with, the construction of executable subgraphs and the synthesis of hardware
