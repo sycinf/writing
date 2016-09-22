@@ -1,5 +1,7 @@
-\chapter{Synthesis of Decoupled Computational Pipeline on FPGAs}
+\Chapter{Synthesis of Decoupled Computational Pipeline on FPGAs}{(\textit{previously published}~\cite{7082758}\cite{DBLP:journals/corr/ChengW16})}
 \label{decoupleChap}
+
+
 As mentioned in~\ref{chap1:hls}, the HLS tools statically schedule
 operations when generating accelerators, whose runtime behavior
 is therefore rather simple. Different parts
@@ -582,7 +584,7 @@ by our backend, Vivado HLS.
 Similarly, for each of the edges, we synthesize a FIFO of depth 64 using Xilinx FIFO generator. 
 As the FPGAs contain a variety of resources,
 we assign a numerical value for each type of primitives used by the node (table~\ref{tab:resourcecost}). We derive the percentage silicon area
-each type of resources occupies from a die photo of an older Xilinx chip~\cite{},
+each type of resources occupies from a die photo of an older Xilinx chip~\cite{wawrzynek2002eecs150},
 and generate the cost of nodes and FIFOs accordingly. 
 With the CPLEX~\cite{iILO06a} optimization software, the formulated ILP can be solved and the experimental evaluation presented in section~\ref{sec:er} has incorporated the outcome of these optimizations.
 
@@ -1216,15 +1218,14 @@ Furthermore, as we perform topological sort on the nodes before partitioning the
 edges might be cut when a new subgraph is created, especially when the dependencies between instructions are relatively denser.
 Therefore, as the input kernels increase in size, our algorithm may result in pipelines with prohibitively high number of communication channels. The optimization we described in section~\ref{dupvscomm}
 partially addresses this issue, but it does not reduce the total number of subgraphs. Similarly, it is possible to model the instruction partitioning
-step as a multiterminal cut problem~\cite{}, which is an NP-hard problem with
-a few known approximation algorithms, but the number of subgraphs
+step as a multiterminal cut problem~\cite{multicut}, which is an NP-hard problem with a few known approximation algorithms, but the number of subgraphs
 can still get large, incurring high area overhead.
 
 One possible direction for future exploration is to generalize our approach by incorporating, as a parameter, the set
 of nodes which must be decoupled from each other. It would then become possible to optimize for the right number of subgraphs, each centered around a group of memory access nodes or strongly connected components. It is of course a huge search space, so we might
 need to rely on randomized algorithms such as simulated annealing to search towards
 a good solution. A challenge there is to come up with a quick estimator of benefit from an instruction partitioning. Unlike the cost of communication channels introduced between separated instruction groups, which can be easily annotated into the edges of the original CDFG, the performance gain of decoupling instruction nodes is harder to model. Empirically, certain quantities can be precomputed or profiled to assist the estimation process. The initiation intervals associated with a strongly connected component can be used to estimate how fast an inner loop memory access node, if being placed in the same partition, can initiate new requests. Meanwhile, if more locality can be observed from the profiled memory access pattern of a particular load/store instruction, the performance hit it incurs on its partition is likely to be smaller, due to a lower cache miss rate.
-To the first order, decoupling nodes exhibiting strong locality into separate partitions has small performance benefit while isolating node withe completely random access pattern can bring about significant gain. In our
+To the first order, decoupling nodes exhibiting strong locality into separate partitions has small performance benefit while isolating node with completely random access pattern can bring about significant gain. In our
 motivating example, for instance, isolating the data fetch (assumed to target random addresses) is more meaningful than separating floating point multiply and the sequential write at the end of the inner loop. On the other hand, 
 off-chip communication bandwidth also imposes an upper bound on how much concurrent data
 requests from the generated pipeline can be accommodated. After a certain point, having more partitions/subgraphs each firing off memory requests independently into a saturated channel would not increase the overall throughput of the computational pipeline. 

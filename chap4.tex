@@ -1,5 +1,5 @@
 
-\chapter{Decoupled Computational Pipeline as a Process Network}
+\Chapter{Decoupled Computational Pipeline as a Process Network}{(\textit{previously published}~\cite{ShaoyiICCAD})}
 \label{liveprof}
 When multiple processes are communicating with each other through finite communication channels, deadlocks may happen. The pipeline of subgraphs we have generated can be seen as a network
 of communicating processes, and thus may become deadlocked under certain circumstances.
@@ -186,13 +186,13 @@ in terms of a KPN, with the addition of a more flexible memory ``process''.
 \section{Bounded Execution of the Process Network}
 In real implementation of a KPN, 
 it is impossible to have unbounded communication FIFOs between
-processes. In~\cite{}, KPNs are 
+processes. In~\cite{boundedwrite}, KPNs are 
 categorized into strictly bounded, bounded and unbounded ones.
 A KPN is strictly bounded if and only if any execution of of the network requires bounded space. It is bounded if and only if there are some
 execution requiring bounded space while it is unbounded if and only if any
 execution requires unbounded space. Methods to find bounds for communication channels
-in KPNs were discussed in~\cite{}\cite{}. In general, whether a
-KPN is bounded is undecidable~\cite{}, but for our process networks, which
+in KPNs were discussed in~\cite{boundedwrite}\cite{Geilen:2003:REK:1765712.1765736}. In general, whether a
+KPN is bounded is undecidable~\cite{Buck:1993:SDD:921086}, but for our process networks, which
 are generated from sequential programs expressed in single static assignment
 form, we can analyze the boundedness of the FIFO channels in various
 scenarios. Note here we try to deduce properties applicable for
@@ -444,14 +444,14 @@ channel can now buffer the tokens produced by INS $\overline{A_1}$ -- INS $\over
 to INS $\overline{B_1}$. The deadlock no longer exists.
 \end{comment}
 
-Indeed, this is the classic approach in resolving artificial deadlock~\cite{boundedwrite}. 
+Indeed, this is the classic approach for resolving artificial deadlock~\cite{boundedwrite}. 
 When artificial deadlock is detected, the process which is write blocked is found, the full FIFO it tries to write to is given more capacity. 
 However, in a network implemented in hardware, the FIFO size cannot be easily increased.
 %As the producer and consumer instruction instances are rescheduled differently with
 %respect to other instructions in their own process, blocking write causes
 %artificial deadlock. Increasing the number of slots in the FIFO can help resolve
 %this problem. 
-To determine the needed buffer space in the channels \textit{a priori}, simulations are sometimes used~\cite{buck1994ptolemy}. It relies 
+To determine the needed buffer space in the channels \textit{a priori}, simulations are sometimes used~\cite{buck1994ptolemy}\cite{efficientNetwork}. It relies 
 on using representative dataset as input and for certain type of problems, simulation results may not provide any guarantee, especially if the control flow is runtime data dependent. In this section, we want to analyze the interaction between FIFO
 sizing and intra-process instruction scheduling, 
 so we can 
@@ -493,47 +493,48 @@ representation of the schedule we have in figure~\ref{fig:deadlockfig}(c).
 Various dependency edges are associated with weights to 
 represent the difference between the subscripts of the pair of instruction
 instances. For instance, as $_{(2)}$push(r1Q, r1) is 
-scheduled before $_{(0)}$push{r2Q, r2} in process 1, the edge from INS push{r2Q, r2} %$\overline{B}$ 
+scheduled before $_{(0)}$push{r2Q, r2} in process 1, the edge from push{r2Q, r2} %$\overline{B}$ 
 to 
 %INS $\overline{A}$ 
 push(r1Q, r1)
 carries
-a weight of 3, meaning the occurrence of INS $\overline{B_x}$ depends on the completion of INS $\overline{A_{x+3}}$. Similarly, when the channel between 
-INS $\overline{A}$ in process 1 and INS $\underline{A}$ in process 2 are of size one, INS $\overline{A_x}$ depends on the completion of INS $\underline{A_{x-1}}$, 
+a weight of 2, meaning the occurrence of $_{(x)}$push(r1Q, r1) depends on the completion of 
+$_{(x+2)}$push(r1Q, r1). Similarly, when the channel between 
+push(r1Q, r1) in process 1 and pop(r1Q, r1) in process 2 is of size one, $_{(x)}$push(r1Q, r1) depends on the completion of $_{x-1}$pop(r1Q, r1), 
 which is represented by the $-1$ weight of the edge representing this
 dependency. The edges denoting data dependencies between processes
-are always of weight 0, as each pair of the end points represents the same instruction instance, with one being the actual source of the data, and the other a placeholder in the consumer process.
-Note the weights assigned correspond to the largest differences
-in instance subscripts, representing the furthest an instruction is running
-ahead of its dependents. In the presence of branches, it is possible that
-an instruction does not get executed every loop iteration. The subscripts
-assumed by the instruction instances do not take this into account, i.e. $I_3$
-in iteration 3 despite it is actually the second time $I$ is executed. Thus under
-this particular scheme, the subscripts assigned to instruction instances
-are just the iteration numbers of the enclosing loop in the original program.
-Note in the literature about loop dependency analysis~\cite{Kennedy:2001:OCM:502981}, the term iteration number is generally associated with analyzable loop index, with
-bounds and regular change steps. Here, however, we just use the term to represent the simple ordering of iterations, with or without actual loop indices.
-
-To shrink the size of the graph, we have taken advantage of the transitive property of dependencies to reduce the number of the $DepS$ edges in the graph.
-As only the scheduling of producer/consumer instructions matters for
-deadlock detection, we can further trim the graph by omitting any $DepS$ edges having end point $j \not\in \bar{J^p} \cup \underline{J}^p$. In figure~\ref{fig:singlelevelLoopCylce}, for instance, the $DepS$ from INS $\underline{A}$ to INS $C$ can be redirected to INS $\underline{B}$, accompanied by the deletion of INS $C$ and the $DepS$ edge from INS $C$ to INS $\underline{B}$.
-
+are always of weight 0, as the end points are both associated to the same instruction instance. This graph is named $precedence$  $graph$ as it captures the necessary ordering of instruction instances, allowing for the analysis of deadlocks.
+%as both the end points correspond  the same instruction instance, with one being the actual source of the data, and the other a placeholder in the consumer process.
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=0.7\linewidth]{chap4fig/singlelevelLoopCycle2.pdf}
+\includegraphics[width=0.8\linewidth]{chap4fig/singlelevelLoopCycle2.pdf}
 \caption{Deadlock Detection using Graph with Weighted Edge
 \label{fig:singlelevelLoopCylce}}
 \end{center}
 \end{figure}
 
-Now, if a non-negatively weighted cycle is found within this graph, we have an artificial deadlock.
-A cycle in the graph means we have an instruction instance $I_x$, whose occurrence depends on the completion of $I_{x+w}$, $w$ being the weight of the cycle.
-With $w$ being greater or equal to zero, $I_x$ cannot happen until itself or a later instance happens -- we have a deadlock. 
+To shrink the size of the precedence graph, we have taken advantage of the transitive property of dependencies to reduce the number of the $DepS$ edges in the graph.
+Also, as only the scheduling of producer/consumer instructions matters for
+deadlock detection, we have trimmed the graph by omitting any $DepS$ edges having end point
+$j \not\in _{push}{I^p} \cup _{pop}{I^p}$. 
+%$j \not\in \bar{J^p} \cup \underline{J}^p$. 
+In figure~\ref{fig:singlelevelLoopCylce}, for instance, $out2[i]$ is not included and all
+its incoming edges are redirected to the nearest communication instructions.
+
+%the $DepS$ from INS $\underline{A}$ to INS $C$ can be redirected to INS $\underline{B}$, accompanied by the deletion of INS $C$ and the $DepS$ edge from INS $C$ to INS $\underline{B}$.
+
+
+
+
+
+Now, if a non-negatively weighted cycle is found within the precedence graph, we have an artificial deadlock.
+A cycle in the graph means we have an instruction instance $_xj$, whose occurrence depends on the completion of $_{x+w}j$, $w$ being the weight of the cycle.
+With $w$ being greater or equal to zero, $_xj$ cannot happen until itself or a later instance happens -- we have a deadlock. 
 The computation to find deadlocks may potentially be expensive. In the worst case, the number
 of simple cycles in the graph can be exponential in
 $|V|$, the number of nodes in the graph. Practically however, the number of
-nodes involved are approximately the same as the number of channels needed, while the graph is rather sparse in the connectivity between these nodes. 
+nodes involved are approximately the same as the number of channels needed, and the graph is rather sparse in the connectivity between these nodes. 
 Methods such as~\cite{doi:10.1137/0204007} can be used for efficient
 enumeration of the cycles and the subsequent identification of the deadlocks.
 
@@ -541,88 +542,137 @@ enumeration of the cycles and the subsequent identification of the deadlocks.
 
 Resolving
 the deadlock involves choosing one of the $DepF$ edges
-in the cycle and add enough slots (making the weight more negative)
+in the cycle and add enough slots (making the weight more negative),
 such that the sum of the edge weights becomes negative. For
-one particular cycle, the $DepF$ edge whose channel has the smallest width can be selected, as this minimizes the cost of adding the extra slots. However,
+one particular cycle, the $DepF$ edge whose channel has the smallest width can be selected, so the cost of adding the extra slots is minimized. Of course,
 as multiple non-negatively weighted cycles can be present simultaneously,
-the global optimal solution would involve finding a set of $DepF$ edges, 
-and minimize the aggregate cost of incrementing each for all cycles to be resolved, which 
-is NP-Hard. (maybe I shall formulate an ILP here??)
+this heuristic does not necessarily produce the globally optimal solution, though it suffices
+for our use cases.
+%would involve finding a set of $DepF$ edges, and minimize the aggregate cost of incrementing each for all cycles to be resolved, which is NP-Hard. %(FIXME: maybe I shall formulate an ILP here??)
+
+
+It is worth noting that the weights assigned to edges correspond to the largest differences
+in instance subscripts, i.e. the furthest an instruction is running
+ahead of its dependents. In the presence of branches, it is possible that
+an instruction does not get executed every loop iteration. The subscripts
+assumed by the instruction instances do not take this into account. In figure~\ref{fig:exeSche}
+for instance, $_{(2)}$push(r2Q, r2) gets executed despite $_{(1)}$push(r2Q, r2) 
+never appears in the schedule of process 1.
+%in iteration 3 despite it is actually the second time $I$ is executed. 
+Thus under our scheme, the subscripts assigned to instruction instances
+are just the iteration numbers of the enclosing loop in the original program.
+Note in the literature about loop dependency analysis~\cite{Kennedy:2001:OCM:502981}, the term iteration number is generally associated with analyzable loop index, with
+bounds and regular change steps. Here, however, we just use the term to represent the simple ordering of iterations, with or without actual loop indices.
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=1.0\linewidth]{chap4fig/vectorAnnot.pdf}
+\includegraphics[width=0.7\linewidth]{chap4fig/executionSchedules.pdf}
+\caption{Execution Schedules and Subscript Assignment in the Presence of Branches
+\label{fig:exeSche}}
+\end{center}
+\end{figure}
+
+
+
+
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.8\linewidth]{chap4fig/vectorAnnot2.pdf}
 \caption{Multi-level Loop Nest Deadlock Detection
 \label{fig:vectorannot}}
 \end{center}
 \end{figure}
 
-So far we have formulated a method for deadlock detection and resolution
-for a single level loop. To generalize this method for loop nests of multiple
+The method we have formulated so far can be easily applied for 
+%So far we have formulated a method for
+deadlock detection and resolution
+of a single level loop. To generalize this method for loop nests of multiple
 levels, we associate each instruction instance with
 a vector of iteration numbers, with the earlier elements corresponding to the outer loops.
 %indicating its position in the iteration space.
 Subsequently, for the weight assigned to each of the edges, instead of
 a single number, a vector is used. The number of elements in the vector
 corresponds to the number of levels in the loop nest.
-An example of this is shown in figure~\ref{fig:vectorannot}. 
+An example of this is shown in figure~\ref{fig:vectorannot}, where a two 
+level loop nest is decoupled into two processes and independently scheduled.
 
 
 
+\begin{comment}
 The vector weights assigned to the edges between instructions of
 the same level in the loop nest are really the same as in the single level loop
 example, except the padding of zeros. A more interesting case is the $DepS$ edge from INS $\overline{E}$ to INS $\overline{B}$, which goes from an outer loop instruction to an inner loop instruction. 
 The last components of the subscript vectors of INS $\overline{E}$ instances are always 1
 as the instruction does not execute in the innermost loop. The subscript vectors of INS $\overline{B}$ instances, however, can take a value up to 10 for its right most element, as the inner most loop has an iteration count of 10. Thus the weight $(0,9)$
 means the $1$st INS $\overline{E}$ instance is scheduled after the $10$th occurrence of INS $\overline{B}$ in the current iteration of the outer loop.
+\end{comment}
+The vector weights assigned to the edges between instructions of
+the same level in the loop nest are really the same as in the single level loop
+example, except the padding of zeros. A more interesting case is the $DepS$ edge from push(r0Q,r0) to push(r2Q,r2), which goes from an outer loop instruction to an inner loop instruction. 
+The last components of the subscript vectors of push(r0Q,r0) instances are always 0
+as the instruction does not execute in the innermost loop. The subscript vectors of push(r2Q,r2) instances, however, can take a value up to M for its right most element, as the inner most loop has an iteration count of M. 
+Thus the weight $(-1,M)$ means that only after the $M$th occurrence of  push(r2Q,r2) in the previous iteration of the outer loop, another instance of push(r0Q,r0) can be scheduled within process 1.
 
-In this modified graph, 
-every cycles in the graph now has a weight sum which is also a vector. 
+
+
+
+In this enhanced precedence graph, 
+every cycle in the graph now has a weight sum which is also a vector. 
 An deadlock is manifested as a cycle with weight being the zero vector ($\vec{0}$)
 or vectors whose first non-zero elements (leading elements) are positive.
 Similar to the case when we have scalar
 weights, these weight vectors 
 indicate an instruction instance depending on itself or a later instance in the execution trace, and thus a deadlock. The deadlocks can also be
 resolved by finding the $DepF$ edges, whose change of capacity makes
-all the cycles' weights' to have negative  leading element. 
+all the cycles' weights to have negative  leading element. 
 
 
 \begin{definition}
-When an artificial deadlock occurs, a cycle of dependency between instruction instances is formed. Define this cycle as $C_v$. Each instruction instance in $C_v$ corresponds to one instruction in the weighted graph. Define the cycle formed in the weighted graph by the corresponding instructions as $C_V$, and the set of instructions
+When an artificial deadlock occurs, a cycle of dependency between instruction instances is formed. Define this cycle as $C_v$. Each instruction instance in $C_v$ corresponds to one instruction in the precedence graph. Define the cycle formed in the precedence graph by the corresponding instructions as $C_V$, and the set of instructions
 as $V$. 
 \end{definition}
 
-As mentioned before, non-communicating instructions/instruction instances can be omitted in the graph without affecting the deadlock analysis, thus $V \subseteq \bar{J^p} \cup \underline{J}^p$. As the nodes in $C_v$ are instantiations of nodes in $C_V$, the edges in $C_v$ are also
-instantiations of edges in $C_V$. Let these edges in $C_v$ carry the same weights as the $C_V$ edges they instantiate.
+As mentioned before, non-communicating instructions/instruction instances can be omitted in the graph without affecting the deadlock analysis, thus $V \subseteq _{push}I^p \cup _{pop}I^p$. As the nodes in $C_v$ are instantiations of nodes in $C_V$, the edges in $C_v$ are also
+instantiations of edges in $C_V$. The weights of these edges are the difference between
+the subscript vectors of the end-points in $C_v$, which are always lexicographically smaller  or equal to the weights carried by edges in $C_V$.
+
+%Let these edges in $C_v$ carry the same weights as the $C_V$ edges they instantiate.
 
 \begin{lemma}
 \label{deadlock2cycle}
 If there is an artificial deadlock in the network, there will be a cycle in
-the weighted graph whose sum of edges
+the precedence graph whose sum of edges
 is either $\vec{0}$ or vectors with positive leading element. 
 \end{lemma}
 
 % we wanna prove the sum of edges in C_i is smaller than C_I
 %Assume $C_I$'s weight has negative left most non-zero element, 
 We can take any point in  $C_v$, and go around the
-cycle $C_v$ to get a sequence $V^1_{X1}$, $V^2_{X2}$ ... $V^n_{Xn}$ where $V^1 ... V^n \in V$, $V^1 = V^n$ and $X_1 = X_n = X_1 + (X_2-X_1) + (X_3-X_2) ... (X_n - X_{n-1})$. The sum of edges in $C_v$ = $(X_2-X_1) + (X_3-X_2) ... (X_n - X_{n-1})$ =$\vec{0}$ as $X_1 = X_n$.  
+cycle $C_v$ to get a sequence $_{(X_1)}V^1$, $_{(X_2)}V^2$ ... $_{(X_n)}V^n$ where $V^1 ... V^n \in V$, $V^1 = V^n$ and $X_1 = X_n = X_1 + (X_2-X_1) + (X_3-X_2) ... (X_n - X_{n-1})$. The sum of edges in $C_v$ = $(X_2-X_1) + (X_3-X_2) ... (X_n - X_{n-1})$ =$\vec{0}$ as $X_1 = X_n$.  
 
 If no two elements in $C_v$ map to the same
-element in $V$, then the sum of edges in $C_v$ is equivalent to the 
-sum of edges in $C_V$, which would be zero -- we have a cycle in the weighted
-graph whose sum of edges is the $\vec{0}$.
+element in $V$, then the sum of edges in $C_v$ is equal to or smaller than the 
+sum of edges in $C_V$, which would be zero or lexicographically greater -- we have a cycle in the weighted
+graph whose sum of edges is $\vec{0}$ or a vector with positive leading element.
 
-Otherwise, we can have $C_v$ containing two instruction instances $U_{Y1}, U_{Y2}$ mapping to the same element $U \in V$, and instruction instances on the path between $U_{Y1}, U_{Y2}$ are all unique instances of instructions in  $W_1 \subseteq  V \setminus U$.  
-Now we can construct a cycle $C_{W1}$ of instructions using $W_1$, and the weight of this cycle is the same as the weight of the path from $U_{Y1}$ and 
-$U_{Y2}$ as every edge in the path is a unique instantiations of a corresponding edge in $C_{W1}$. This decomposition can be applied recursively to 
-the remaining part of $C_v$ until we have $C_{W1}, C_{W2}...C_{Wn}$ whose
-sum equals to the weight of $C_v$. Since weight of $C_v$ is  $\vec{0}$, 
-they can either all be of weight $\vec{0}$, or at least one of them will have
-positive leading element. This process is illustrated in figure~\ref{fig:decomp} for a single level loop.
+Otherwise, we can have $C_v$ containing two instruction instances $_{Y_1}U, _{Y_2}U$ mapping to the same element $U \in V$, and instruction instances on the path between $_{Y_1}U, _{Y_2}U$ are all instances of unique instructions in  $W_1 \subseteq  V \setminus U$.  
+Now we can construct a cycle $C_{W_1}$ of instructions using $W_1$, and the weight of this cycle is the same or greater than the weight of the path between $_{Y1}U$ and 
+$_{Y2}U$. This is essentially the case we have just discussed, where only single instances of
+the instructions are present in a cycle. We can decompose $C_v$ further, and obtain more of these cycles,  $C_{W_1}, C_{W_2}...C_{W_n}$, the sum of their respective weights must be equal to or greater then the weight of $C_v$.
+%as every edge in the path is a unique instantiations of a corresponding edge in $C_{W_1}$. 
+%This decomposition can be applied recursively to 
+%the remaining part of $C_v$ until we have $C_{W_1}, C_{W_2}...C_{W_n}$ whose
+%sum equals to the weight of $C_v$. 
+Since weight of $C_v$ is  $\vec{0}$, 
+these cycles can either all be of weight $\vec{0}$, or at least one of them will have
+positive leading element. This process is illustrated in figure~\ref{fig:decomp} for a single level loop. In essence, if a cycle (of instruction instances)
+in a graph carries a weight of $\vec{0}$, then the weight of one of its component simple cycles must have a positive leading element/be $\vec{0}$. 
+The weights of the simple cycles here provide lower bounds for the weights of cycles of instructions in the precedence graph.
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=0.9\linewidth]{chap4fig/decomp.pdf}
-\caption{Decomposition of Cycle of Instruction Instances 
+\includegraphics[width=0.9\linewidth]{chap4fig/decomp2.pdf}
+\caption{Decomposition of Cycle of Instruction Instances
 \label{fig:decomp}}
 \end{center}
 \end{figure}
@@ -630,7 +680,7 @@ positive leading element. This process is illustrated in figure~\ref{fig:decomp}
 
 
 As lemma~\ref{deadlock2cycle} is proven to be true, the absence of cycles of
-weight $\vec{0}$ or with positive leading elements guarantees the the absence of artificial deadlock (the contrapositive).
+weight $\vec{0}$ or with positive leading elements guarantees the the absence of artificial deadlock (the contrapositive of lemma~\ref{deadlock2cycle}).
 
 \begin{comment}
 % real not useful
@@ -656,13 +706,7 @@ it may.
 
 %\begin{comment}
 
-\begin{figure}[htp]
-\begin{center}
-\includegraphics[width=1.0\linewidth]{chap4fig/unresolve.pdf}
-\caption{Rescheduling Creates Statically Unresolvable Deadlock
-\label{fig:badsitu}}
-\end{center}
-\end{figure}
+
 
 \subsection{Statically Unresolvable Artificial Deadlocks}
 Using the analysis framework we have formulated, we can foresee situations
@@ -677,9 +721,18 @@ number of iterations of the inner loop is statically unknown, there will
 always be a $DepF$ between a pair of the $push$ and $pop$ instruction instances (and therefore a cycle of dependence),
 regardless of how large the FIFO size is. 
 
-In the weighted edge graph, the number of iterations is represented
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=1.0\linewidth]{chap4fig/unresolve2.pdf}
+\caption{Rescheduling Creates Statically Unresolvable Deadlock
+\label{fig:badsitu}}
+\end{center}
+\end{figure}
+
+In the predence graph, the number of iterations is represented
 symbolically and the $DepS$ edge between the outer loop and inner loop producers carries a weight of $(0,i)$. Assuming FIFOs of size 1, a cycle of weight $(0, i-1)$ is found. Without knowing the bound of $i$, there is no way we can add enough
-space to the $DepF$ edge between the producer and consumer of ``data" such
+space to the $DepF$ edge between the producer and consumer of $data$ such
 that the cycle weight has negative leading element.
 
 
@@ -688,10 +741,10 @@ in this example to demonstrate the validity of the reordering. There is no local
 To prevent this type of unresolvable deadlocks, we can impose constraints on the
 reordering of instructions performed by the HLS tools. The starting point of
 instruction rescheduling is always the original program order, or more specifically the locally consistent $G(p)$. 
-It was proven that if every process is run according to $G(p)$, there will be no artificial deadlock. Thus as long as we do not add symbolic vectors into the the weights of the cycles in the graph representing the process network, no unresolvable deadlock would be introduced.
+It was proven that if every process is run according to $G(p)$, there will be no artificial deadlock. Thus as long as we do not introduce symbolic vectors into the the weights of the cycles in the precedence, no unresolvable deadlock would be introduced.
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=1.0\linewidth]{chap4fig/safeRule.pdf}
+\includegraphics[width=1.0\linewidth]{chap4fig/safeRule2.pdf}
 \caption{Safe Reordering of Instructions
 \label{fig:safeReschdule}}
 \end{center}
@@ -700,7 +753,7 @@ It was proven that if every process is run according to $G(p)$, there will be no
 
 A sufficient condition to ensure this is to disallow
 outer loop instruction to be locally reordered with respect to inner loop instruction.
-According to our scheme, all the simple paths whose weights contain symbolic variables are ones going from an outer loop instruction to inner loop ones.
+According to our scheme, all the simple paths whose weights contain symbolic variables must be ones going from an outer loop instruction to inner loop ones.
 Meanwhile,
 simple paths between instruction 
 of the same loop level, if not going through inner loop instruction, are 
@@ -774,13 +827,7 @@ consumer instruction instance is always scheduled before the cycle of blocked
 processes is formed.
 \end{comment}
 
-\begin{figure}[htp]
-\begin{center}
-\includegraphics[width=0.9\linewidth]{chap4fig/outstandingSchedule.pdf}
-\caption{Deadlock Involving Memory Access
-\label{fig:ff}}
-\end{center}
-\end{figure}
+
 
 
 \subsection{Memory Access Representation}
@@ -793,12 +840,18 @@ However, the sending of requests and receiving of the responses can often
 be decoupled, as we have done in chapter~\ref{decoupleChap}. In the case when they are assigned to the same process, to accommodate the latency of data access, instructions can also be scheduled between them. 
 Now when the responses are sent back from the memory, their designated consumers
 may not be ready to execute, and more buffering is needed. This behavior can be easily incorporated into our model. 
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{chap4fig/outstandingSchedule.pdf}
+\caption{Deadlock Involving Memory Access
+\label{fig:ff}}
+\end{center}
+\end{figure}
 
-
-As shown in figure~\ref{fig:ff}, corresponding to each memory access, a \textit{send\_req/receive\_resp} pair is created in the schedule.  Because multiple \textit{send\_req}s are scheduled
+As shown in figure~\ref{fig:ff}, corresponding to each memory access, a \textit{send\_req/receive\_resp} pair is created in the schedule. The reaction of the memory is modelled by a pop action responding to the incoming request, and a push action producing one response data token.  As multiple \textit{send\_req}s are scheduled
 before \textit{receive\_resp}, i.e. due to aggressive loop pipelining, the memory subsystem must be able to buffer/serve multiple outstanding memory requests to prevent deadlock. In the example schedule, 4 \textit{send\_req}s are scheduled before the first \textit{receive\_resp}, while the memory subsystem (with the associated FIFOs) 
 can only accommodate three, a deadlock is thus created. This is detected as the
-positively weighted cycle in the graph. Just like for normal processes, increasing
+zero weight cycle in the precedence graph. Just like for normal processes, increasing
 the FIFO size resolves the issue. When the \textit{send\_req} and \textit{receive\_resp}
 are partitioned into two different processes, a similar graph can be created and the minimal amount of space for deadlock avoidance can be computed.
 
@@ -813,8 +866,8 @@ about the memory accesses causing deadlock. In figure~\ref{}b, for instance, 2 e
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=0.95\linewidth]{chap4fig/burstDependence.pdf}
-\caption{Weighted Graph for Burst Mode Memory Access (a) send\_req and receive\_resp in a single process (b) send\_req and receive\_resp are decoupled
+\includegraphics[width=0.95\linewidth]{chap4fig/burstDependence2.pdf}
+\caption{Example Precedence Graphs for Burst Mode Memory Access (a) send\_req and receive\_resp in a single process (b) send\_req and receive\_resp are decoupled into two processes
 \label{fig:burstDep}}
 \end{center}
 \end{figure}
@@ -822,31 +875,37 @@ about the memory accesses causing deadlock. In figure~\ref{}b, for instance, 2 e
 Another common optimization in memory access is the use of burst mode.
 As described in chapter~\ref{decoupleChap}, to concatenate
 memory requests across loop iterations into one burst access, the \textit{send\_req} operation is hoisted to one level out of the original loop. 
-The \textit{receive\_resp}, meanwhile, remains in the initial loop level. Figure~\ref{fig:burstDep} shows how a weighted graph can be used to represent the transformed program. In (a), only a single process is involved, while (b) demonstrates
-the weighted graph when the memory access is decoupled into two processes. In both cases, all the cycle weights have negative leading element even when each FIFO is assumed to be of size one. No deadlocks would occur in this case. A more interesting
+The \textit{receive\_resp}, meanwhile, remains in the initial loop level.
+Even though the memory ``process'' does not block on reads, if the response data it sends to other normal processes is not consumed promptly, it can blocked on writes. 
+The head-of-line blocking can then create a dependency cycle, resulting in a deadlock. Our precedence graph can be used to compute the necessary buffer size to resolve this situation as well. 
+Figure~\ref{fig:burstDep} shows how a precedence graph can be used to represent the transformed program. In (a), only a single process is involved, while (b) shows
+the precedence graph when the memory access is decoupled into two processes. In both cases, all the cycle weights have negative leading element even when each FIFO is assumed to be of size one. No deadlocks would occur in this case. A more interesting
 scenario is when two memory accesses are converted to burst mode and the interaction
 between them causes deadlocks. This is illustrated in figure~\ref{fig:burstDepCop}.
 
 
 \begin{figure}[htp]
 \begin{center}
-\includegraphics[width=1.0\linewidth]{chap4fig/burstDepCoupling.pdf}
+\includegraphics[width=0.9\linewidth]{chap4fig/burstDepCoupling2.pdf}
 \caption{Deadlock Due to Interaction Between Two Burst Mode Memory Accesses
 \label{fig:burstDepCop}}
 \end{center}
 \end{figure}
 
-Besides the usual dependence edges, an extra burst dependency edge is added between \textit{Push(data2)}
-to \textit{Push(data1)}. This edge signifies the head-of-line blocking caused by the
-large amount of data carried by one response.
-In this particular example, the request for $data1$ is responded
-with $B$ tokens, which have to be consumed/buffered before the response for the next
-request ($data2$) is accessible by its \textit{receive\_resp} operation. This information is encoded
-in the weight of the newly added edge.
-To resolve the deadlock shown in the figure, the capacity of the FIFO between \textit{Push(data2)} and \textit{receive\_resp(data2)} should be increased by $B$, such
-that the weight of the deadlock-causing cycle becomes (0,-1). In essence, the head-of-line 
-burst mode responses need to be buffered entirely to ensure the subsequent 
-$receive\_resp$ is getting data, and the whole datapath can then continue executing.
+Besides the usual dependence edges, an extra $DepM$ dependency edge is added between \textit{push(data2)}
+and \textit{push(data1)}.
+The symbolic variable $B$ in the weight of this edge captures the head-of-line blocking due to large amount of response data, i.e. how many tokens have to be consumed/buffered before the response for the next request ($data2$) become accessible for the receiver. 
+%This edge signifies the head-of-line blocking caused by the large amount of data carried by one response.
+%In this particular example, the request for $data1$ is responded with $B$ tokens, which have to be consumed/buffered before the response for the next request ($data2$) is accessible by its \textit{receive\_resp} operation. This information is encoded in the weight of the newly added edge.
+%In this example, assuming the arbiter for the memory subsystem implements a policy which can potentially take in and serve multiple ($K$) consecutive requests from one stream, $B$ can be as big as $BurstSize_{max}*K$. 
+%On the other hand, if a round-robin arbiter is used, $B = BurstSize_{max}$ and for our experiment platform which uses the AXI bus protocol, this number is 256. 
+With this precedence graph, we can easily detect a potential deadlock in the implementation. 
+%compute that the buffering for the two memory response channels needs to be increased to $B$ for the deadlocks to be resolved.
+To resolve this deadlock, the capacity of the FIFO between \textit{push(data1)} and \textit{receive\_resp(data1)} should be increased to $B$, such
+that the weight of the deadlock-causing cycle becomes (0,-1). A similar buffering increase in the response channel for \textit{data2} resolves the other remaining deadlock.
+In essence, the head-of-line 
+burst mode responses need to be buffered entirely to ensure other subsequent 
+$receive\_resp$s are getting their data, and the whole datapath can then continue executing.
 
 The actual value of $B$ depends on a few factors. In chapter~\ref{decoupleChap}, we mentioned the burst access adapter which generates
 multiple burst mode requests according to the parameters of the $send\_req$ operation. For the
@@ -854,37 +913,47 @@ process in figure~\ref{fig:burstDepCop}, this means two stream of requests $S_1$
 Assume the arbiter for memory subsystem implements a policy which can potentially take in and serve multiple ($K$) consecutive requests from one stream, we can compute $B$ to be $BurstSize_{max}*K$. 
 In the case of a round-robin schedule, $B = BurstSize_{max}$ and for our experiment platform which uses AXI bus protocal, this number is 256. 
 
-When multiple burst mode accesses are distributed across different accelerators, 
+When multiple burst mode accesses are distributed across different decoupled processes, 
 depending on the exact graph generated, the required buffer size can be a lot smaller
-and in certain cases, not at all affected by the size of the burst. This is shown in figure~\ref{}. By decoupling the memory accesses and duplicate the loop counters, we essentially have two separate reduction engines running independently. As their schedules are completely
-decoupled, there are no cycles containing the burst dependency edge. Thus even with
-small buffer space, no deadlocks will occur.
+and in certain cases, not at all affected by the size of the burst. This is shown in figure~\ref{fig:doubleProcess}. By decoupling the memory accesses and duplicate the loop counters, we essentially have two separate data fetch engines running independently. As their schedules are completely
+separated, there are no cycles containing the $DepM$ edge. Thus even with
+a buffer size of one in each channel, no deadlocks will occur.
 
+
+\begin{figure}[htp]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{chap4fig/doubleProcesses.pdf}
+\caption{Burst Mode Memory Access by Decoupled Processes
+\label{fig:doubleProcess}}
+\end{center}
+\end{figure}
  
 
 \section{Discussion and Future Work}
 In this chapter, we devised a proof for the absence of artificial deadlock in a pipeline of processes
 generated by our flow, assuming each of them is executed according to the original program order. A framework is then proposed to compute the minimum FIFO size needed to avoid deadlocks when the processes are synthesized into accelerators, which aggressively parallelize/reorder operations. This approach is proposed to reason about the properties of our accelerator pipeline, generated by
-splitting a single CDFG. However, it may also be applied to network of statically scheduled processes
+splitting a single CDFG. However, it may also be applied to network of processes
 created using other methods.
 
 
-The weighted graph constructed in our analysis is based on 1) the scheduling of sender and receiver operators within each process, and 2) the point-to-point communication between pairs of sender and receiver instructions in different processes.
-The first part can be easily extracted from any statically scheduled accelerators. 
-The second part is  applicable to a subset of communication patterns, where each FIFO is read/written to by only one instruction locally, or more precisely, at a single time slot allocated in the local schedule. 
-If a process network satisfy the second condition, appropriate FIFO
+In our analysis, the construction of precedence graph is based on 1) the scheduling of sender and receiver operators within each process, and 2) the size of communication channels between pairs of sender and receiver instructions in different processes.
+The local ordering of instructions can be easily extracted from any statically scheduled accelerators, but not all networks of processes satisfies the condition that each pair of
+sender and receiver has a dedicated communication channel. If each FIFO is read/written to by only one instruction locally, or more precisely, at a single time slot allocated in the local schedule,  
+%the second part is constrains the communication patterns of the networks, where each FIFO is read/written to by only one instruction locally, or more precisely, at a single time slot allocated in the local schedule. 
+%If a process network satisfy the second condition, 
+appropriate FIFO
 sizes for deadlock avoidance can be derived statically.
 
 
-In commercial high level synthesis tools~\cite{}, for instance, computations can be manually structured into a series of functions which are annotated to allow the generation of a streaming pipeline. However, the problem of artificial deadlock is left to be addressed by the users as no systematic approach is provided by the vendor for sizing the FIFOs. If within every function, only one instruction accesses each FIFO interface, we can generate our weighted graph and perform deadlock analysis. Of course there are cases where this is not true, then the simulation based approach or communication buffers other than FIFOs may need to be used.
+In commercial high level synthesis tools~\cite{tools:vivadohls}, for instance, computations can be manually structured into a series of functions which are annotated to allow the generation of a streaming pipeline. However, the problem of artificial deadlock is left to be addressed by the users as no systematic approach is provided by the vendor for sizing the FIFOs. If within every function, only one instruction accesses each FIFO interface, we can generate our precedence graph and perform deadlock analysis. Of course there are cases where this is not true, when the simulation based approach may need to be used. 
+%Alternatively, hardware buffers other than FIFOs can be incorporated into the design, allowing 
+%or communication buffers other than FIFOs may need to be used.
 
 
 In many cases, the minimal FIFO sizes for deadlock avoidance may not be ideal for performance purposes. The decoupled computational pipeline works well when its member accelerators
-can execute out of sync with each other. Very small FIFO sizes potentially allow the progress
-of one process to interfere with that of the others. Figure~\ref{} provides a good example
-of this. Assuming only a small amount of buffer space is allocated between the memory
-and the two accelerators, the head-of-line blocking would force one process to wait for
-the computation in the other. One accelerator's slow rate of data consumption can thus 
+can execute out of sync with each other. Very small FIFO sizes potentially allow the lack of progress in one process to interfere with the other processes. 
+Figure~\ref{} provides a good example of this. Assuming only a small amount of buffer space is allocated between the memory and the two accelerators, the head-of-line blocking would force one process to wait for the computation in the other. 
+One accelerator's slow rate of data consumption can thus 
 prevent its peer from accessing data, which is part of the original problem we tried to address.
 On the other hand, with FIFO large enough to store the entire burst, the two accelerator
 can progress simultaneously, greatly increase the overall throughput of the pipeline.
@@ -902,7 +971,7 @@ is not consuming tokens fast enough, where
 
 An example of this is shown in figure~\ref{}. In essence, we want to monitor the backlog of data
 in every communication channel. 
-
+In~\cite{}, the trade off between performance and fifo sizing was demonstrated as smaller fifos lead to more context switches and longer execution time. Similar observation 
 
 Another way to look at what we have developed so far is a framework to generate and analyze a process network from a sequential program. The algorithm through which
 the partitioning of instruction is but just one pluggable component in this flow.
