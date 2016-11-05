@@ -2,10 +2,10 @@
 \label{chap1}
 \section{Trend in General Purpose Computing Platforms}
 The downscaling of transistor size, as first observed by Moore~\cite{Moore:2000:CMC:333067.333074}, massively increased the
-capability of VLSI circuits for more than 30 years. The number of transistors on a single silicon die doubles approximately every 18 months while the supply voltage and transistor channel length scaled down according to the prediction by Dennard~\cite{dennard1974design}. This advancement in technology not only
-enabled more integration, it also kept the power consumption of the new chip the same as its predecessors due to the voltage scaling. Bigger caches and
-various architectural features are implemented using the newly available
-transistors, improving single thread performance. At the same time, the voltage scaling also allows for increased clock frequency of processors under the same power budget. Intel 80386 chips released in the 80s operated at 25 MHz while the Pentium D, released in the middle of the last decade, reached
+capability of VLSI circuits for more than three decades. The number of transistors on a single silicon die doubles approximately every 18 months while the supply voltage and transistor channel length scaled down according to the prediction by Dennard~\cite{dennard1974design}. This advancement in technology not only
+enabled more integration, it also kept the power consumption of the new chip the same as its predecessors, taking advantage of the voltage scaling. Bigger caches and
+various architectural features were implemented using the newly available
+transistors, which improved single thread performance. At the same time, the voltage scaling also allows for increased clock frequency of processors under the same power budget. Intel 80386 chips released in the 80s operated at 25 MHz while the Pentium D, released in the middle of the last decade, reached
 a clock frequency of more than 3.5 GHz. This 140x boost in frequency, coupled with
 greater instruction issue width, more accurate branch predictor and many other
 micro-architectural innovations unlocked huge performance increase for
@@ -20,7 +20,7 @@ the performance boost provided by the continuous advancement of hardware technol
 can no longer be sustained. The benefits of user transparent architecture optimizations are also 
 diminishing. As parallel computers and more recently, heterogeneous computing platforms become mainstream,
 the software developers are finally faced with the challenge of matching their computation specifications
-with the characterisitcs of the underlying compute substrate. 
+with the characteristics of the underlying compute substrate. 
 
 
 \begin{figure}[htp]
@@ -54,7 +54,7 @@ This flexibility of course comes at a cost. As the logic and
 routing resources are all reprogrammable mechanisms supported by RAM bits, there are significant
 area, performance and power overheads compared to the ASICs~\cite{4068926}. To alleviate these disadvantages, 
 more specialized circuits like block RAM and DSP blocks are added to modern
-FPGAs~\cite{chips:virtex5}~\cite{chips:arria}. Subsequently some of the common functionalities can be mapped onto
+FPGAs~\cite{chips:virtex5}~\cite{chips:arria}. Subsequently some of the common functions can be mapped onto
 these blocks and get closer to ASIC performance/power. When an application
 is implemented on an FPGA, arithmetic and logic operations are spatially mapped to
 the various compute resources in the reconfigurable array, while the dependencies between them
@@ -112,7 +112,7 @@ software developers.
 
 \section{High Level Synthesis} 
 \label{chap1:hls}
-Given the difficulty in progamming FPGAs, there has
+Given the difficulty in programming FPGAs, there has
 been a trend towards design synthesis from higher levels of
 specifications~\cite{Coussy:2008:HSA:1457713},~\cite{intro2hls}. Being more compact and expressive, high level
 languages, when used as design input, can greatly increase the
@@ -178,13 +178,13 @@ the users still have to visualize and create hardware descriptions,
 albeit with the C/C++ syntax.
 To effectively harness the power of reconfigurable platforms for software acceleration, designers usually need to identify parallelism
 in the application, which can then be exploited by the tool with the addition of pragmas and directives. 
-More often than not, the hardware infrastrucutre for data movement into and out of on chip buffers also need to be created and managed explicitly.
+More often than not, the hardware infrastructure for data movement into and out of on chip buffers also need to be created and managed explicitly.
 In most scenarios, there is still a trade-off between ease of use and the achieved quality of results. 
 It is thus important to provide methods in parallelism discovery, design space exploration and system integration
 to help the user better take advantage of this unique compute substrate.
 \section{Dissertation Organization}
 
-In this dissertation, we present tools and mechanisms for optimizing, analyzing and integrating HLS generated accelerators.
+In this dissertation, we present tools and mechanisms for transforming, optimizing and integrating FPGA accelerators using high-level synthesis approach.
 %and easing the integration of them into applications. 
 
 \subsection{Synthesis of computational pipelines with decoupled memory access}
@@ -253,8 +253,7 @@ in chapter~\ref{instrumentChap}.
 
 \subsection{}
 \vspace{-30.0pt}
-Finally in chapter~\ref{concluChap}, we conclude our dissertation and discuss potential directions for
-future studies. 
+%Finally in chapter~\ref{concluChap}, we conclude the dissertation and discuss potential directions for future studies. 
 %\subsection{}
 %\vspace{-10pt}
 \begin{comment}
@@ -301,9 +300,9 @@ In summary, the main contributions of my thesis include the following:
     accelerators.
     \item Creating an analysis framework for the generated pipeline, which is formulated as a process network. It is then possible to examine the interaction between scheduling and buffer sizing in this network, allowing detection and resolution of deadlocks statically.
     \item Improving the usability of FPGAs by creating a flow which synthesize
-    accelerators from program binaries. Various aspects of integrating the accelerators with the original program are also discussed. It is now possible to offload computation to FPGAs in an user-transparent fashion.
+    accelerators from program binaries. Various aspects of integrating the accelerators with the original program are also discussed. It is now possible to offload certain kinds of computation to FPGAs in an user-transparent fashion.
     \item Quantifying the benefits of the proposed flows using off-the-shelf FPGA SoCs. The
-    performance and area consumption for the benchmarks are presented. Design space exploration is also performed to demonstrate the trade-off between execution time and resource usage.
+    performance and area consumption for the benchmarks are presented. Some design space exploration is also performed to demonstrate the trade-off between execution time and resource usage.
     
     
 \end{itemize}
@@ -316,7 +315,7 @@ In this dissertation, we present tools and mechanisms for optimizing, analyzing 
 \subsection{Synthesis of computational pipelines with decoupled memory access}
 
 The first flow we created transforms a sequential program into a computational pipeline consisted of multiple
-processing stages connected by communication channels. FPGA is especially efficient in implementing streaming 
+modules connected by communication channels. FPGA is especially efficient in implementing streaming 
 applications where data move through a cascade of pipeline stages. This is unfortunately not how a typical 
 C/C++ program describes its computation. By utilizing pipeline parallelism in sequential programs, 
 %we can drastically improve the performance of generated

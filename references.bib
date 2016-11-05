@@ -175,7 +175,7 @@ The BibTeX style designer's guide.
  year = {2001},
  location = {Bristol, UK},
  pages = {1-14},
- %numpages = {16},
+ numpages = {16},
  %url = {http://dl.acm.org/citation.cfm?id=1765712.1765736},
  %acmid = {1765736},
  publisher = {IOS Press}
@@ -819,6 +819,22 @@ ISSN={0278-0070},}
  address = {Piscataway, NJ, USA},
 } 
 
+@inproceedings{Hiser:2007:EIB:1251974.1252530,
+ author = {Hiser, Jason D. and Williams, Daniel and Hu, Wei and Davidson, Jack W. and Mars, Jason and Childers, Bruce R.},
+ title = {Evaluating Indirect Branch Handling Mechanisms in Software Dynamic Translation Systems},
+ booktitle = {Proceedings of the International Symposium on Code Generation and Optimization},
+ series = {CGO '07},
+ year = {2007},
+ isbn = {0-7695-2764-7},
+ pages = {61--73},
+ numpages = {13},
+ url = {http://dx.doi.org/10.1109/CGO.2007.10},
+ doi = {10.1109/CGO.2007.10},
+ acmid = {1252530},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+} 
+
 @ARTICLE{1033026, 
 author={Kathail, V. and Aditya, S. and Schreiber, R. and Rau, B.R. and Cronquist, D.C. and Sivaraman, M.}, 
 journal={Computer}, 
@@ -1266,6 +1282,98 @@ doi={10.1109/TCAD.2009.2013541},
 ISSN={0278-0070},
 month={March},}
 
+@inproceedings{Bhattacharyya:2013:IMU:2523721.2523775,
+ author = {Bhattacharyya, Arnamoy},
+ title = {Do Inputs Matter?: Using Data-dependence Profiling to Evaluate Thread Level Speculation in BG/Q},
+ booktitle = {Proceedings of the 22Nd International Conference on Parallel Architectures and Compilation Techniques},
+ series = {PACT '13},
+ year = {2013},
+ isbn = {978-1-4799-1021-2},
+ location = {Edinburgh, Scotland, UK},
+ pages = {401--402},
+ numpages = {2},
+ url = {http://dl.acm.org/citation.cfm?id=2523721.2523775},
+ acmid = {2523775},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+ keywords = {combined profiling, systems, thread level speculation},
+} 
+
+@inproceedings{Jablin:2012:DMD:2259016.2259038,
+ author = {Jablin, Thomas B. and Jablin, James A. and Prabhu, Prakash and Liu, Feng and August, David I.},
+ title = {Dynamically Managed Data for CPU-GPU Architectures},
+ booktitle = {Proceedings of the Tenth International Symposium on Code Generation and Optimization},
+ series = {CGO '12},
+ year = {2012},
+ isbn = {978-1-4503-1206-6},
+ location = {San Jose, California},
+ pages = {165--174},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2259016.2259038},
+ doi = {10.1145/2259016.2259038},
+ acmid = {2259038},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+
+@article{Jablin:2011:ACC:1993316.1993516,
+ author = {Jablin, Thomas B. and Prabhu, Prakash and Jablin, James A. and Johnson, Nick P. and Beard, Stephen R. and August, David I.},
+ title = {Automatic CPU-GPU Communication Management and Optimization},
+ journal = {SIGPLAN Not.},
+ issue_date = {June 2011},
+ volume = {46},
+ number = {6},
+ month = jun,
+ year = {2011},
+ issn = {0362-1340},
+ pages = {142--151},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1993316.1993516},
+ doi = {10.1145/1993316.1993516},
+ acmid = {1993516},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {communication, gpu, management, optimization},
+} 
+
+@inproceedings{Pai:2012:FEA:2370816.2370824,
+ author = {Pai, Sreepathi and Govindarajan, R. and Thazhuthaveetil, Matthew J.},
+ title = {Fast and Efficient Automatic Memory Management for GPUs Using Compiler-assisted Runtime Coherence Scheme},
+ booktitle = {Proceedings of the 21st International Conference on Parallel Architectures and Compilation Techniques},
+ series = {PACT '12},
+ year = {2012},
+ isbn = {978-1-4503-1182-3},
+ location = {Minneapolis, Minnesota, USA},
+ pages = {33--42},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2370816.2370824},
+ doi = {10.1145/2370816.2370824},
+ acmid = {2370824},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {automatic, data transfers, gpu, memory management, software coherence},
+} 
+
+@inproceedings{Tournavitis:2009:THA:1542476.1542496,
+ author = {Tournavitis, Georgios and Wang, Zheng and Franke, Bj\"{o}rn and O'Boyle, Michael F.P.},
+ title = {Towards a Holistic Approach to Auto-parallelization: Integrating Profile-driven Parallelism Detection and Machine-learning Based Mapping},
+ booktitle = {Proceedings of the 30th ACM SIGPLAN Conference on Programming Language Design and Implementation},
+ series = {PLDI '09},
+ year = {2009},
+ isbn = {978-1-60558-392-1},
+ location = {Dublin, Ireland},
+ pages = {177--187},
+ numpages = {11},
+ url = {http://doi.acm.org/10.1145/1542476.1542496},
+ doi = {10.1145/1542476.1542496},
+ acmid = {1542496},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {auto-parallelization, machine-learning based parallelism mapping, openmp, profile-driven parallelism detection},
+} 
+
+
 
 @manual{vivado_hls:appnoteMMult,
   title         = "Zynq-7000 All Programmable SoC
@@ -1492,7 +1600,43 @@ abstract = "Given a directed graph where edges are associated with weights which
  keywords = {instruction scheduling, loop scheduling, modulo scheduling, software pipelining},
 } 
 
+@article{Meswani:2013:MPP:2493921.2493922,
+ author = {Meswani, Mitesh R. and Carrington, Laura and Unat, Didem and Snavely, Allan and Baden, Scott and Poole, Stephen},
+ title = {Modeling and Predicting Performance of High Performance Computing Applications on Hardware Accelerators},
+ journal = {Int. J. High Perform. Comput. Appl.},
+ issue_date = {May       2013},
+ volume = {27},
+ number = {2},
+ month = may,
+ year = {2013},
+ issn = {1094-3420},
+ pages = {89--108},
+ numpages = {20},
+ url = {http://dx.doi.org/10.1177/1094342012468180},
+ doi = {10.1177/1094342012468180},
+ acmid = {2493922},
+ publisher = {Sage Publications, Inc.},
+ address = {Thousand Oaks, CA, USA},
+ keywords = {FPGA, GPU, HPC, accelerators, benchmarking, idioms, performance modeling, performance prediction},
+} 
 
+
+@inproceedings{Oyamada:2007:SPE:1323351.1323449,
+ author = {Oyamada, M. and Wagner, F. R. and Bonaciu, M. and Cesario, W. and Jerraya, A.},
+ title = {Software Performance Estimation in MPSoC Design},
+ booktitle = {Proceedings of the 2007 Asia and South Pacific Design Automation Conference},
+ series = {ASP-DAC '07},
+ year = {2007},
+ isbn = {1-4244-0629-3},
+ pages = {38--43},
+ numpages = {6},
+ url = {http://dx.doi.org/10.1109/ASPDAC.2007.357789},
+ doi = {10.1109/ASPDAC.2007.357789},
+ acmid = {1323449},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ keywords = {cycle-accurate simulation model, software performance estimation, MPSoC design, design space exploration, software-dominated embedded systems, integrated methodology, performance analysis, neural networks, bus-functional model, design validation, multiprocessor platform, MPEG4 encoder},
+}
 
 @article{Patterson:2004,
  author = {Patterson, David A.},
@@ -1557,6 +1701,38 @@ pages={35-42},
 keywords={application program interfaces;field programmable gate arrays;multiprocessing systems;parallel architectures;CUDA kernel;FPGA programming;Moores law;application program interface;clock frequency;compute unified device architecture;computing industry;field programmable gate array;graphics processing unit;multicore system;multiprocessor system;parallel processing;performance per watt boosting;power dissipation;Clocks;Computer industry;Concurrent computing;Field programmable gate arrays;Frequency;Kernel;Moore's Law;Parallel processing;Power dissipation;Yarn},
 doi={10.1109/SASP.2009.5226333},
 month={July},}
+
+@mastersthesis{Ban76,
+    author = {Banerjee, U.},
+    citeulike-article-id = {1433023},
+    keywords = {bibtex-import},
+    month = nov,
+    number = {76-837},
+    posted-at = {2007-07-04 13:25:44},
+    priority = {2},
+    school = {Dept. of Computer Science, University of Illinois at Urbana-Champaign},
+    title = {{Data dependence in ordinary programs}},
+    year = {1976}
+}
+
+@inproceedings{Pai:2012:FEA:2370816.2370824,
+ author = {Pai, Sreepathi and Govindarajan, R. and Thazhuthaveetil, Matthew J.},
+ title = {Fast and Efficient Automatic Memory Management for GPUs Using Compiler-assisted Runtime Coherence Scheme},
+ booktitle = {Proceedings of the 21st International Conference on Parallel Architectures and Compilation Techniques},
+ series = {PACT '12},
+ year = {2012},
+ isbn = {978-1-4503-1182-3},
+ location = {Minneapolis, Minnesota, USA},
+ pages = {33--42},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2370816.2370824},
+ doi = {10.1145/2370816.2370824},
+ acmid = {2370824},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {automatic, data transfers, gpu, memory management, software coherence},
+} 
+
 
 @INPROCEEDINGS{legupmultithread,
 author={Jongsok Choi and Brown, S. and Anderson, J.},
@@ -1692,6 +1868,26 @@ same reference, but using IEEEtran's howpublished extension
   year={2010}
 }
 
+@article{Buck:2000:ARC:1080622.1080630,
+ author = {Buck, Bryan and Hollingsworth, Jeffrey K.},
+ title = {An API for Runtime Code Patching},
+ journal = {Int. J. High Perform. Comput. Appl.},
+ issue_date = {November  2000},
+ volume = {14},
+ number = {4},
+ month = nov,
+ year = {2000},
+ issn = {1094-3420},
+ pages = {317--329},
+ numpages = {13},
+ url = {http://dx.doi.org/10.1177/109434200001400404},
+ doi = {10.1177/109434200001400404},
+ acmid = {1080630},
+ publisher = {Sage Publications, Inc.},
+ address = {Thousand Oaks, CA, USA},
+} 
+
+
 
 
 @article{multicut,
@@ -1759,6 +1955,16 @@ doi = {http://doi.ieeecomputersociety.org/10.1109/FPGA.2000.2},
 publisher = {IEEE Computer Society},
 address = {Los Alamitos, CA, USA},
 }
+
+@book{Banerjee:1988:DAS:535430,
+ author = {Banerjee, Utpal K.},
+ title = {Dependence Analysis for Supercomputing},
+ year = {1988},
+ isbn = {0898382890},
+ publisher = {Kluwer Academic Publishers},
+ address = {Norwell, MA, USA},
+} 
+
 
 @ARTICLE{1240967,
 author={A. Lodi and M. Toma and F. Campi and A. Cappelli and R. Canegallo and R. Guerrieri},
@@ -2299,7 +2505,18 @@ page 1551, reference #6.
   year         = "2003"
 }
 
+@manual{sdaccel,
+  title        = "SDAccel Development Environment User Guide",
+  organization = "Xilinx",
+  year         = "2015"
+}
 
+
+@manual{dyninst,
+  title        = "Dyninst Programmer's Guide",
+  organization = "Computer Science Department, University of Wisconsin-Madison \& University of Maryland",
+  year         = "2015"
+}
 
 
 Other unusual references
@@ -2329,7 +2546,16 @@ page 181, reference #14.
   year          = "1999"
 }
 
-
+@phdthesis{Sheffield:EECS-2013-185,
+    Author = {Sheffield, David},
+    Title = {Three Fingered Jack: Productively Addressing Platform Diversity},
+    School = {EECS Department, University of California, Berkeley},
+    Year = {2013},
+    Month = {Nov},
+    URL = {http://www2.eecs.berkeley.edu/Pubs/TechRpts/2013/EECS-2013-185.html},
+    Number = {UCB/EECS-2013-185},
+    
+}
 a software package as a manual
 From the June 2002 issue of "IEEE/ASME Journal of Microelectromechanical
 Systems", page 205, reference #20.
@@ -2342,6 +2568,16 @@ Sometimes they put the version/release information in the title.
   note          = "Release 4.3"
 }
 
+@INPROCEEDINGS{6339372, 
+author={D. Sheffield and M. Anderson and K. Keutzer}, 
+booktitle={22nd International Conference on Field Programmable Logic and Applications (FPL)}, 
+title={Automatic generation of application-specific accelerators for FPGAs from python loop nests}, 
+year={2012}, 
+pages={567-570}, 
+keywords={field programmable gate arrays;logic design;parallel processing;FPGA;application-specific accelerators;automatic generation;benchmark kernels;design space exploration;high-level synthesis;multiple parallel processing elements;optimized loop body;python loop nests;soft-core C performance;three-fingered Jack;Benchmark testing;Field programmable gate arrays;Image color analysis;Kernel;Random access memory;Table lookup;Vectors}, 
+doi={10.1109/FPL.2012.6339372}, 
+ISSN={1946-147X}, 
+month={Aug},}
 
 a software package as an electronic reference
 From the February 2003 issue of  "IEEE/ACM Transactions on Networking",
@@ -2553,6 +2789,22 @@ author={Kasahara, H. and Honda, H. and Mogi, A. and Ogura, A. and Fujiwara, K. a
 pages={283-297},
 language={English}
 }
+@inproceedings{omega,
+ author = {Pugh, William},
+ title = {The Omega Test: A Fast and Practical Integer Programming Algorithm for Dependence Analysis},
+ booktitle = {Proceedings of the 1991 ACM/IEEE Conference on Supercomputing},
+ series = {Supercomputing '91},
+ year = {1991},
+ isbn = {0-89791-459-7},
+ location = {Albuquerque, New Mexico, USA},
+ pages = {4--13},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/125826.125848},
+ doi = {10.1145/125826.125848},
+ acmid = {125848},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
 
 @ARTICLE{5719584, 
 author={Lindtjorn, O. and Clapp, R. and Pell, O. and Haohuan Fu and Flynn, M. and Haohuan Fu}, 

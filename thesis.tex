@@ -12,8 +12,8 @@
 \usepackage{amssymb}
 
 % Double spacing, if you want it.
-% \def\dsp{\def\baselinestretch{2.0}\large\normalsize}
-% \dsp
+%\def\dsp{\def\baselinestretch{2.0}\large\normalsize}
+%\dsp
 
 % If the Grad. Division insists that the first paragraph of a section
 % be indented (like the others), then include this line:
@@ -61,7 +61,7 @@
       \vrule height0.75em width0.5em depth0.25em\fi}
 \algnewcommand{\LineComment}[1]{\State \(\triangleright\) #1}
 
-\newcommand{\Chapter}[2]{\chapter[#1]{#1\\[1ex]\huge#2}} 
+\newcommand{\Chapter}[2]{\chapter[#1]{#1\\[1ex]\normalsize#2}} 
 
 \bibliography{IEEEabrv,references}
 
@@ -73,7 +73,7 @@
 
 \title{Accelerator Synthesis and Integration for CPU FPGA Systems }
 \author{Shaoyi Cheng}
-\degreesemester{Spring}
+\degreesemester{Fall}
 \degreeyear{2016}
 \degree{Doctor of Philosophy}
 \chair{Professor John Wawrzynek}
@@ -99,7 +99,7 @@
 \include{abstract}
 
 \begin{frontmatter}
-
+\begin{comment}
 \begin{dedication}
 \null\vfil
 \begin{center}
@@ -107,7 +107,7 @@ To Me\\\vspace{12pt}
 \end{center}
 \vfil\null
 \end{dedication}
-
+\end{comment}
 \tableofcontents
 \clearpage
 \listoffigures

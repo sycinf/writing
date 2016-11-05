@@ -1,3 +1,28 @@
 \chapter{Conclusion}
 \label{concluChap}
 
+The main challenge in making FPGA a viable mainstream computing platform is to provide both good quality of results and ease of
+use to a large customer base. Conventional HLS serves as a great
+productivity tool for hardware engineers who have good understanding of the low level implementation details and the mapping process. It does not, unfortunately, provide a easy path for software programmers to quickly offload computation onto FPGA when they try to achieve better performance. Despite the relative ease of creating $a$ hardware engine from high level languages, the advantage of programmable logic over general purpose processor can
+rarely be realized without extensive rewriting of the software code. In this thesis, we have constructed flows and performed experiments to validate a few possible approaches with which this gap between productivity and implementation quality can be narrowed.
+
+The decoupled computational pipeline synthesis is, basically, an  instance of a source to source transformation flow converting sequential programs to process networks. A partitioning algorithm was proposed to specifically cater to the characteristics of the FPGA platform. By converting a single threaded sequential program to a cascade of independently scheduled modules, the flow creates a pipeline through which data can stream through. This paradigm is especially suitable for FPGA
+mapping and has proven to have significant performance advantage against CPU and direct HLS implementations.
+The complementary deadlock analysis scheme helps determine the required sizes of the FIFO channels to prevent artificial deadlocks. There are certain cases where the needed buffer space cannot be statically determined, which the analyzer can reveal as well. Process networks generated using other partitioning algorithms and mapped to platforms other than FPGAs may also
+benefit from the analysis framework we have proposed, as long as the usage of the channels follows certain rules. In essence, we
+have built the infrastructure using which user can extract more
+performance from the FPGA without providing algorithm descriptions
+drastically different than typical processor-centric software kernels. 
+
+An even more aggressive attempt to reduce user involvement in generating accelerators was to use the program binaries as the
+starting point of high level synthesis. With the help of past execution profiles, memory level and coarse grained parallelism
+can all be exploited. 
+On the other hand, due to the probabilistic nature of this profile based approach, dynamic checking mechanisms are needed to ensure the parallelization performed during accelerator synthesis is actually valid. In general, the amount of computation involved in these run time checks scales up with the number of memory accesses performed by the executed binary. However, for loop nests
+with analyzable memory access patterns, the run time checks needed
+can be of constant cost. We devised a flow targeting these kernels, demonstrating the possibility of user-transparent accelerator generation and integration, into which past work
+in optimizing compilers can also be incorporated.
+
+For each part in this thesis, the potential for further investigation was also discussed. The achieved speedups in our experiments do not represent the limit of the FPGA platforms, but rather a set of design points capturing good trade-offs between
+user effort and accelerator performance. As more exploration 
+is performed in the field of high level synthesis, the power
+of reconfigurable computing will become more accessible to designers and eventually, end users.
